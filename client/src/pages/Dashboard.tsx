@@ -1,12 +1,13 @@
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProgressRing } from "@/components/ProgressRing";
+import { EditMealModal } from "@/components/EditMealModal";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useEffect } from "react";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,6 +16,8 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedMeal, setSelectedMeal] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -233,27 +236,40 @@ export default function Dashboard() {
             </div>
           ) : meals.length > 0 ? (
             <div className="space-y-3">
-              {meals.slice(0, 3).map((meal: any) => (
-                <div key={meal.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3">
-                      <span className="text-lg">{getMealIcon(meal.mealType?.name || '')}</span>
+              {meals.slice(0, 3).map((meal: any) => {
+                // Calculate meal calories from mealFoods
+                const mealCalories = meal.mealFoods?.reduce((sum: number, mf: any) => 
+                  sum + parseFloat(mf.calories || "0"), 0) || 0;
+                
+                return (
+                  <div 
+                    key={meal.id} 
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    onClick={() => {
+                      setSelectedMeal(meal);
+                      setIsEditModalOpen(true);
+                    }}
+                  >
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mr-3">
+                        <span className="text-lg">{getMealIcon(meal.mealType?.name || '')}</span>
+                      </div>
+                      <div>
+                        <p className="font-medium">{meal.mealType?.name || 'Refeição'}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {meal.mealFoods?.length || 0} itens • {format(new Date(meal.createdAt), "HH:mm")}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{meal.mealType?.name || 'Refeição'}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {meal.mealFoods?.length || 0} itens • {format(new Date(meal.createdAt), "HH:mm")}
+                    <div className="text-right">
+                      <p className="font-semibold">{Math.round(mealCalories)} kcal</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {caloriesGoal > 0 ? Math.round((mealCalories / caloriesGoal) * 100) : 0}% da meta
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{meal.totalCalories || 0} kcal</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {caloriesGoal > 0 ? Math.round(((meal.totalCalories || 0) / caloriesGoal) * 100) : 0}% da meta
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">

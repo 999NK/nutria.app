@@ -199,7 +199,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/meals/:mealId/foods', isAuthenticated, async (req: any, res) => {
     try {
       const { mealId } = req.params;
-      const mealFoodData = insertMealFoodSchema.parse({ ...req.body, mealId: parseInt(mealId) });
+      
+      // Create a properly formatted meal food object
+      const mealFoodData = {
+        mealId: parseInt(mealId),
+        foodId: parseInt(req.body.foodId),
+        quantity: req.body.quantity.toString(),
+        unit: req.body.unit,
+        calories: req.body.calories.toString(),
+        protein: req.body.protein.toString(),
+        carbs: req.body.carbs.toString(),
+        fat: req.body.fat.toString(),
+      };
+      
       const mealFood = await storage.addFoodToMeal(mealFoodData);
       res.json(mealFood);
     } catch (error) {
@@ -282,11 +294,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
-      const nutrition = await storage.getDailyNutrition(userId, date);
+      
+      // Get all meals for today
+      const meals = await storage.getMeals(userId, date);
+      
+      // Calculate total nutrition from all meals
+      let totalCalories = 0;
+      let totalProtein = 0;
+      let totalCarbs = 0;
+      let totalFat = 0;
+      
+      for (const meal of meals) {
+        for (const mealFood of meal.mealFoods) {
+          totalCalories += parseFloat(mealFood.calories?.toString() || "0");
+          totalProtein += parseFloat(mealFood.protein?.toString() || "0");
+          totalCarbs += parseFloat(mealFood.carbs?.toString() || "0");
+          totalFat += parseFloat(mealFood.fat?.toString() || "0");
+        }
+      }
+      
+      const nutrition = {
+        date,
+        calories: Math.round(totalCalories),
+        protein: Math.round(totalProtein),
+        carbs: Math.round(totalCarbs),
+        fat: Math.round(totalFat),
+      };
+      
       res.json(nutrition);
     } catch (error) {
-      console.error("Error fetching daily nutrition:", error);
-      res.status(500).json({ message: "Failed to fetch daily nutrition" });
+      console.error("Error calculating daily nutrition:", error);
+      res.status(500).json({ message: "Failed to calculate daily nutrition" });
     }
   });
 
