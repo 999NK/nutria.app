@@ -50,11 +50,26 @@ export default function Dashboard() {
     enabled: isAuthenticated,
   });
 
-  // Calculate progress
-  const caloriesConsumed = dailyNutrition?.totalCalories || 0;
-  const proteinConsumed = parseFloat(dailyNutrition?.totalProtein || "0");
-  const carbsConsumed = parseFloat(dailyNutrition?.totalCarbs || "0");
-  const fatConsumed = parseFloat(dailyNutrition?.totalFat || "0");
+  // Calculate progress from actual meals
+  const caloriesConsumed = meals.reduce((sum: number, meal: any) => {
+    return sum + (meal.mealFoods?.reduce((mealSum: number, mf: any) => 
+      mealSum + parseFloat(mf.calories || "0"), 0) || 0);
+  }, 0);
+  
+  const proteinConsumed = meals.reduce((sum: number, meal: any) => {
+    return sum + (meal.mealFoods?.reduce((mealSum: number, mf: any) => 
+      mealSum + parseFloat(mf.protein || "0"), 0) || 0);
+  }, 0);
+  
+  const carbsConsumed = meals.reduce((sum: number, meal: any) => {
+    return sum + (meal.mealFoods?.reduce((mealSum: number, mf: any) => 
+      mealSum + parseFloat(mf.carbs || "0"), 0) || 0);
+  }, 0);
+  
+  const fatConsumed = meals.reduce((sum: number, meal: any) => {
+    return sum + (meal.mealFoods?.reduce((mealSum: number, mf: any) => 
+      mealSum + parseFloat(mf.fat || "0"), 0) || 0);
+  }, 0);
 
   const caloriesGoal = user?.dailyCalories || 2000;
   const proteinGoal = user?.dailyProtein || 120;
@@ -289,6 +304,16 @@ export default function Dashboard() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Edit Meal Modal */}
+      <EditMealModal
+        meal={selectedMeal}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedMeal(null);
+        }}
+      />
     </div>
   );
 }
