@@ -6,7 +6,6 @@ import { insertFoodSchema, insertMealTypeSchema, insertMealSchema, insertMealFoo
 import { aiService } from "./services/aiService";
 import { pdfService } from "./services/pdfService";
 import { notificationService } from "./services/notificationService";
-import { usdaFoodService } from "./services/usdaFoodService";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -87,67 +86,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating food:", error);
       res.status(400).json({ message: "Invalid food data" });
-    }
-  });
-
-  // USDA Food Search routes
-  app.get('/api/foods/search', async (req, res) => {
-    try {
-      const query = req.query.q as string;
-      if (!query) {
-        return res.status(400).json({ message: "Query parameter 'q' is required" });
-      }
-      
-      const foods = await usdaFoodService.searchFoods(query);
-      res.json(foods);
-    } catch (error) {
-      console.error("Error searching foods:", error);
-      res.status(500).json({ message: "Failed to search foods" });
-    }
-  });
-
-  app.get('/api/foods/usda/:fdcId', async (req, res) => {
-    try {
-      const fdcId = parseInt(req.params.fdcId);
-      if (isNaN(fdcId)) {
-        return res.status(400).json({ message: "Invalid FDC ID" });
-      }
-      
-      const food = await usdaFoodService.getFoodDetails(fdcId);
-      if (!food) {
-        return res.status(404).json({ message: "Food not found" });
-      }
-      
-      res.json(food);
-    } catch (error) {
-      console.error("Error fetching food details:", error);
-      res.status(500).json({ message: "Failed to fetch food details" });
-    }
-  });
-
-  app.post('/api/foods/from-usda', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { usdaFdcId } = req.body;
-      
-      // Get food data from USDA
-      const usdaFood = await usdaFoodService.getFoodDetails(usdaFdcId);
-      if (!usdaFood) {
-        return res.status(404).json({ message: "USDA food not found" });
-      }
-      
-      // Save to local database
-      const foodData = insertFoodSchema.parse({
-        ...usdaFood,
-        userId,
-        isCustom: false
-      });
-      
-      const food = await storage.createFood(foodData);
-      res.json(food);
-    } catch (error) {
-      console.error("Error importing USDA food:", error);
-      res.status(400).json({ message: "Failed to import food from USDA" });
     }
   });
 

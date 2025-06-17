@@ -6,10 +6,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
-import AddMeal from "@/pages/AddMealEnhanced";
+import AddMeal from "@/pages/AddMeal";
 import MyFoods from "@/pages/MyFoods";
 import Progress from "@/pages/Progress";
-import Profile from "@/pages/ProfileEnhanced";
+import Profile from "@/pages/Profile";
 import Onboarding from "@/pages/Onboarding";
 import Layout from "@/components/Layout";
 import NotFound from "@/pages/not-found";
@@ -34,8 +34,6 @@ function Router() {
     <Switch>
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
-      ) : !(user as any)?.isProfileComplete ? (
-        <Route path="/" component={Onboarding} />
       ) : (
         <Layout>
           <Route path="/" component={Dashboard} />

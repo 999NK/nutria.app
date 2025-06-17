@@ -38,7 +38,6 @@ export const users = pgTable("users", {
   weight: decimal("weight", { precision: 5, scale: 2 }),
   height: integer("height"),
   age: integer("age"),
-  gender: varchar("gender").default("male"), // male, female
   activityLevel: varchar("activity_level").default("moderate"),
   goal: varchar("goal").default("maintain"), // lose, gain, maintain
   dailyCalories: integer("daily_calories").default(2000),
