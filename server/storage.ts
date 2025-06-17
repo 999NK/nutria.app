@@ -96,13 +96,36 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserGoals(userId: string, goals: { dailyCalories: number; dailyProtein: number; dailyCarbs: number; dailyFat: number }): Promise<User> {
+  async updateUserGoals(userId: string, updates: { 
+    weight?: number; 
+    height?: number; 
+    age?: number; 
+    goal?: string; 
+    activityLevel?: string; 
+    dailyCalories: number; 
+    dailyProtein: number; 
+    dailyCarbs: number; 
+    dailyFat: number; 
+    isProfileComplete?: boolean;
+  }): Promise<User> {
+    const updateData: any = {
+      dailyCalories: updates.dailyCalories,
+      dailyProtein: updates.dailyProtein,
+      dailyCarbs: updates.dailyCarbs,
+      dailyFat: updates.dailyFat,
+      updatedAt: new Date(),
+    };
+
+    if (updates.weight !== undefined) updateData.weight = updates.weight.toString();
+    if (updates.height !== undefined) updateData.height = updates.height;
+    if (updates.age !== undefined) updateData.age = updates.age;
+    if (updates.goal !== undefined) updateData.goal = updates.goal;
+    if (updates.activityLevel !== undefined) updateData.activityLevel = updates.activityLevel;
+    if (updates.isProfileComplete !== undefined) updateData.isProfileComplete = updates.isProfileComplete;
+
     const [user] = await db
       .update(users)
-      .set({
-        ...goals,
-        updatedAt: new Date(),
-      })
+      .set(updateData)
       .where(eq(users.id, userId))
       .returning();
     return user;

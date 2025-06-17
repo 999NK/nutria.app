@@ -84,6 +84,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // USDA food search
+  app.get('/api/foods/search', async (req, res) => {
+    try {
+      const { query } = req.query;
+      if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+      
+      const { usdaFoodService } = await import("./services/usdaFoodService");
+      const foods = await usdaFoodService.searchFoods(query as string);
+      res.json(foods);
+    } catch (error) {
+      console.error("Error searching USDA foods:", error);
+      res.status(500).json({ message: "Failed to search foods" });
+    }
+  });
+
+  // Add USDA food to user's foods
+  app.post('/api/foods/from-usda', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { usdaFood } = req.body;
+      
+      const foodData = {
+        name: usdaFood.name,
+        brand: usdaFood.brand,
+        category: usdaFood.category,
+        usdaFdcId: usdaFood.usdaFdcId,
+        caloriesPer100g: usdaFood.caloriesPer100g,
+        proteinPer100g: usdaFood.proteinPer100g,
+        carbsPer100g: usdaFood.carbsPer100g,
+        fatPer100g: usdaFood.fatPer100g,
+        fiberPer100g: usdaFood.fiberPer100g,
+        sugarPer100g: usdaFood.sugarPer100g,
+        sodiumPer100g: usdaFood.sodiumPer100g,
+        userId,
+        isCustom: false,
+      };
+      
+      const food = await storage.createFood(foodData);
+      res.json(food);
+    } catch (error) {
+      console.error("Error adding USDA food:", error);
+      res.status(400).json({ message: "Failed to add food" });
+    }
+  });
+
   app.post('/api/foods', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
