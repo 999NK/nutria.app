@@ -10,11 +10,12 @@ import AddMeal from "@/pages/AddMeal";
 import MyFoods from "@/pages/MyFoods";
 import Progress from "@/pages/Progress";
 import Profile from "@/pages/Profile";
+import Onboarding from "@/pages/Onboarding";
 import Layout from "@/components/Layout";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (

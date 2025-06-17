@@ -45,19 +45,24 @@ export const users = pgTable("users", {
   dailyCarbs: integer("daily_carbs").default(225),
   dailyFat: integer("daily_fat").default(67),
   notificationsEnabled: boolean("notifications_enabled").default(true),
+  isProfileComplete: boolean("is_profile_complete").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const foods = pgTable("foods", {
   id: serial("id").primaryKey(),
+  usdaFdcId: integer("usda_fdc_id").unique(), // USDA Food Data Central ID
   name: varchar("name", { length: 255 }).notNull(),
   brand: varchar("brand", { length: 255 }),
-  caloriesPer100g: integer("calories_per_100g").notNull(),
-  proteinPer100g: decimal("protein_per_100g", { precision: 5, scale: 2 }).notNull(),
-  carbsPer100g: decimal("carbs_per_100g", { precision: 5, scale: 2 }).notNull(),
-  fatPer100g: decimal("fat_per_100g", { precision: 5, scale: 2 }).notNull(),
-  fiberPer100g: decimal("fiber_per_100g", { precision: 5, scale: 2 }).default("0"),
+  category: varchar("category", { length: 255 }),
+  caloriesPer100g: decimal("calories_per_100g", { precision: 7, scale: 2 }).notNull(),
+  proteinPer100g: decimal("protein_per_100g", { precision: 7, scale: 2 }).notNull(),
+  carbsPer100g: decimal("carbs_per_100g", { precision: 7, scale: 2 }).notNull(),
+  fatPer100g: decimal("fat_per_100g", { precision: 7, scale: 2 }).notNull(),
+  fiberPer100g: decimal("fiber_per_100g", { precision: 7, scale: 2 }).default("0"),
+  sugarPer100g: decimal("sugar_per_100g", { precision: 7, scale: 2 }).default("0"),
+  sodiumPer100g: decimal("sodium_per_100g", { precision: 7, scale: 2 }).default("0"),
   isCustom: boolean("is_custom").default(false),
   userId: varchar("user_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
@@ -86,14 +91,14 @@ export const meals = pgTable("meals", {
 
 export const mealFoods = pgTable("meal_foods", {
   id: serial("id").primaryKey(),
-  mealId: integer("meal_id").references(() => meals.id).notNull(),
-  foodId: integer("food_id").references(() => foods.id).notNull(),
+  mealId: integer("meal_id").references(() => meals.id, { onDelete: "cascade" }).notNull(),
+  foodId: integer("food_id").references(() => foods.id, { onDelete: "cascade" }).notNull(),
   quantity: decimal("quantity", { precision: 8, scale: 2 }).notNull(),
   unit: varchar("unit", { length: 20 }).default("g"), // g, ml, units, spoons, cups
-  calories: integer("calories").notNull(),
-  protein: decimal("protein", { precision: 5, scale: 2 }).notNull(),
-  carbs: decimal("carbs", { precision: 5, scale: 2 }).notNull(),
-  fat: decimal("fat", { precision: 5, scale: 2 }).notNull(),
+  calories: decimal("calories", { precision: 7, scale: 2 }).notNull(),
+  protein: decimal("protein", { precision: 7, scale: 2 }).notNull(),
+  carbs: decimal("carbs", { precision: 7, scale: 2 }).notNull(),
+  fat: decimal("fat", { precision: 7, scale: 2 }).notNull(),
 });
 
 export const recipes = pgTable("recipes", {
