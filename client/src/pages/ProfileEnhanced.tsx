@@ -26,6 +26,7 @@ export default function ProfileEnhanced() {
     weight: 0,
     height: 0,
     age: 0,
+    gender: "",
     goal: "",
     activityLevel: "",
   });
@@ -49,6 +50,7 @@ export default function ProfileEnhanced() {
         weight: (user as any).weight || 0,
         height: (user as any).height || 0,
         age: (user as any).age || 0,
+        gender: (user as any).gender || "",
         goal: (user as any).goal || "",
         activityLevel: (user as any).activityLevel || "",
       });
@@ -60,8 +62,10 @@ export default function ProfileEnhanced() {
     const heightCm = data.height;
     const age = data.age;
 
-    // BMR calculation using Mifflin-St Jeor equation (assuming male for simplification)
-    const bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + 5;
+    // BMR calculation using Mifflin-St Jeor equation with gender-specific formula
+    const bmr = data.gender === "male" 
+      ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5  // Men
+      : 10 * weightKg + 6.25 * heightCm - 5 * age - 161; // Women
 
     const activityMultipliers = {
       sedentary: 1.2,
@@ -158,7 +162,7 @@ export default function ProfileEnhanced() {
   });
 
   const handleSave = () => {
-    if (!editedData.weight || !editedData.height || !editedData.age || !editedData.goal || !editedData.activityLevel) {
+    if (!editedData.weight || !editedData.height || !editedData.age || !editedData.gender || !editedData.goal || !editedData.activityLevel) {
       toast({
         title: "Dados incompletos",
         description: "Preencha todos os campos obrigatórios.",
@@ -278,6 +282,23 @@ export default function ProfileEnhanced() {
                       disabled={!isEditing}
                       className={!isEditing ? "bg-gray-50 dark:bg-gray-800" : ""}
                     />
+                  </div>
+
+                  <div>
+                    <Label>Gênero</Label>
+                    <Select
+                      value={isEditing ? editedData.gender : (user as any).gender || ""}
+                      onValueChange={(value) => setEditedData(prev => ({ ...prev, gender: value }))}
+                      disabled={!isEditing}
+                    >
+                      <SelectTrigger className={!isEditing ? "bg-gray-50 dark:bg-gray-800" : ""}>
+                        <SelectValue placeholder="Selecione seu gênero" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">👨 Masculino</SelectItem>
+                        <SelectItem value="female">👩 Feminino</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
