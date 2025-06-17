@@ -47,13 +47,10 @@ export default function Onboarding() {
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileData) => {
       const goals = calculateNutritionGoals(data);
-      await apiRequest(`/api/user/goals`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          ...data,
-          ...goals,
-          isProfileComplete: true,
-        }),
+      return await apiRequest("PATCH", `/api/user/goals`, {
+        ...data,
+        ...goals,
+        isProfileComplete: true,
       });
     },
     onSuccess: () => {

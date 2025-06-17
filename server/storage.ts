@@ -31,7 +31,18 @@ export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
-  updateUserGoals(userId: string, goals: { dailyCalories: number; dailyProtein: number; dailyCarbs: number; dailyFat: number }): Promise<User>;
+  updateUserGoals(userId: string, updates: { 
+    weight?: number; 
+    height?: number; 
+    age?: number; 
+    goal?: string; 
+    activityLevel?: string; 
+    dailyCalories: number; 
+    dailyProtein: number; 
+    dailyCarbs: number; 
+    dailyFat: number; 
+    isProfileComplete?: boolean;
+  }): Promise<User>;
   
   // Food operations
   getFoods(userId?: string, search?: string): Promise<Food[]>;

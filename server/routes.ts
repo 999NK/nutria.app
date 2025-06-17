@@ -17,8 +17,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const defaultMealTypes = [
       { name: "Café da Manhã", icon: "coffee", isDefault: true },
       { name: "Almoço", icon: "utensils", isDefault: true },
-      { name: "Jantar", icon: "bowl-food", isDefault: true },
       { name: "Lanche", icon: "cookie-bite", isDefault: true },
+      { name: "Jantar", icon: "bowl-food", isDefault: true },
+      { name: "Ceia", icon: "moon", isDefault: true },
     ];
 
     for (const mealType of defaultMealTypes) {
@@ -48,19 +49,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/user/goals', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const goalsSchema = z.object({
+      const updateSchema = z.object({
+        weight: z.number().min(30).max(300).optional(),
+        height: z.number().min(100).max(250).optional(),
+        age: z.number().min(13).max(120).optional(),
+        goal: z.enum(["lose", "gain", "maintain"]).optional(),
+        activityLevel: z.enum(["sedentary", "light", "moderate", "active", "very_active"]).optional(),
         dailyCalories: z.number().min(1200).max(5000),
         dailyProtein: z.number().min(50).max(300),
         dailyCarbs: z.number().min(100).max(600),
         dailyFat: z.number().min(20).max(200),
+        isProfileComplete: z.boolean().optional(),
       });
 
-      const goals = goalsSchema.parse(req.body);
-      const user = await storage.updateUserGoals(userId, goals);
+      const updateData = updateSchema.parse(req.body);
+      const user = await storage.updateUserGoals(userId, updateData);
       res.json(user);
     } catch (error) {
-      console.error("Error updating goals:", error);
-      res.status(400).json({ message: "Invalid goal values" });
+      console.error("Error updating user profile:", error);
+      res.status(400).json({ message: "Invalid profile data" });
     }
   });
 
