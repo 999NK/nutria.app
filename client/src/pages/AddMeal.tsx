@@ -11,7 +11,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { CustomFoodModal } from "@/components/CustomFoodModal";
-import { FoodSearchModal } from "@/components/FoodSearchModal";
+import { FoodDropdownSearch } from "@/components/FoodDropdownSearch";
 
 interface FoodItem {
   id: number;
@@ -216,6 +216,24 @@ export default function AddMeal() {
     setFoodSearch("");
   };
 
+  const handleAddFoodFromSearch = (food: any) => {
+    const newFood: FoodItem = {
+      id: food.id || Date.now(),
+      name: food.name,
+      quantity: food.quantity,
+      unit: food.unit,
+      calories: food.calories,
+      protein: food.protein,
+      carbs: food.carbs,
+      fat: food.fat,
+    };
+    setAddedFoods(prev => [...prev, newFood]);
+    toast({
+      title: "Alimento adicionado",
+      description: `${food.name} foi adicionado à refeição`,
+    });
+  };
+
   const removeFoodItem = (index: number) => {
     setAddedFoods(prev => prev.filter((_, i) => i !== index));
   };
@@ -325,46 +343,17 @@ export default function AddMeal() {
             </div>
           </div>
 
-          {/* Manual Food Search */}
-          <div>
-            <Label>Buscar Alimento</Label>
-            <div className="relative mt-2">
-              <Input
-                placeholder="Digite o nome do alimento..."
-                value={foodSearch}
-                onChange={(e) => setFoodSearch(e.target.value)}
-                className="pr-10"
-              />
-              <i className="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            </div>
-            
-            {/* Search Results */}
-            {foods.length > 0 && (
-              <div className="mt-2 space-y-1 max-h-40 overflow-y-auto border rounded-lg">
-                {foods.slice(0, 5).map((food: any) => (
-                  <button
-                    key={food.id}
-                    className="w-full p-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800 border-b last:border-b-0"
-                    onClick={() => addFoodFromSearch(food)}
-                  >
-                    <div className="font-medium">{food.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {food.caloriesPer100g} kcal/100g • {food.proteinPer100g}g prot
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
+          {/* Food Search with Quantity */}
+          <FoodDropdownSearch onAddFood={handleAddFoodFromSearch} />
+          
           {/* Custom Food Entry */}
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full mt-4"
             onClick={() => setShowCustomFood(true)}
           >
             <i className="fas fa-edit mr-2 text-orange-500"></i>
-            Entrada Manual Personalizada
+            Criar Alimento Personalizado
           </Button>
         </CardContent>
       </Card>

@@ -22,11 +22,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       { name: "Ceia", icon: "moon", isDefault: true },
     ];
 
-    for (const mealType of defaultMealTypes) {
-      try {
-        await storage.createMealType(mealType);
-      } catch (error) {
-        // Meal type might already exist
+    // Check if meal types already exist
+    const existingMealTypes = await storage.getMealTypes();
+    if (existingMealTypes.length === 0) {
+      for (const mealType of defaultMealTypes) {
+        try {
+          await storage.createMealType(mealType);
+        } catch (error) {
+          console.error("Error creating meal type:", error);
+        }
       }
     }
   };
