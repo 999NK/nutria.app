@@ -63,19 +63,19 @@ export default function AddMealEnhanced() {
   const [activeTab, setActiveTab] = useState("usda");
 
   // Fetch meal types
-  const { data: mealTypes = [] } = useQuery({
+  const { data: mealTypes = [] } = useQuery<any[]>({
     queryKey: ["/api/meal-types"],
     enabled: isAuthenticated,
   });
 
   // Search USDA foods
-  const { data: usdaFoods = [], isLoading: isSearching } = useQuery({
+  const { data: usdaFoods = [], isLoading: isSearching } = useQuery<USDAFood[]>({
     queryKey: ["/api/foods/search", searchQuery],
     enabled: searchQuery.length > 2,
   });
 
   // Fetch user's custom foods
-  const { data: customFoods = [] } = useQuery({
+  const { data: customFoods = [] } = useQuery<any[]>({
     queryKey: ["/api/foods"],
     enabled: isAuthenticated,
   });
@@ -149,7 +149,7 @@ export default function AddMealEnhanced() {
       }
 
       // Create meal
-      const meal = await apiRequest("/api/meals", "POST", {
+      const meal: any = await apiRequest("/api/meals", "POST", {
         mealTypeId: parseInt(selectedMealType),
         date: new Date().toISOString().split('T')[0],
       });
@@ -158,12 +158,12 @@ export default function AddMealEnhanced() {
       for (const food of selectedFoods) {
         await apiRequest(`/api/meals/${meal.id}/foods`, "POST", {
           foodId: food.id,
-          quantity: food.quantity.toString(),
+          quantity: parseFloat(food.quantity.toString()),
           unit: food.unit,
-          calories: food.calories.toString(),
-          protein: food.protein.toString(),
-          carbs: food.carbs.toString(),
-          fat: food.fat.toString(),
+          calories: parseFloat(food.calories.toString()),
+          protein: parseFloat(food.protein.toString()),
+          carbs: parseFloat(food.carbs.toString()),
+          fat: parseFloat(food.fat.toString()),
         });
       }
 
