@@ -18,6 +18,9 @@ const profileSchema = z.object({
   weight: z.number().min(30, "Peso deve ser maior que 30kg").max(300, "Peso deve ser menor que 300kg"),
   height: z.number().min(100, "Altura deve ser maior que 100cm").max(250, "Altura deve ser menor que 250cm"),
   age: z.number().min(13, "Idade deve ser maior que 13 anos").max(120, "Idade deve ser menor que 120 anos"),
+  gender: z.enum(["male", "female"], {
+    required_error: "Selecione seu gênero",
+  }),
   goal: z.enum(["lose", "gain", "maintain"], {
     required_error: "Selecione um objetivo",
   }),
@@ -39,6 +42,7 @@ export default function Onboarding() {
       weight: undefined,
       height: undefined,
       age: undefined,
+      gender: undefined,
       goal: undefined,
       activityLevel: "moderate",
     },
@@ -76,8 +80,10 @@ export default function Onboarding() {
     const heightCm = data.height;
     const age = data.age;
 
-    // Assumindo gênero masculino para simplificação (pode ser adicionado depois)
-    const bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + 5;
+    // Fórmula BMR específica por gênero
+    const bmr = data.gender === "male" 
+      ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5  // Homens
+      : 10 * weightKg + 6.25 * heightCm - 5 * age - 161; // Mulheres
 
     // Fatores de atividade
     const activityMultipliers = {
@@ -209,6 +215,28 @@ export default function Onboarding() {
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Gênero</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione seu gênero" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="male">👨 Masculino</SelectItem>
+                            <SelectItem value="female">👩 Feminino</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               )}
 
@@ -296,6 +324,12 @@ export default function Onboarding() {
                       <span className="font-medium">{form.watch("age")} anos</span>
                     </div>
                     <div className="flex justify-between">
+                      <span>Gênero:</span>
+                      <span className="font-medium">
+                        {form.watch("gender") === "male" ? "Masculino" : "Feminino"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
                       <span>Objetivo:</span>
                       <span className="font-medium">
                         {form.watch("goal") === "lose" && "Emagrecimento"}
@@ -324,7 +358,7 @@ export default function Onboarding() {
                     onClick={nextStep} 
                     className="flex-1"
                     disabled={
-                      (step === 1 && (!form.watch("weight") || !form.watch("height") || !form.watch("age"))) ||
+                      (step === 1 && (!form.watch("weight") || !form.watch("height") || !form.watch("age") || !form.watch("gender"))) ||
                       (step === 2 && (!form.watch("goal") || !form.watch("activityLevel")))
                     }
                   >
