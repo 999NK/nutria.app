@@ -111,6 +111,13 @@ export default function ProfileEnhanced() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       setIsEditing(false);
+      
+      // If this is the first time completing profile, redirect to home
+      if (!(user as any)?.isProfileComplete) {
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
+      }
     },
     onError: (error) => {
       if (isUnauthorizedError(error as Error)) {
