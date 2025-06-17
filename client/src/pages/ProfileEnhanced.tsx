@@ -244,14 +244,14 @@ export default function ProfileEnhanced() {
                 <div className="space-y-4">
                   <div>
                     <Label>Email</Label>
-                    <Input value={user.email || ""} disabled className="bg-gray-50 dark:bg-gray-800" />
+                    <Input value={(user as any).email || ""} disabled className="bg-gray-50 dark:bg-gray-800" />
                   </div>
 
                   <div>
                     <Label>Peso (kg)</Label>
                     <Input
                       type="number"
-                      value={isEditing ? editedData.weight : user.weight || ""}
+                      value={isEditing ? editedData.weight : (user as any).weight || ""}
                       onChange={(e) => setEditedData(prev => ({ ...prev, weight: Number(e.target.value) }))}
                       disabled={!isEditing}
                       className={!isEditing ? "bg-gray-50 dark:bg-gray-800" : ""}
@@ -262,7 +262,7 @@ export default function ProfileEnhanced() {
                     <Label>Altura (cm)</Label>
                     <Input
                       type="number"
-                      value={isEditing ? editedData.height : user.height || ""}
+                      value={isEditing ? editedData.height : (user as any).height || ""}
                       onChange={(e) => setEditedData(prev => ({ ...prev, height: Number(e.target.value) }))}
                       disabled={!isEditing}
                       className={!isEditing ? "bg-gray-50 dark:bg-gray-800" : ""}
@@ -273,7 +273,7 @@ export default function ProfileEnhanced() {
                     <Label>Idade</Label>
                     <Input
                       type="number"
-                      value={isEditing ? editedData.age : user.age || ""}
+                      value={isEditing ? editedData.age : (user as any).age || ""}
                       onChange={(e) => setEditedData(prev => ({ ...prev, age: Number(e.target.value) }))}
                       disabled={!isEditing}
                       className={!isEditing ? "bg-gray-50 dark:bg-gray-800" : ""}
@@ -285,7 +285,7 @@ export default function ProfileEnhanced() {
                   <div>
                     <Label>Objetivo</Label>
                     <Select
-                      value={isEditing ? editedData.goal : user.goal || ""}
+                      value={isEditing ? editedData.goal : (user as any).goal || ""}
                       onValueChange={(value) => setEditedData(prev => ({ ...prev, goal: value }))}
                       disabled={!isEditing}
                     >
@@ -303,7 +303,7 @@ export default function ProfileEnhanced() {
                   <div>
                     <Label>Nível de Atividade</Label>
                     <Select
-                      value={isEditing ? editedData.activityLevel : user.activityLevel || ""}
+                      value={isEditing ? editedData.activityLevel : (user as any).activityLevel || ""}
                       onValueChange={(value) => setEditedData(prev => ({ ...prev, activityLevel: value }))}
                       disabled={!isEditing}
                     >
@@ -320,16 +320,16 @@ export default function ProfileEnhanced() {
                     </Select>
                   </div>
 
-                  {user.weight && user.height && (
+                  {(user as any).weight && (user as any).height && (
                     <div>
                       <Label>IMC</Label>
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
                         <div className="text-lg font-semibold">
-                          {((user.weight || 0) / Math.pow((user.height || 0) / 100, 2)).toFixed(1)}
+                          {(((user as any).weight || 0) / Math.pow(((user as any).height || 0) / 100, 2)).toFixed(1)}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {(() => {
-                            const bmi = (user.weight || 0) / Math.pow((user.height || 0) / 100, 2);
+                            const bmi = ((user as any).weight || 0) / Math.pow(((user as any).height || 0) / 100, 2);
                             if (bmi < 18.5) return "Abaixo do peso";
                             if (bmi < 25) return "Peso normal";
                             if (bmi < 30) return "Sobrepeso";
@@ -378,25 +378,25 @@ export default function ProfileEnhanced() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card>
                   <CardContent className="pt-4 text-center">
-                    <div className="text-2xl font-bold text-green-600">{user.dailyCalories}</div>
+                    <div className="text-2xl font-bold text-green-600">{(user as any).dailyCalories}</div>
                     <div className="text-sm text-muted-foreground">Calorias/dia</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-4 text-center">
-                    <div className="text-2xl font-bold text-blue-600">{user.dailyProtein}g</div>
+                    <div className="text-2xl font-bold text-blue-600">{(user as any).dailyProtein}g</div>
                     <div className="text-sm text-muted-foreground">Proteína</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-4 text-center">
-                    <div className="text-2xl font-bold text-orange-600">{user.dailyCarbs}g</div>
+                    <div className="text-2xl font-bold text-orange-600">{(user as any).dailyCarbs}g</div>
                     <div className="text-sm text-muted-foreground">Carboidratos</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-4 text-center">
-                    <div className="text-2xl font-bold text-purple-600">{user.dailyFat}g</div>
+                    <div className="text-2xl font-bold text-purple-600">{(user as any).dailyFat}g</div>
                     <div className="text-sm text-muted-foreground">Gordura</div>
                   </CardContent>
                 </Card>
@@ -422,7 +422,7 @@ export default function ProfileEnhanced() {
                     </div>
                   </div>
                   <Switch
-                    checked={user.notificationsEnabled || false}
+                    checked={(user as any).notificationsEnabled || false}
                     onCheckedChange={toggleNotificationsMutation.mutate}
                     disabled={toggleNotificationsMutation.isPending}
                   />
@@ -433,8 +433,8 @@ export default function ProfileEnhanced() {
                 <div className="space-y-2">
                   <Label className="text-base">Informações da Conta</Label>
                   <div className="text-sm text-muted-foreground space-y-1">
-                    <div>Membro desde: {new Date(user.createdAt || "").toLocaleDateString("pt-BR")}</div>
-                    <div>Última atualização: {new Date(user.updatedAt || "").toLocaleDateString("pt-BR")}</div>
+                    <div>Membro desde: {new Date((user as any).createdAt || "").toLocaleDateString("pt-BR")}</div>
+                    <div>Última atualização: {new Date((user as any).updatedAt || "").toLocaleDateString("pt-BR")}</div>
                   </div>
                 </div>
 
