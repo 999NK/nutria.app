@@ -11,6 +11,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { CustomFoodModal } from "@/components/CustomFoodModal";
+import { FoodSearchModal } from "@/components/FoodSearchModal";
 
 interface FoodItem {
   id: number;
@@ -35,6 +36,7 @@ export default function AddMeal() {
   const [foodSearch, setFoodSearch] = useState("");
   const [addedFoods, setAddedFoods] = useState<FoodItem[]>([]);
   const [showCustomFood, setShowCustomFood] = useState(false);
+  const [showFoodSearch, setShowFoodSearch] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
