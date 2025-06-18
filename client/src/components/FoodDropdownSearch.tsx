@@ -55,10 +55,15 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
   const [unit, setUnit] = useState("g");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
-  // Debounce search query
+  // Debounce search query with validation
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
+      const trimmed = searchQuery.trim();
+      if (trimmed.length >= 3) {
+        setDebouncedQuery(trimmed);
+      } else {
+        setDebouncedQuery("");
+      }
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -66,13 +71,13 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
   // Search foods (both user's and USDA)
   const { data: foods = [], isLoading } = useQuery({
     queryKey: ["/api/foods", debouncedQuery],
-    enabled: debouncedQuery.length > 1,
+    enabled: debouncedQuery.length >= 3,
   });
 
   // Search USDA foods
   const { data: usdaFoods = [] } = useQuery({
     queryKey: ["/api/foods/search", debouncedQuery],
-    enabled: debouncedQuery.length > 2,
+    enabled: debouncedQuery.length >= 3,
   });
 
   // Combine both food sources
