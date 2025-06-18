@@ -152,12 +152,13 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
     refetchOnWindowFocus: false,
   });
 
-  // Trigger searches when debouncedQuery changes
+  // Trigger searches only when valid query is available
   useEffect(() => {
     if (debouncedQuery.length >= 3 && isOpen) {
       console.log("🔄 Triggering search for:", debouncedQuery);
-      refetchUserFoods();
-      refetchUsdaFoods();
+      // Only trigger if query is actually valid
+      refetchUserFoods().catch(() => {});
+      refetchUsdaFoods().catch(() => {});
     }
   }, [debouncedQuery, isOpen, refetchUserFoods, refetchUsdaFoods]);
 
