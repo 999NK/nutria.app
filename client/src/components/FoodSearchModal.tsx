@@ -65,15 +65,6 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
     }
   }, [isOpen]);
 
-  // Trigger searches when debouncedQuery changes
-  useEffect(() => {
-    if (debouncedQuery.length >= 3 && isOpen) {
-      console.log("🔄 Triggering search for:", debouncedQuery);
-      refetchUserFoods();
-      refetchUsdaFoods();
-    }
-  }, [debouncedQuery, isOpen, refetchUserFoods, refetchUsdaFoods]);
-
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -95,9 +86,10 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
       const query = debouncedQuery.trim();
       console.log("👤 User foods query:", query);
       
+      // Strict validation to prevent any empty queries
       if (!query || query.length < 3) {
-        console.log("❌ User query too short, returning empty");
-        return [];
+        console.log("❌ User query too short, throwing error to prevent fetch");
+        throw new Error("Query too short");
       }
       
       try {
@@ -129,9 +121,10 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
       const query = debouncedQuery.trim();
       console.log('🌍 USDA query:', query);
       
+      // Strict validation to prevent any empty queries
       if (!query || query.length < 3) {
-        console.log('❌ USDA query too short, returning empty');
-        return [];
+        console.log('❌ USDA query too short, throwing error to prevent fetch');
+        throw new Error("Query too short");
       }
 
       try {
@@ -158,6 +151,15 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
     staleTime: 30 * 1000,
     refetchOnWindowFocus: false,
   });
+
+  // Trigger searches when debouncedQuery changes
+  useEffect(() => {
+    if (debouncedQuery.length >= 3 && isOpen) {
+      console.log("🔄 Triggering search for:", debouncedQuery);
+      refetchUserFoods();
+      refetchUsdaFoods();
+    }
+  }, [debouncedQuery, isOpen, refetchUserFoods, refetchUsdaFoods]);
 
   const addUsdaFoodMutation = useMutation({
     mutationFn: async (usdaFood: Food) => {
