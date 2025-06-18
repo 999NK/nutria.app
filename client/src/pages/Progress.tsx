@@ -144,9 +144,9 @@ export default function Progress() {
       </div>
 
       {/* Enhanced Progress Cards - 2x2 Layout */}
-      <div className="grid grid-cols-2 gap-3 max-w-4xl mx-auto">
+      <div className="flex flex-wrap w-full">
         {/* Calories Card */}
-        <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+        <Card className="w-1/2 p-1.5 relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
           <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 to-emerald-400/10" />
           <CardContent className="relative p-3 text-center">
             <div className="mb-2">
@@ -178,7 +178,7 @@ export default function Progress() {
         </Card>
 
         {/* Protein Card */}
-        <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+        <Card className="w-1/2 p-1.5 relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-indigo-400/10" />
           <CardContent className="relative p-3 text-center">
             <div className="mb-2">
@@ -210,7 +210,7 @@ export default function Progress() {
         </Card>
 
         {/* Carbs Card */}
-        <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
+        <Card className="w-1/2 p-1.5 relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-400/10 to-orange-400/10" />
           <CardContent className="relative p-3 text-center">
             <div className="mb-2">
@@ -242,7 +242,7 @@ export default function Progress() {
         </Card>
 
         {/* Fat Card */}
-        <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20">
+        <Card className="w-1/2 p-1.5 relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20">
           <div className="absolute inset-0 bg-gradient-to-br from-red-400/10 to-pink-400/10" />
           <CardContent className="relative p-3 text-center">
             <div className="mb-2">
