@@ -41,11 +41,171 @@ class USDAFoodService {
   private readonly apiKey: string;
   private readonly baseUrl = 'https://api.nal.usda.gov/fdc/v1';
 
+  // Portuguese to English food translation dictionary
+  private readonly foodTranslations: Record<string, string> = {
+    // Frutas
+    'banana': 'banana',
+    'maçã': 'apple',
+    'laranja': 'orange',
+    'uva': 'grape',
+    'limão': 'lemon',
+    'manga': 'mango',
+    'abacaxi': 'pineapple',
+    'morango': 'strawberry',
+    'pêra': 'pear',
+    'pêssego': 'peach',
+    'melancia': 'watermelon',
+    'melão': 'melon',
+    'kiwi': 'kiwi',
+    'mamão': 'papaya',
+    'coco': 'coconut',
+    'abacate': 'avocado',
+    
+    // Carnes
+    'frango': 'chicken',
+    'carne': 'beef',
+    'porco': 'pork',
+    'peixe': 'fish',
+    'salmão': 'salmon',
+    'atum': 'tuna',
+    'camarão': 'shrimp',
+    'peru': 'turkey',
+    'cordeiro': 'lamb',
+    'bacon': 'bacon',
+    'linguiça': 'sausage',
+    'presunto': 'ham',
+    
+    // Grãos e Cereais
+    'arroz': 'rice',
+    'feijão': 'beans',
+    'lentilha': 'lentils',
+    'grão-de-bico': 'chickpeas',
+    'quinoa': 'quinoa',
+    'aveia': 'oats',
+    'trigo': 'wheat',
+    'milho': 'corn',
+    'centeio': 'rye',
+    'cevada': 'barley',
+    
+    // Laticínios
+    'leite': 'milk',
+    'queijo': 'cheese',
+    'iogurte': 'yogurt',
+    'manteiga': 'butter',
+    'cream': 'cream',
+    'requeijão': 'cottage cheese',
+    
+    // Ovos
+    'ovo': 'egg',
+    'ovos': 'eggs',
+    
+    // Vegetais
+    'tomate': 'tomato',
+    'cebola': 'onion',
+    'alho': 'garlic',
+    'batata': 'potato',
+    'cenoura': 'carrot',
+    'brócolis': 'broccoli',
+    'couve-flor': 'cauliflower',
+    'espinafre': 'spinach',
+    'alface': 'lettuce',
+    'pepino': 'cucumber',
+    'pimentão': 'bell pepper',
+    'abobrinha': 'zucchini',
+    'berinjela': 'eggplant',
+    'beterraba': 'beet',
+    'repolho': 'cabbage',
+    'couve': 'kale',
+    'rúcula': 'arugula',
+    
+    // Nozes e Sementes
+    'amendoim': 'peanuts',
+    'castanha': 'nuts',
+    'nozes': 'walnuts',
+    'amêndoas': 'almonds',
+    'pistache': 'pistachios',
+    'sementes de girassol': 'sunflower seeds',
+    'chia': 'chia seeds',
+    'linhaça': 'flax seeds',
+    
+    // Óleos e Gorduras
+    'azeite': 'olive oil',
+    'óleo': 'oil',
+    'óleo de coco': 'coconut oil',
+    'óleo de girassol': 'sunflower oil',
+    
+    // Pães e Massas
+    'pão': 'bread',
+    'macarrão': 'pasta',
+    'espaguete': 'spaghetti',
+    'lasanha': 'lasagna',
+    'pizza': 'pizza',
+    'biscoito': 'cookie',
+    'bolacha': 'cracker',
+    
+    // Doces
+    'açúcar': 'sugar',
+    'mel': 'honey',
+    'chocolate': 'chocolate',
+    'bolo': 'cake',
+    'sorvete': 'ice cream',
+    'doce': 'candy',
+    
+    // Bebidas
+    'água': 'water',
+    'café': 'coffee',
+    'chá': 'tea',
+    'suco': 'juice',
+    'refrigerante': 'soda',
+    'cerveja': 'beer',
+    'vinho': 'wine',
+    
+    // Temperos
+    'sal': 'salt',
+    'pimenta': 'pepper',
+    'açafrão': 'turmeric',
+    'canela': 'cinnamon',
+    'orégano': 'oregano',
+    'manjericão': 'basil',
+    'salsa': 'parsley',
+    'coentro': 'cilantro',
+    'alecrim': 'rosemary',
+    'tomilho': 'thyme'
+  };
+
   constructor() {
     this.apiKey = process.env.USDA_API_KEY || '';
     if (!this.apiKey) {
       console.warn('USDA_API_KEY not provided. Food search will use fallback data.');
     }
+  }
+
+  private translateToEnglish(query: string): string {
+    // Normalize accents and special characters
+    const normalizeString = (str: string): string => {
+      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    };
+    
+    const normalizedQuery = normalizeString(query);
+    
+    // Direct translation with normalized strings
+    for (const [portuguese, english] of Object.entries(this.foodTranslations)) {
+      const normalizedPortuguese = normalizeString(portuguese);
+      if (normalizedQuery === normalizedPortuguese) {
+        return english;
+      }
+    }
+    
+    // Partial match for compound words
+    for (const [portuguese, english] of Object.entries(this.foodTranslations)) {
+      const normalizedPortuguese = normalizeString(portuguese);
+      if (normalizedQuery.includes(normalizedPortuguese) || normalizedPortuguese.includes(normalizedQuery)) {
+        return english;
+      }
+    }
+    
+    // Return original query if no translation found
+    return query;
   }
 
   async searchFoods(query: string, pageSize: number = 50): Promise<ProcessedFood[]> {
@@ -54,7 +214,11 @@ class USDAFoodService {
     }
 
     try {
-      const url = `${this.baseUrl}/foods/search?api_key=${this.apiKey}&query=${encodeURIComponent(query)}&pageSize=${pageSize}&dataType=Foundation,SR%20Legacy`;
+      // Translate Portuguese to English for better USDA results
+      const translatedQuery = this.translateToEnglish(query);
+      console.log(`Searching USDA: "${query}" -> "${translatedQuery}"`);
+      
+      const url = `${this.baseUrl}/foods/search?api_key=${this.apiKey}&query=${encodeURIComponent(translatedQuery)}&pageSize=${pageSize}&dataType=Foundation,SR%20Legacy`;
       
       const response = await fetch(url);
       if (!response.ok) {
