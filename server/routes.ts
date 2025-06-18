@@ -634,6 +634,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PDF Report generation endpoint
+  app.get('/api/reports/nutrition-pdf', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { period = 'daily', date = new Date().toISOString().split('T')[0] } = req.query;
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      let nutritionHistory: any[] = [];
+      let startDate: string;
+      let endDate: string;
+
+      switch (period) {
+        case 'daily':
+          startDate = endDate = date;
+          const dailyNutrition = await storage.getDailyNutrition(userId, date);
+          if (dailyNutrition) {
+            nutritionHistory = [dailyNutrition];
+          }
+          break;
+        case 'weekly':
+          const weekStart = new Date(date);
+          weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+          startDate = weekStart.toISOString().split('T')[0];
+          endDate = weekEnd.toISOString().split('T')[0];
+          nutritionHistory = await storage.getNutritionHistory(userId, startDate, endDate);
+          break;
+        case 'monthly':
+          const monthStart = new Date(date);
+          monthStart.setDate(1);
+          const monthEnd = new Date(monthStart);
+          monthEnd.setMonth(monthEnd.getMonth() + 1);
+          monthEnd.setDate(0);
+          startDate = monthStart.toISOString().split('T')[0];
+          endDate = monthEnd.toISOString().split('T')[0];
+          nutritionHistory = await storage.getNutritionHistory(userId, startDate, endDate);
+          break;
+        default:
+          return res.status(400).json({ message: "Invalid period" });
+      }
+
+      const reportData = {
+        user,
+        nutritionHistory,
+        startDate,
+        endDate,
+        type: period as 'daily' | 'weekly' | 'monthly'
+      };
+
+      const pdfBuffer = await pdfService.generateNutritionReport(reportData);
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="relatorio-nutricional-${period}-${date}.pdf"`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("Error generating PDF report:", error);
+      res.status(500).json({ message: "Failed to generate PDF report" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
