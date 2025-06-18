@@ -209,60 +209,27 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
 
           {/* Food Selection */}
           {!selectedFood ? (
-            <Tabs defaultValue="my-foods" className="w-full">
+            <Tabs defaultValue={userFoods.length > 0 ? "my-foods" : "usda-foods"} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="usda-foods" className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Base Mundial (600.000+ alimentos)
+                  {usdaFoods.length > 0 && (
+                    <Badge variant="secondary" className="ml-1">
+                      {usdaFoods.length}
+                    </Badge>
+                  )}
+                </TabsTrigger>
                 <TabsTrigger value="my-foods" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   Meus Alimentos
-                </TabsTrigger>
-                <TabsTrigger value="usda-foods" className="flex items-center gap-2">
-                  <Globe className="h-4 w-4" />
-                  Base Mundial (USDA)
+                  {userFoods.length > 0 && (
+                    <Badge variant="secondary" className="ml-1">
+                      {userFoods.length}
+                    </Badge>
+                  )}
                 </TabsTrigger>
               </TabsList>
-
-              <TabsContent value="my-foods" className="max-h-60 overflow-y-auto">
-                {isLoadingUserFoods ? (
-                  <div className="text-center py-4">Buscando...</div>
-                ) : userFoods.length > 0 ? (
-                  <div className="space-y-2">
-                    {userFoods.map((food: Food) => (
-                      <Card
-                        key={food.id}
-                        className="cursor-pointer hover:bg-accent transition-colors"
-                        onClick={() => handleSelectFood(food)}
-                      >
-                        <CardContent className="p-3">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h4 className="font-medium">{food.name}</h4>
-                              {food.brand && (
-                                <p className="text-sm text-muted-foreground">{food.brand}</p>
-                              )}
-                              <div className="flex gap-2 mt-1">
-                                <Badge variant="outline">
-                                  {food.caloriesPer100g} kcal/100g
-                                </Badge>
-                                {food.isCustom && (
-                                  <Badge variant="secondary">Personalizado</Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : searchQuery.length > 2 ? (
-                  <div className="text-center py-4 text-muted-foreground">
-                    Nenhum alimento encontrado em sua lista
-                  </div>
-                ) : (
-                  <div className="text-center py-4 text-muted-foreground">
-                    Digite pelo menos 3 caracteres para buscar
-                  </div>
-                )}
-              </TabsContent>
 
               <TabsContent value="usda-foods" className="max-h-60 overflow-y-auto">
                 {isLoadingUsdaFoods ? (
