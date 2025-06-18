@@ -36,14 +36,18 @@ export const getQueryFn: <T>(options: {
       const params = new URLSearchParams();
       const queryParams = queryKey[1] as Record<string, string>;
       
+      console.log('Query parameters:', queryParams);
+      
       Object.entries(queryParams).forEach(([key, value]) => {
         if (value && value.trim()) {
           params.append(key, value);
+          console.log(`Added param: ${key}=${value}`);
         }
       });
       
       if (params.toString()) {
         url += '?' + params.toString();
+        console.log('Final URL:', url);
       }
     }
     
