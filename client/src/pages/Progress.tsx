@@ -144,26 +144,26 @@ export default function Progress() {
       </div>
 
       {/* Enhanced Progress Cards - 2x2 Layout */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-6 max-w-4xl mx-auto">
+      <div className="grid grid-cols-2 gap-3 max-w-4xl mx-auto">
         {/* Calories Card */}
         <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
           <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 to-emerald-400/10" />
-          <CardContent className="relative p-3 sm:p-6 text-center">
-            <div className="mb-2 sm:mb-4">
-              <div className="w-12 h-12 sm:w-20 sm:h-20 mx-auto mb-2 sm:mb-4 relative">
+          <CardContent className="relative p-3 text-center">
+            <div className="mb-2">
+              <div className="w-12 h-12 mx-auto mb-2 relative">
                 <ProgressRing progress={progress.calories} size={48} color="#22c55e">
                   <div className="text-center">
-                    <div className="text-sm sm:text-lg font-bold text-green-700">{progress.calories}%</div>
+                    <div className="text-sm font-bold text-green-700">{progress.calories}%</div>
                   </div>
                 </ProgressRing>
               </div>
-              <Activity className="w-4 h-4 sm:w-6 sm:h-6 text-green-600 mx-auto mb-1 sm:mb-2" />
-              <h3 className="text-sm sm:text-lg font-semibold text-green-800 dark:text-green-300">Calorias</h3>
+              <Activity className="w-4 h-4 text-green-600 mx-auto mb-1" />
+              <h3 className="text-sm font-semibold text-green-800 dark:text-green-300">Calorias</h3>
               <div className="space-y-1">
-                <p className="text-lg sm:text-2xl font-bold text-green-700 dark:text-green-300">
+                <p className="text-lg font-bold text-green-700 dark:text-green-300">
                   {(dailyNutrition as any)?.calories || 0}
                 </p>
-                <p className="text-xs sm:text-sm text-green-600 dark:text-green-400">
+                <p className="text-xs text-green-600 dark:text-green-400">
                   de {(user as any)?.dailyCalories || 0} kcal
                 </p>
                 <div className="w-full bg-green-200 rounded-full h-2 mt-2">
@@ -180,22 +180,22 @@ export default function Progress() {
         {/* Protein Card */}
         <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-indigo-400/10" />
-          <CardContent className="relative p-6 text-center">
-            <div className="mb-4">
-              <div className="w-20 h-20 mx-auto mb-4 relative">
-                <ProgressRing progress={progress.protein} size={80} color="#3b82f6">
+          <CardContent className="relative p-3 text-center">
+            <div className="mb-2">
+              <div className="w-12 h-12 mx-auto mb-2 relative">
+                <ProgressRing progress={progress.protein} size={48} color="#3b82f6">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-blue-700">{progress.protein}%</div>
+                    <div className="text-sm font-bold text-blue-700">{progress.protein}%</div>
                   </div>
                 </ProgressRing>
               </div>
-              <Target className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-              <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-300">Proteínas</h3>
+              <Target className="w-4 h-4 text-blue-600 mx-auto mb-1" />
+              <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300">Proteínas</h3>
               <div className="space-y-1">
-                <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                <p className="text-lg font-bold text-blue-700 dark:text-blue-300">
                   {(dailyNutrition as any)?.protein || 0}g
                 </p>
-                <p className="text-sm text-blue-600 dark:text-blue-400">
+                <p className="text-xs text-blue-600 dark:text-blue-400">
                   de {(user as any)?.dailyProtein || 0}g
                 </p>
                 <div className="w-full bg-blue-200 rounded-full h-2 mt-2">
@@ -212,22 +212,22 @@ export default function Progress() {
         {/* Carbs Card */}
         <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-400/10 to-orange-400/10" />
-          <CardContent className="relative p-6 text-center">
-            <div className="mb-4">
-              <div className="w-20 h-20 mx-auto mb-4 relative">
-                <ProgressRing progress={progress.carbs} size={80} color="#f59e0b">
+          <CardContent className="relative p-3 text-center">
+            <div className="mb-2">
+              <div className="w-12 h-12 mx-auto mb-2 relative">
+                <ProgressRing progress={progress.carbs} size={48} color="#f59e0b">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-amber-700">{progress.carbs}%</div>
+                    <div className="text-sm font-bold text-amber-700">{progress.carbs}%</div>
                   </div>
                 </ProgressRing>
               </div>
-              <TrendingUp className="w-6 h-6 text-amber-600 mx-auto mb-2" />
-              <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-300">Carboidratos</h3>
+              <TrendingUp className="w-4 h-4 text-amber-600 mx-auto mb-1" />
+              <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300">Carboidratos</h3>
               <div className="space-y-1">
-                <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">
+                <p className="text-lg font-bold text-amber-700 dark:text-amber-300">
                   {(dailyNutrition as any)?.carbs || 0}g
                 </p>
-                <p className="text-sm text-amber-600 dark:text-amber-400">
+                <p className="text-xs text-amber-600 dark:text-amber-400">
                   de {(user as any)?.dailyCarbs || 0}g
                 </p>
                 <div className="w-full bg-amber-200 rounded-full h-2 mt-2">
@@ -244,22 +244,22 @@ export default function Progress() {
         {/* Fat Card */}
         <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20">
           <div className="absolute inset-0 bg-gradient-to-br from-red-400/10 to-pink-400/10" />
-          <CardContent className="relative p-6 text-center">
-            <div className="mb-4">
-              <div className="w-20 h-20 mx-auto mb-4 relative">
-                <ProgressRing progress={progress.fat} size={80} color="#ef4444">
+          <CardContent className="relative p-3 text-center">
+            <div className="mb-2">
+              <div className="w-12 h-12 mx-auto mb-2 relative">
+                <ProgressRing progress={progress.fat} size={48} color="#ef4444">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-red-700">{progress.fat}%</div>
+                    <div className="text-sm font-bold text-red-700">{progress.fat}%</div>
                   </div>
                 </ProgressRing>
               </div>
-              <Calendar className="w-6 h-6 text-red-600 mx-auto mb-2" />
-              <h3 className="text-lg font-semibold text-red-800 dark:text-red-300">Gorduras</h3>
+              <Calendar className="w-4 h-4 text-red-600 mx-auto mb-1" />
+              <h3 className="text-sm font-semibold text-red-800 dark:text-red-300">Gorduras</h3>
               <div className="space-y-1">
-                <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+                <p className="text-lg font-bold text-red-700 dark:text-red-300">
                   {(dailyNutrition as any)?.fat || 0}g
                 </p>
-                <p className="text-sm text-red-600 dark:text-red-400">
+                <p className="text-xs text-red-600 dark:text-red-400">
                   de {(user as any)?.dailyFat || 0}g
                 </p>
                 <div className="w-full bg-red-200 rounded-full h-2 mt-2">
