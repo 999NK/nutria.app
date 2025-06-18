@@ -80,16 +80,15 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
   }, [searchQuery]);
 
   // Search user's foods
-  const { data: userFoods = [], isLoading: isLoadingUserFoods, refetch: refetchUserFoods } = useQuery({
+  const userFoodsQuery = useQuery({
     queryKey: ["user-foods", debouncedQuery],
     queryFn: async () => {
       const query = debouncedQuery.trim();
       console.log("👤 User foods query:", query);
       
-      // Strict validation to prevent any empty queries
       if (!query || query.length < 3) {
-        console.log("❌ User query too short, throwing error to prevent fetch");
-        throw new Error("Query too short");
+        console.log("❌ User query too short, returning empty array");
+        return [];
       }
       
       try {
@@ -109,22 +108,25 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
         return [];
       }
     },
-    enabled: false, // Disable automatic execution
+    enabled: debouncedQuery.length >= 3 && isOpen,
     staleTime: 30 * 1000,
     refetchOnWindowFocus: false,
   });
 
+  const userFoods = userFoodsQuery.data || [];
+  const isLoadingUserFoods = userFoodsQuery.isLoading;
+  const refetchUserFoods = userFoodsQuery.refetch;
+
   // Search USDA foods
-  const { data: usdaFoods = [], isLoading: isLoadingUsdaFoods, refetch: refetchUsdaFoods } = useQuery({
+  const usdaFoodsQuery = useQuery({
     queryKey: ["usda-foods", debouncedQuery],
     queryFn: async () => {
       const query = debouncedQuery.trim();
       console.log('🌍 USDA query:', query);
       
-      // Strict validation to prevent any empty queries
       if (!query || query.length < 3) {
-        console.log('❌ USDA query too short, throwing error to prevent fetch');
-        throw new Error("Query too short");
+        console.log('❌ USDA query too short, returning empty array');
+        return [];
       }
 
       try {
@@ -147,20 +149,16 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
         return [];
       }
     },
-    enabled: false, // Disable automatic execution
+    enabled: debouncedQuery.length >= 3 && isOpen,
     staleTime: 30 * 1000,
     refetchOnWindowFocus: false,
   });
 
-  // Trigger searches only when valid query is available
-  useEffect(() => {
-    if (debouncedQuery.length >= 3 && isOpen) {
-      console.log("🔄 Triggering search for:", debouncedQuery);
-      // Only trigger if query is actually valid
-      refetchUserFoods().catch(() => {});
-      refetchUsdaFoods().catch(() => {});
-    }
-  }, [debouncedQuery, isOpen, refetchUserFoods, refetchUsdaFoods]);
+  const usdaFoods = usdaFoodsQuery.data || [];
+  const isLoadingUsdaFoods = usdaFoodsQuery.isLoading;
+  const refetchUsdaFoods = usdaFoodsQuery.refetch;
+
+
 
   const addUsdaFoodMutation = useMutation({
     mutationFn: async (usdaFood: Food) => {
