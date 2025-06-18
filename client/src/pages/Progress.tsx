@@ -9,6 +9,32 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { ProgressRing } from "@/components/ProgressRing";
 import { useToast } from "@/hooks/use-toast";
 
+interface HourlyData {
+  hour: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+interface WeeklyData {
+  date: string;
+  dayName: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+interface MonthlyData {
+  weekStart: string;
+  weekEnd: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
 export default function Progress() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [activeView, setActiveView] = useState("daily");
@@ -64,17 +90,17 @@ export default function Progress() {
     },
   });
 
-  const { data: hourlyData, isLoading: hourlyLoading } = useQuery({
+  const { data: hourlyData, isLoading: hourlyLoading } = useQuery<HourlyData[]>({
     queryKey: ['/api/progress/hourly', selectedDate],
     refetchInterval: 10 * 1000, // Refetch every 10 seconds for real-time updates
   });
 
-  const { data: weeklyData, isLoading: weeklyLoading } = useQuery({
+  const { data: weeklyData, isLoading: weeklyLoading } = useQuery<WeeklyData[]>({
     queryKey: ['/api/progress/weekly'],
     refetchInterval: 30 * 1000, // Refetch every 30 seconds
   });
 
-  const { data: monthlyData, isLoading: monthlyLoading } = useQuery({
+  const { data: monthlyData, isLoading: monthlyLoading } = useQuery<MonthlyData[]>({
     queryKey: ['/api/progress/monthly'],
     refetchInterval: 60 * 1000, // Refetch every minute
   });
@@ -93,8 +119,8 @@ export default function Progress() {
   };
 
   const formatHourlyChart = () => {
-    if (!hourlyData || !(hourlyData as any[]).filter) return [];
-    return (hourlyData as any[])
+    if (!hourlyData || !Array.isArray(hourlyData)) return [];
+    return hourlyData
       .filter(item => item.calories > 0 || item.protein > 0 || item.carbs > 0 || item.fat > 0)
       .map(item => ({
         time: `${item.hour}:00`,
@@ -146,132 +172,140 @@ export default function Progress() {
       {/* Enhanced Progress Cards - 2x2 Layout */}
       <div className="flex flex-wrap w-full">
         {/* Calories Card */}
-        <Card className="w-1/2 p-1.5 relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
-          <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 to-emerald-400/10" />
-          <CardContent className="relative p-3 text-center">
-            <div className="mb-2">
-              <div className="w-12 h-12 mx-auto mb-2 relative">
-                <ProgressRing progress={progress.calories} size={48} color="#22c55e">
-                  <div className="text-center">
-                    <div className="text-sm font-bold text-green-700">{progress.calories}%</div>
+        <div className="w-1/2 p-1 min-w-[160px]">
+          <Card className="h-full relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 to-emerald-400/10" />
+            <CardContent className="relative p-3 text-center">
+              <div className="mb-2">
+                <div className="w-12 h-12 mx-auto mb-2 relative">
+                  <ProgressRing progress={progress.calories} size={48} color="#22c55e">
+                    <div className="text-center">
+                      <div className="text-sm font-bold text-green-700">{progress.calories}%</div>
+                    </div>
+                  </ProgressRing>
+                </div>
+                <Activity className="w-4 h-4 text-green-600 mx-auto mb-1" />
+                <h3 className="text-sm font-semibold text-green-800 dark:text-green-300">Calorias</h3>
+                <div className="space-y-1">
+                  <p className="text-lg font-bold text-green-700 dark:text-green-300">
+                    {(dailyNutrition as any)?.calories || 0}
+                  </p>
+                  <p className="text-xs text-green-600 dark:text-green-400">
+                    de {(user as any)?.dailyCalories || 0} kcal
+                  </p>
+                  <div className="w-full bg-green-200 rounded-full h-2 mt-2">
+                    <div 
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(progress.calories, 100)}%` }}
+                    />
                   </div>
-                </ProgressRing>
-              </div>
-              <Activity className="w-4 h-4 text-green-600 mx-auto mb-1" />
-              <h3 className="text-sm font-semibold text-green-800 dark:text-green-300">Calorias</h3>
-              <div className="space-y-1">
-                <p className="text-lg font-bold text-green-700 dark:text-green-300">
-                  {(dailyNutrition as any)?.calories || 0}
-                </p>
-                <p className="text-xs text-green-600 dark:text-green-400">
-                  de {(user as any)?.dailyCalories || 0} kcal
-                </p>
-                <div className="w-full bg-green-200 rounded-full h-2 mt-2">
-                  <div 
-                    className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(progress.calories, 100)}%` }}
-                  />
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Protein Card */}
-        <Card className="w-1/2 p-1.5 relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-indigo-400/10" />
-          <CardContent className="relative p-3 text-center">
-            <div className="mb-2">
-              <div className="w-12 h-12 mx-auto mb-2 relative">
-                <ProgressRing progress={progress.protein} size={48} color="#3b82f6">
-                  <div className="text-center">
-                    <div className="text-sm font-bold text-blue-700">{progress.protein}%</div>
+        <div className="w-1/2 p-1 min-w-[160px]">
+          <Card className="h-full relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-indigo-400/10" />
+            <CardContent className="relative p-3 text-center">
+              <div className="mb-2">
+                <div className="w-12 h-12 mx-auto mb-2 relative">
+                  <ProgressRing progress={progress.protein} size={48} color="#3b82f6">
+                    <div className="text-center">
+                      <div className="text-sm font-bold text-blue-700">{progress.protein}%</div>
+                    </div>
+                  </ProgressRing>
+                </div>
+                <Target className="w-4 h-4 text-blue-600 mx-auto mb-1" />
+                <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300">Proteínas</h3>
+                <div className="space-y-1">
+                  <p className="text-lg font-bold text-blue-700 dark:text-blue-300">
+                    {(dailyNutrition as any)?.protein || 0}g
+                  </p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400">
+                    de {(user as any)?.dailyProtein || 0}g
+                  </p>
+                  <div className="w-full bg-blue-200 rounded-full h-2 mt-2">
+                    <div 
+                      className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(progress.protein, 100)}%` }}
+                    />
                   </div>
-                </ProgressRing>
-              </div>
-              <Target className="w-4 h-4 text-blue-600 mx-auto mb-1" />
-              <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300">Proteínas</h3>
-              <div className="space-y-1">
-                <p className="text-lg font-bold text-blue-700 dark:text-blue-300">
-                  {(dailyNutrition as any)?.protein || 0}g
-                </p>
-                <p className="text-xs text-blue-600 dark:text-blue-400">
-                  de {(user as any)?.dailyProtein || 0}g
-                </p>
-                <div className="w-full bg-blue-200 rounded-full h-2 mt-2">
-                  <div 
-                    className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(progress.protein, 100)}%` }}
-                  />
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Carbs Card */}
-        <Card className="w-1/2 p-1.5 relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-400/10 to-orange-400/10" />
-          <CardContent className="relative p-3 text-center">
-            <div className="mb-2">
-              <div className="w-12 h-12 mx-auto mb-2 relative">
-                <ProgressRing progress={progress.carbs} size={48} color="#f59e0b">
-                  <div className="text-center">
-                    <div className="text-sm font-bold text-amber-700">{progress.carbs}%</div>
+        <div className="w-1/2 p-1 min-w-[160px]">
+          <Card className="h-full relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-400/10 to-orange-400/10" />
+            <CardContent className="relative p-3 text-center">
+              <div className="mb-2">
+                <div className="w-12 h-12 mx-auto mb-2 relative">
+                  <ProgressRing progress={progress.carbs} size={48} color="#f59e0b">
+                    <div className="text-center">
+                      <div className="text-sm font-bold text-amber-700">{progress.carbs}%</div>
+                    </div>
+                  </ProgressRing>
+                </div>
+                <TrendingUp className="w-4 h-4 text-amber-600 mx-auto mb-1" />
+                <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300">Carboidratos</h3>
+                <div className="space-y-1">
+                  <p className="text-lg font-bold text-amber-700 dark:text-amber-300">
+                    {(dailyNutrition as any)?.carbs || 0}g
+                  </p>
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                    de {(user as any)?.dailyCarbs || 0}g
+                  </p>
+                  <div className="w-full bg-amber-200 rounded-full h-2 mt-2">
+                    <div 
+                      className="bg-gradient-to-r from-amber-500 to-orange-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(progress.carbs, 100)}%` }}
+                    />
                   </div>
-                </ProgressRing>
-              </div>
-              <TrendingUp className="w-4 h-4 text-amber-600 mx-auto mb-1" />
-              <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300">Carboidratos</h3>
-              <div className="space-y-1">
-                <p className="text-lg font-bold text-amber-700 dark:text-amber-300">
-                  {(dailyNutrition as any)?.carbs || 0}g
-                </p>
-                <p className="text-xs text-amber-600 dark:text-amber-400">
-                  de {(user as any)?.dailyCarbs || 0}g
-                </p>
-                <div className="w-full bg-amber-200 rounded-full h-2 mt-2">
-                  <div 
-                    className="bg-gradient-to-r from-amber-500 to-orange-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(progress.carbs, 100)}%` }}
-                  />
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Fat Card */}
-        <Card className="w-1/2 p-1.5 relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20">
-          <div className="absolute inset-0 bg-gradient-to-br from-red-400/10 to-pink-400/10" />
-          <CardContent className="relative p-3 text-center">
-            <div className="mb-2">
-              <div className="w-12 h-12 mx-auto mb-2 relative">
-                <ProgressRing progress={progress.fat} size={48} color="#ef4444">
-                  <div className="text-center">
-                    <div className="text-sm font-bold text-red-700">{progress.fat}%</div>
+        <div className="w-1/2 p-1 min-w-[160px]">
+          <Card className="h-full relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-400/10 to-pink-400/10" />
+            <CardContent className="relative p-3 text-center">
+              <div className="mb-2">
+                <div className="w-12 h-12 mx-auto mb-2 relative">
+                  <ProgressRing progress={progress.fat} size={48} color="#ef4444">
+                    <div className="text-center">
+                      <div className="text-sm font-bold text-red-700">{progress.fat}%</div>
+                    </div>
+                  </ProgressRing>
+                </div>
+                <Calendar className="w-4 h-4 text-red-600 mx-auto mb-1" />
+                <h3 className="text-sm font-semibold text-red-800 dark:text-red-300">Gorduras</h3>
+                <div className="space-y-1">
+                  <p className="text-lg font-bold text-red-700 dark:text-red-300">
+                    {(dailyNutrition as any)?.fat || 0}g
+                  </p>
+                  <p className="text-xs text-red-600 dark:text-red-400">
+                    de {(user as any)?.dailyFat || 0}g
+                  </p>
+                  <div className="w-full bg-red-200 rounded-full h-2 mt-2">
+                    <div 
+                      className="bg-gradient-to-r from-red-500 to-pink-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(progress.fat, 100)}%` }}
+                    />
                   </div>
-                </ProgressRing>
-              </div>
-              <Calendar className="w-4 h-4 text-red-600 mx-auto mb-1" />
-              <h3 className="text-sm font-semibold text-red-800 dark:text-red-300">Gorduras</h3>
-              <div className="space-y-1">
-                <p className="text-lg font-bold text-red-700 dark:text-red-300">
-                  {(dailyNutrition as any)?.fat || 0}g
-                </p>
-                <p className="text-xs text-red-600 dark:text-red-400">
-                  de {(user as any)?.dailyFat || 0}g
-                </p>
-                <div className="w-full bg-red-200 rounded-full h-2 mt-2">
-                  <div 
-                    className="bg-gradient-to-r from-red-500 to-pink-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(progress.fat, 100)}%` }}
-                  />
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Enhanced Charts Section */}
@@ -455,7 +489,7 @@ export default function Progress() {
         </Button>
       </div>
 
-      {weeklyData && (weeklyData as any[]).length > 0 && (
+      {weeklyData && weeklyData.length > 0 && (
         <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-0 shadow-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl">
@@ -467,7 +501,7 @@ export default function Progress() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={weeklyData as any[]}>
+              <LineChart data={weeklyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis 
                   dataKey="dayName" 
@@ -530,7 +564,7 @@ export default function Progress() {
         </Button>
       </div>
 
-      {monthlyData && (monthlyData as any[]).length > 0 && (
+      {monthlyData && monthlyData.length > 0 && (
         <Card className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-0 shadow-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl">
@@ -542,7 +576,7 @@ export default function Progress() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={monthlyData as any[]}>
+              <BarChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis 
                   dataKey="weekStart" 
