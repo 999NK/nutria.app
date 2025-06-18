@@ -143,8 +143,8 @@ export default function Progress() {
         </div>
       </div>
 
-      {/* Enhanced Progress Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Enhanced Progress Cards - 2x2 Layout */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
         {/* Calories Card */}
         <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
           <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 to-emerald-400/10" />
@@ -275,10 +275,10 @@ export default function Progress() {
       </div>
 
       {/* Enhanced Charts Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        {/* Hourly Consumption Chart */}
+      <div className="space-y-8">
+        {/* Hourly Consumption Chart - Full Width */}
         {formatHourlyChart().length > 0 && (
-          <Card className="col-span-1 xl:col-span-2 bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50 border-0 shadow-xl">
+          <Card className="w-full bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50 border-0 shadow-xl">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-3 text-xl">
                 <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
@@ -374,7 +374,7 @@ export default function Progress() {
 
         {/* Macro Distribution Pie Chart */}
         {macroDistribution.some(item => item.value > 0) && (
-          <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-0 shadow-xl">
+          <Card className="w-full bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-0 shadow-xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-xl">
                 <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
@@ -387,14 +387,14 @@ export default function Progress() {
               </p>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={400}>
                 <PieChart>
                   <Pie
                     data={macroDistribution}
                     cx="50%"
                     cy="50%"
-                    outerRadius={100}
-                    innerRadius={40}
+                    outerRadius={120}
+                    innerRadius={60}
                     fill="#8884d8"
                     dataKey="value"
                     label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
@@ -412,7 +412,15 @@ export default function Progress() {
                       boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
                     }}
                   />
-                  <Legend />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={36}
+                    iconType="circle"
+                    wrapperStyle={{
+                      paddingTop: '20px',
+                      fontSize: '14px'
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
