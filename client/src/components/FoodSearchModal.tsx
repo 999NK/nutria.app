@@ -53,15 +53,13 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
-  // Debug state
-  console.log('🔍 Search state:', { searchQuery, debouncedQuery });
 
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (searchQuery.trim().length > 2) {
-        setDebouncedQuery(searchQuery.trim());
+      const trimmed = searchQuery.trim();
+      if (trimmed.length >= 3) {
+        setDebouncedQuery(trimmed);
       } else {
         setDebouncedQuery("");
       }
@@ -73,8 +71,11 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
   const { data: userFoods = [], isLoading: isLoadingUserFoods } = useQuery({
     queryKey: ["user-foods", debouncedQuery],
     queryFn: async () => {
+      const query = debouncedQuery.trim();
+      if (!query || query.length < 3) return [];
+      
       try {
-        const response = await fetch(`/api/foods?search=${encodeURIComponent(debouncedQuery)}`, {
+        const response = await fetch(`/api/foods?search=${encodeURIComponent(query)}`, {
           credentials: "include"
         });
         if (!response.ok) {
@@ -86,7 +87,7 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
         return [];
       }
     },
-    enabled: !!debouncedQuery && debouncedQuery.length >= 3,
+    enabled: debouncedQuery.length >= 3,
     staleTime: 30 * 1000,
     refetchOnWindowFocus: false,
   });
@@ -95,14 +96,24 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
   const { data: usdaFoods = [], isLoading: isLoadingUsdaFoods } = useQuery({
     queryKey: ["usda-foods", debouncedQuery],
     queryFn: async () => {
+      const query = debouncedQuery.trim();
+      if (!query || query.length < 3) {
+        console.log('❌ Query too short:', query);
+        return [];
+      }
+
       try {
-        console.log('🔍 Searching USDA for:', debouncedQuery);
-        const response = await fetch(`/api/foods/search?query=${encodeURIComponent(debouncedQuery)}`, {
+        const url = `/api/foods/search?query=${encodeURIComponent(query)}`;
+        console.log('🔎 USDA URL:', url);
+        const response = await fetch(url, {
           credentials: "include"
         });
+        
         if (!response.ok) {
-          throw new Error(`Erro ${response.status}`);
+          console.error("❌ USDA API error:", response.status, response.statusText);
+          return [];
         }
+        
         const result = await response.json();
         console.log('🌍 USDA results:', result.length, 'foods found');
         return result;
@@ -111,7 +122,7 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
         return [];
       }
     },
-    enabled: !!debouncedQuery && debouncedQuery.length >= 3,
+    enabled: debouncedQuery.length >= 3,
     staleTime: 30 * 1000,
     refetchOnWindowFocus: false,
   });
@@ -247,7 +258,6 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
               </TabsList>
 
               <TabsContent value="usda-foods" className="max-h-60 overflow-y-auto">
-                {console.log('🌍 USDA Tab - Loading:', isLoadingUsdaFoods, 'Foods:', usdaFoods.length)}
                 {isLoadingUsdaFoods ? (
                   <div className="text-center py-4">Buscando na base mundial...</div>
                 ) : usdaFoods.length > 0 ? (
