@@ -151,37 +151,62 @@ export default function Dashboard() {
             </ProgressRing>
           </div>
 
-          {/* Macros Progress */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-                <div 
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-300" 
-                  style={{ width: `${Math.min(100, (proteinConsumed / proteinGoal) * 100)}%` }}
-                />
+          {/* Macros Progress - 2x2 Grid Layout */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Calories Card */}
+            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
+              <div className="text-center">
+                <div className="w-full bg-green-200 dark:bg-green-700 rounded-full h-2 mb-2">
+                  <div 
+                    className="bg-green-500 h-2 rounded-full transition-all duration-300" 
+                    style={{ width: `${Math.min(100, caloriesProgress)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-green-600 dark:text-green-400 font-medium">Calorias</p>
+                <p className="text-sm font-bold text-green-700 dark:text-green-300">{caloriesConsumed} kcal</p>
               </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Proteína</p>
-              <p className="text-sm font-semibold">{proteinConsumed.toFixed(0)}g</p>
             </div>
-            <div className="text-center">
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-                <div 
-                  className="bg-yellow-500 h-2 rounded-full transition-all duration-300" 
-                  style={{ width: `${Math.min(100, (carbsConsumed / carbsGoal) * 100)}%` }}
-                />
+
+            {/* Protein Card */}
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+              <div className="text-center">
+                <div className="w-full bg-blue-200 dark:bg-blue-700 rounded-full h-2 mb-2">
+                  <div 
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-300" 
+                    style={{ width: `${Math.min(100, (proteinConsumed / proteinGoal) * 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Proteína</p>
+                <p className="text-sm font-bold text-blue-700 dark:text-blue-300">{proteinConsumed.toFixed(0)}g</p>
               </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Carboidratos</p>
-              <p className="text-sm font-semibold">{carbsConsumed.toFixed(0)}g</p>
             </div>
-            <div className="text-center">
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-                <div 
-                  className="bg-orange-500 h-2 rounded-full transition-all duration-300" 
-                  style={{ width: `${Math.min(100, (fatConsumed / fatGoal) * 100)}%` }}
-                />
+
+            {/* Carbs Card */}
+            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-700">
+              <div className="text-center">
+                <div className="w-full bg-yellow-200 dark:bg-yellow-700 rounded-full h-2 mb-2">
+                  <div 
+                    className="bg-yellow-500 h-2 rounded-full transition-all duration-300" 
+                    style={{ width: `${Math.min(100, (carbsConsumed / carbsGoal) * 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">Carboidratos</p>
+                <p className="text-sm font-bold text-yellow-700 dark:text-yellow-300">{carbsConsumed.toFixed(0)}g</p>
               </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Gordura</p>
-              <p className="text-sm font-semibold">{fatConsumed.toFixed(0)}g</p>
+            </div>
+
+            {/* Fat Card */}
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
+              <div className="text-center">
+                <div className="w-full bg-orange-200 dark:bg-orange-700 rounded-full h-2 mb-2">
+                  <div 
+                    className="bg-orange-500 h-2 rounded-full transition-all duration-300" 
+                    style={{ width: `${Math.min(100, (fatConsumed / fatGoal) * 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-orange-600 dark:text-orange-400 font-medium">Gordura</p>
+                <p className="text-sm font-bold text-orange-700 dark:text-orange-300">{fatConsumed.toFixed(0)}g</p>
+              </div>
             </div>
           </div>
         </CardContent>
