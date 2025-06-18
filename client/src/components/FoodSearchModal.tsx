@@ -65,15 +65,22 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
     }
   }, [isOpen]);
 
-  // Debounce search query
+  // Debounce search query with strict validation
   useEffect(() => {
     const timer = setTimeout(() => {
       const trimmed = searchQuery.trim();
-      console.log("🕐 Debounced query update:", trimmed);
+      console.log("Query input:", trimmed, "Length:", trimmed.length);
+      
+      // Only update if query is valid length
       if (trimmed.length >= 3) {
+        console.log("Setting debounced query:", trimmed);
         setDebouncedQuery(trimmed);
       } else {
+        console.log("Query too short, clearing results");
         setDebouncedQuery("");
+        // Clear results immediately for short queries
+        setUserFoods([]);
+        setUsdaFoods([]);
       }
     }, 500);
     return () => clearTimeout(timer);
@@ -84,26 +91,35 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
   const [isLoadingUserFoods, setIsLoadingUserFoods] = useState(false);
 
   const searchUserFoods = async (query: string) => {
-    if (!query || query.length < 3) {
+    const trimmedQuery = query?.trim() || "";
+    console.log("USER FOODS - Input query:", `"${trimmedQuery}"`, "Length:", trimmedQuery.length);
+    
+    if (!trimmedQuery || trimmedQuery.length < 3) {
+      console.log("USER FOODS - Query too short, setting empty array");
       setUserFoods([]);
       return;
     }
 
+    console.log("USER FOODS - Starting fetch for:", trimmedQuery);
     setIsLoadingUserFoods(true);
+    
     try {
-      const url = `/api/foods?search=${encodeURIComponent(query)}`;
-      console.log("🔗 User foods URL:", url);
+      const url = `/api/foods?search=${encodeURIComponent(trimmedQuery)}`;
+      console.log("USER FOODS - Fetching URL:", url);
+      
       const response = await fetch(url, {
         credentials: "include"
       });
+      
       if (!response.ok) {
         throw new Error(`Erro ${response.status}`);
       }
+      
       const result = await response.json();
-      console.log("👤 User foods result:", result.length, "items");
+      console.log("USER FOODS - Success:", result.length, "items found");
       setUserFoods(result);
     } catch (error) {
-      console.error("Erro ao buscar alimentos do usuário:", error);
+      console.error("USER FOODS - Error:", error);
       setUserFoods([]);
     } finally {
       setIsLoadingUserFoods(false);
@@ -115,43 +131,53 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
   const [isLoadingUsdaFoods, setIsLoadingUsdaFoods] = useState(false);
 
   const searchUsdaFoods = async (query: string) => {
-    if (!query || query.length < 3) {
+    const trimmedQuery = query?.trim() || "";
+    console.log("USDA FOODS - Input query:", `"${trimmedQuery}"`, "Length:", trimmedQuery.length);
+    
+    if (!trimmedQuery || trimmedQuery.length < 3) {
+      console.log("USDA FOODS - Query too short, setting empty array");
       setUsdaFoods([]);
       return;
     }
 
+    console.log("USDA FOODS - Starting fetch for:", trimmedQuery);
     setIsLoadingUsdaFoods(true);
+    
     try {
-      const url = `/api/foods/search?query=${encodeURIComponent(query)}`;
-      console.log('🔗 USDA URL:', url);
+      const url = `/api/foods/search?query=${encodeURIComponent(trimmedQuery)}`;
+      console.log("USDA FOODS - Fetching URL:", url);
+      
       const response = await fetch(url, {
         credentials: "include"
       });
       
       if (!response.ok) {
-        console.error("❌ USDA API error:", response.status, response.statusText);
+        console.error("USDA FOODS - API Error:", response.status, response.statusText);
         setUsdaFoods([]);
         return;
       }
       
       const result = await response.json();
-      console.log('🌍 USDA results:', result.length, 'foods found');
+      console.log("USDA FOODS - Success:", result.length, "foods found");
       setUsdaFoods(result);
     } catch (error) {
-      console.error("Erro ao buscar alimentos USDA:", error);
+      console.error("USDA FOODS - Error:", error);
       setUsdaFoods([]);
     } finally {
       setIsLoadingUsdaFoods(false);
     }
   };
 
-  // Trigger searches when debouncedQuery changes
+  // Trigger searches only for valid queries
   useEffect(() => {
-    if (debouncedQuery.length >= 3 && isOpen) {
-      console.log("🔄 Manual search triggered for:", debouncedQuery);
+    if (!isOpen) return;
+    
+    if (debouncedQuery && debouncedQuery.length >= 3) {
+      console.log("Executing search for:", debouncedQuery);
       searchUserFoods(debouncedQuery);
       searchUsdaFoods(debouncedQuery);
-    } else if (debouncedQuery.length < 3) {
+    } else {
+      console.log("Clearing search results - query too short or empty");
       setUserFoods([]);
       setUsdaFoods([]);
     }
