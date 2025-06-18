@@ -64,13 +64,13 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
 
   // Search user's foods
   const { data: userFoods = [], isLoading: isLoadingUserFoods } = useQuery({
-    queryKey: ["/api/foods", debouncedQuery],
+    queryKey: ["/api/foods", { search: debouncedQuery }],
     enabled: debouncedQuery.length > 2,
   });
 
   // Search USDA foods
   const { data: usdaFoods = [], isLoading: isLoadingUsdaFoods } = useQuery({
-    queryKey: ["/api/foods/search", debouncedQuery],
+    queryKey: ["/api/foods/search", { query: debouncedQuery }],
     enabled: debouncedQuery.length > 2,
   });
 
