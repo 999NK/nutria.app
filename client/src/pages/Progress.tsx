@@ -144,26 +144,26 @@ export default function Progress() {
       </div>
 
       {/* Enhanced Progress Cards - 2x2 Layout */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 max-w-4xl mx-auto">
         {/* Calories Card */}
         <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
           <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 to-emerald-400/10" />
-          <CardContent className="relative p-6 text-center">
-            <div className="mb-4">
-              <div className="w-20 h-20 mx-auto mb-4 relative">
-                <ProgressRing progress={progress.calories} size={80} color="#22c55e">
+          <CardContent className="relative p-3 sm:p-6 text-center">
+            <div className="mb-2 sm:mb-4">
+              <div className="w-12 h-12 sm:w-20 sm:h-20 mx-auto mb-2 sm:mb-4 relative">
+                <ProgressRing progress={progress.calories} size={48} color="#22c55e">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-green-700">{progress.calories}%</div>
+                    <div className="text-sm sm:text-lg font-bold text-green-700">{progress.calories}%</div>
                   </div>
                 </ProgressRing>
               </div>
-              <Activity className="w-6 h-6 text-green-600 mx-auto mb-2" />
-              <h3 className="text-lg font-semibold text-green-800 dark:text-green-300">Calorias</h3>
+              <Activity className="w-4 h-4 sm:w-6 sm:h-6 text-green-600 mx-auto mb-1 sm:mb-2" />
+              <h3 className="text-sm sm:text-lg font-semibold text-green-800 dark:text-green-300">Calorias</h3>
               <div className="space-y-1">
-                <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                <p className="text-lg sm:text-2xl font-bold text-green-700 dark:text-green-300">
                   {(dailyNutrition as any)?.calories || 0}
                 </p>
-                <p className="text-sm text-green-600 dark:text-green-400">
+                <p className="text-xs sm:text-sm text-green-600 dark:text-green-400">
                   de {(user as any)?.dailyCalories || 0} kcal
                 </p>
                 <div className="w-full bg-green-200 rounded-full h-2 mt-2">
