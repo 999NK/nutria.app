@@ -2,10 +2,12 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertFoodSchema, insertMealTypeSchema, insertMealSchema, insertMealFoodSchema, insertRecipeSchema, insertRecipeIngredientSchema } from "@shared/schema";
+import { insertFoodSchema, insertMealTypeSchema, insertMealSchema, insertMealFoodSchema, insertRecipeSchema, insertRecipeIngredientSchema, meals, mealTypes } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { pdfService } from "./services/pdfService";
 import { notificationService } from "./services/notificationService";
+import { db } from "./db";
+import { eq, and, sql } from "drizzle-orm";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -354,18 +356,214 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/nutrition/history', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const startDate = req.query.startDate as string;
-      const endDate = req.query.endDate as string;
+      const period = (req.query.period as string) || 'week';
+      const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
       
-      if (!startDate || !endDate) {
-        return res.status(400).json({ message: "Start date and end date are required" });
+      let startDate: string;
+      let endDate: string;
+      
+      const baseDate = new Date(date);
+      
+      switch (period) {
+        case 'day':
+          startDate = date;
+          endDate = date;
+          break;
+        case 'week':
+          const weekStart = new Date(baseDate);
+          weekStart.setDate(baseDate.getDate() - baseDate.getDay());
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekStart.getDate() + 6);
+          startDate = weekStart.toISOString().split('T')[0];
+          endDate = weekEnd.toISOString().split('T')[0];
+          break;
+        case 'month':
+          const monthStart = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+          const monthEnd = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
+          startDate = monthStart.toISOString().split('T')[0];
+          endDate = monthEnd.toISOString().split('T')[0];
+          break;
+        default:
+          startDate = date;
+          endDate = date;
       }
 
       const history = await storage.getNutritionHistory(userId, startDate, endDate);
-      res.json(history);
+      res.json({ period, startDate, endDate, data: history });
     } catch (error) {
       console.error("Error fetching nutrition history:", error);
       res.status(500).json({ message: "Failed to fetch nutrition history" });
+    }
+  });
+
+  // Real-time progress tracking endpoints
+  app.get('/api/progress/hourly', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
+      
+      // Get meals for the day with timestamps
+      const dayMeals = await db
+        .select({
+          id: meals.id,
+          mealTypeId: meals.mealTypeId,
+          totalCalories: meals.totalCalories,
+          totalProtein: meals.totalProtein,
+          totalCarbs: meals.totalCarbs,
+          totalFat: meals.totalFat,
+          createdAt: meals.createdAt,
+          mealType: {
+            name: mealTypes.name,
+            icon: mealTypes.icon
+          }
+        })
+        .from(meals)
+        .leftJoin(mealTypes, eq(meals.mealTypeId, mealTypes.id))
+        .where(
+          and(
+            eq(meals.userId, userId),
+            eq(meals.date, date)
+          )
+        )
+        .orderBy(meals.createdAt);
+
+      // Group by hour
+      const hourlyData = Array.from({ length: 24 }, (_, hour) => ({
+        hour,
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        meals: [] as any[]
+      }));
+
+      dayMeals.forEach(meal => {
+        const hour = new Date(meal.createdAt).getHours();
+        hourlyData[hour].calories += meal.totalCalories || 0;
+        hourlyData[hour].protein += parseFloat(meal.totalProtein || '0');
+        hourlyData[hour].carbs += parseFloat(meal.totalCarbs || '0');
+        hourlyData[hour].fat += parseFloat(meal.totalFat || '0');
+        hourlyData[hour].meals.push({
+          id: meal.id,
+          type: meal.mealType?.name,
+          icon: meal.mealType?.icon,
+          calories: meal.totalCalories
+        });
+      });
+
+      res.json(hourlyData);
+    } catch (error) {
+      console.error("Error fetching hourly progress:", error);
+      res.status(500).json({ message: "Failed to fetch hourly progress" });
+    }
+  });
+
+  app.get('/api/progress/weekly', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
+      
+      const baseDate = new Date(date);
+      const weekStart = new Date(baseDate);
+      weekStart.setDate(baseDate.getDate() - baseDate.getDay());
+      
+      const weeklyData = [];
+      
+      for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(weekStart);
+        currentDate.setDate(weekStart.getDate() + i);
+        const dateStr = currentDate.toISOString().split('T')[0];
+        
+        const dayMeals = await db
+          .select({
+            totalCalories: sql<number>`COALESCE(SUM(${meals.totalCalories}), 0)`,
+            totalProtein: sql<number>`COALESCE(SUM(CAST(${meals.totalProtein} AS NUMERIC)), 0)`,
+            totalCarbs: sql<number>`COALESCE(SUM(CAST(${meals.totalCarbs} AS NUMERIC)), 0)`,
+            totalFat: sql<number>`COALESCE(SUM(CAST(${meals.totalFat} AS NUMERIC)), 0)`,
+            mealCount: sql<number>`COUNT(${meals.id})`
+          })
+          .from(meals)
+          .where(
+            and(
+              eq(meals.userId, userId),
+              eq(meals.date, dateStr)
+            )
+          );
+
+        weeklyData.push({
+          date: dateStr,
+          dayName: currentDate.toLocaleDateString('pt-BR', { weekday: 'short' }),
+          calories: dayMeals[0].totalCalories,
+          protein: Math.round(dayMeals[0].totalProtein),
+          carbs: Math.round(dayMeals[0].totalCarbs),
+          fat: Math.round(dayMeals[0].totalFat),
+          mealCount: dayMeals[0].mealCount
+        });
+      }
+
+      res.json(weeklyData);
+    } catch (error) {
+      console.error("Error fetching weekly progress:", error);
+      res.status(500).json({ message: "Failed to fetch weekly progress" });
+    }
+  });
+
+  app.get('/api/progress/monthly', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
+      
+      const baseDate = new Date(date);
+      const monthStart = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+      const monthEnd = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
+      
+      const monthlyData = [];
+      
+      // Group by weeks within the month
+      let currentWeekStart = new Date(monthStart);
+      currentWeekStart.setDate(monthStart.getDate() - monthStart.getDay());
+      
+      while (currentWeekStart <= monthEnd) {
+        const weekEnd = new Date(currentWeekStart);
+        weekEnd.setDate(currentWeekStart.getDate() + 6);
+        
+        const weekStartStr = currentWeekStart.toISOString().split('T')[0];
+        const weekEndStr = weekEnd.toISOString().split('T')[0];
+        
+        const weekMeals = await db
+          .select({
+            totalCalories: sql<number>`COALESCE(SUM(${meals.totalCalories}), 0)`,
+            totalProtein: sql<number>`COALESCE(SUM(CAST(${meals.totalProtein} AS NUMERIC)), 0)`,
+            totalCarbs: sql<number>`COALESCE(SUM(CAST(${meals.totalCarbs} AS NUMERIC)), 0)`,
+            totalFat: sql<number>`COALESCE(SUM(CAST(${meals.totalFat} AS NUMERIC)), 0)`,
+            mealCount: sql<number>`COUNT(${meals.id})`
+          })
+          .from(meals)
+          .where(
+            and(
+              eq(meals.userId, userId),
+              sql`${meals.date} >= ${weekStartStr}`,
+              sql`${meals.date} <= ${weekEndStr}`
+            )
+          );
+
+        monthlyData.push({
+          weekStart: weekStartStr,
+          weekEnd: weekEndStr,
+          calories: weekMeals[0].totalCalories,
+          protein: Math.round(weekMeals[0].totalProtein),
+          carbs: Math.round(weekMeals[0].totalCarbs),
+          fat: Math.round(weekMeals[0].totalFat),
+          mealCount: weekMeals[0].mealCount
+        });
+        
+        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+      }
+
+      res.json(monthlyData);
+    } catch (error) {
+      console.error("Error fetching monthly progress:", error);
+      res.status(500).json({ message: "Failed to fetch monthly progress" });
     }
   });
 

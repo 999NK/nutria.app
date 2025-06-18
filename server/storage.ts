@@ -258,10 +258,10 @@ export class DatabaseStorage implements IStorage {
   private async updateMealTotals(mealId: number): Promise<void> {
     const mealFoodTotals = await db
       .select({
-        totalCalories: sql<number>`SUM(${mealFoods.calories})`,
-        totalProtein: sql<number>`SUM(${mealFoods.protein})`,
-        totalCarbs: sql<number>`SUM(${mealFoods.carbs})`,
-        totalFat: sql<number>`SUM(${mealFoods.fat})`,
+        totalCalories: sql<number>`COALESCE(SUM(CAST(${mealFoods.calories} AS NUMERIC)), 0)`,
+        totalProtein: sql<number>`COALESCE(SUM(CAST(${mealFoods.protein} AS NUMERIC)), 0)`,
+        totalCarbs: sql<number>`COALESCE(SUM(CAST(${mealFoods.carbs} AS NUMERIC)), 0)`,
+        totalFat: sql<number>`COALESCE(SUM(CAST(${mealFoods.fat} AS NUMERIC)), 0)`,
       })
       .from(mealFoods)
       .where(eq(mealFoods.mealId, mealId));
@@ -271,10 +271,10 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(meals)
       .set({
-        totalCalories: totals.totalCalories || 0,
-        totalProtein: totals.totalProtein?.toString() || "0",
-        totalCarbs: totals.totalCarbs?.toString() || "0",
-        totalFat: totals.totalFat?.toString() || "0",
+        totalCalories: Math.round(Number(totals.totalCalories) || 0),
+        totalProtein: (Number(totals.totalProtein) || 0).toFixed(1),
+        totalCarbs: (Number(totals.totalCarbs) || 0).toFixed(1),
+        totalFat: (Number(totals.totalFat) || 0).toFixed(1),
       })
       .where(eq(meals.id, mealId));
   }

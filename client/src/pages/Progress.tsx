@@ -1,445 +1,405 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
+import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
-import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-
-type PeriodType = 'daily' | 'weekly' | 'monthly';
+import { Badge } from "@/components/ui/badge";
+import { Calendar, TrendingUp, Target, Activity, Clock, BarChart3, Zap } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell } from "recharts";
+import { ProgressRing } from "@/components/ProgressRing";
 
 export default function Progress() {
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const { toast } = useToast();
-  const [period, setPeriod] = useState<PeriodType>('daily');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [activeView, setActiveView] = useState("daily");
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Redirect if not authenticated
+  // Update time every minute for real-time updates
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Não autorizado",
-        description: "Você precisa fazer login novamente...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
 
-  // Calculate date ranges based on period
-  const getDateRange = () => {
-    const today = new Date();
-    let startDate: Date;
-    let endDate: Date = today;
-
-    switch (period) {
-      case 'daily':
-        startDate = subDays(today, 6); // Last 7 days
-        break;
-      case 'weekly':
-        startDate = subDays(startOfWeek(today), 21); // Last 4 weeks
-        endDate = endOfWeek(today);
-        break;
-      case 'monthly':
-        startDate = subDays(startOfMonth(today), 90); // Last 3 months
-        endDate = endOfMonth(today);
-        break;
-      default:
-        startDate = subDays(today, 6);
-    }
-
-    return {
-      startDate: format(startDate, 'yyyy-MM-dd'),
-      endDate: format(endDate, 'yyyy-MM-dd'),
-    };
-  };
-
-  const { startDate, endDate } = getDateRange();
-
-  // Fetch nutrition history
-  const { data: nutritionHistory = [], isLoading: historyLoading } = useQuery({
-    queryKey: ["/api/nutrition/history", { startDate, endDate }],
-    enabled: isAuthenticated,
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user']
   });
 
-  // Export PDF mutation
-  const exportPDFMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch("/api/export/pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          startDate,
-          endDate,
-          type: period,
-        }),
-      });
-      
-      if (!response.ok) throw new Error("Failed to export PDF");
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `nutria-relatorio-${period}-${format(new Date(), 'yyyy-MM-dd')}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    },
-    onSuccess: () => {
-      toast({
-        title: "PDF exportado!",
-        description: "Seu relatório foi baixado com sucesso",
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Não autorizado",
-          description: "Você foi desconectado. Fazendo login novamente...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Erro na exportação",
-        description: "Não foi possível gerar o relatório PDF",
-        variant: "destructive",
-      });
-    },
+  const { data: hourlyData, isLoading: hourlyLoading } = useQuery({
+    queryKey: ['/api/progress/hourly', selectedDate],
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 
-  // Process data for charts
-  const processChartData = () => {
-    if (!nutritionHistory.length) return [];
+  const { data: weeklyData, isLoading: weeklyLoading } = useQuery({
+    queryKey: ['/api/progress/weekly', selectedDate],
+    refetchInterval: 30 * 60 * 1000, // Refetch every 30 minutes
+  });
 
-    return nutritionHistory.map((day: any) => ({
-      date: format(new Date(day.date), period === 'daily' ? 'dd/MM' : period === 'weekly' ? 'dd/MM' : 'MM/yyyy', { locale: ptBR }),
-      calories: day.totalCalories || 0,
-      protein: parseFloat(day.totalProtein || "0"),
-      carbs: parseFloat(day.totalCarbs || "0"),
-      fat: parseFloat(day.totalFat || "0"),
-      goal: day.goalCalories || user?.dailyCalories || 2000,
-    })).reverse();
-  };
+  const { data: monthlyData, isLoading: monthlyLoading } = useQuery({
+    queryKey: ['/api/progress/monthly', selectedDate],
+    refetchInterval: 60 * 60 * 1000, // Refetch every hour
+  });
 
-  const chartData = processChartData();
+  const { data: dailyNutrition } = useQuery({
+    queryKey: ['/api/nutrition/daily', selectedDate],
+    refetchInterval: 2 * 60 * 1000, // Refetch every 2 minutes
+  });
 
-  // Calculate averages
-  const calculateAverages = () => {
-    if (!nutritionHistory.length) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-
-    const totals = nutritionHistory.reduce((acc, day: any) => ({
-      calories: acc.calories + (day.totalCalories || 0),
-      protein: acc.protein + parseFloat(day.totalProtein || "0"),
-      carbs: acc.carbs + parseFloat(day.totalCarbs || "0"),
-      fat: acc.fat + parseFloat(day.totalFat || "0"),
-    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
-
-    const count = nutritionHistory.length;
-    return {
-      calories: Math.round(totals.calories / count),
-      protein: Math.round(totals.protein / count),
-      carbs: Math.round(totals.carbs / count),
-      fat: Math.round(totals.fat / count),
-    };
-  };
-
-  const averages = calculateAverages();
-
-  // Calculate goal achievement days
-  const calculateGoalDays = () => {
-    if (!nutritionHistory.length) return 0;
+  const calculateDailyProgress = () => {
+    if (!dailyNutrition || !user) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
     
-    return nutritionHistory.filter((day: any) => {
-      const dayCalories = day.totalCalories || 0;
-      const goalCalories = day.goalCalories || user?.dailyCalories || 2000;
-      return dayCalories >= goalCalories * 0.9 && dayCalories <= goalCalories * 1.1;
-    }).length;
+    return {
+      calories: Math.round((dailyNutrition.calories / user.dailyCalories) * 100),
+      protein: Math.round((dailyNutrition.protein / user.dailyProtein) * 100),
+      carbs: Math.round((dailyNutrition.carbs / user.dailyCarbs) * 100),
+      fat: Math.round((dailyNutrition.fat / user.dailyFat) * 100),
+    };
   };
 
-  const goalDays = calculateGoalDays();
+  const progress = calculateDailyProgress();
 
-  // Macro distribution data for pie chart
-  const macroData = [
-    { name: 'Proteínas', value: averages.protein * 4, color: '#3B82F6' },
-    { name: 'Carboidratos', value: averages.carbs * 4, color: '#FBB827' },
-    { name: 'Gorduras', value: averages.fat * 9, color: '#FB923C' },
-  ];
-
-  const getPeriodLabel = () => {
-    switch (period) {
-      case 'daily': return 'Últimos 7 dias';
-      case 'weekly': return 'Últimas 4 semanas';
-      case 'monthly': return 'Últimos 3 meses';
-      default: return 'Período';
-    }
+  const formatHourlyChart = () => {
+    if (!hourlyData) return [];
+    
+    return hourlyData
+      .filter((hour: any) => hour.calories > 0)
+      .map((hour: any) => ({
+        ...hour,
+        time: `${hour.hour.toString().padStart(2, '0')}:00`,
+        totalNutrients: hour.protein + hour.carbs + hour.fat
+      }));
   };
 
-  if (isLoading || !isAuthenticated) {
-    return null;
-  }
+  const macroDistribution = dailyNutrition ? [
+    { name: 'Proteínas', value: dailyNutrition.protein, color: '#3b82f6' },
+    { name: 'Carboidratos', value: dailyNutrition.carbs, color: '#f59e0b' },
+    { name: 'Gorduras', value: dailyNutrition.fat, color: '#ef4444' }
+  ] : [];
 
-  return (
-    <div className="p-4 space-y-6 pb-20">
+  const renderHourlyView = () => (
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Progresso</h2>
-        <Button
-          onClick={() => exportPDFMutation.mutate()}
-          disabled={exportPDFMutation.isPending}
-          size="sm"
-          className="bg-primary text-white"
-        >
-          {exportPDFMutation.isPending ? (
-            <i className="fas fa-spinner fa-spin mr-2"></i>
-          ) : (
-            <i className="fas fa-download mr-2"></i>
-          )}
-          Exportar PDF
-        </Button>
+        <div>
+          <h2 className="text-2xl font-bold">Progresso do Dia</h2>
+          <p className="text-gray-600">Atualizado em tempo real • {currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+        </div>
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Zap className="w-3 h-3 mr-1" />
+          Ao vivo
+        </Badge>
       </div>
 
-      {/* Time Period Selector */}
-      <Tabs value={period} onValueChange={(value) => setPeriod(value as PeriodType)}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="daily">Diário</TabsTrigger>
-          <TabsTrigger value="weekly">Semanal</TabsTrigger>
-          <TabsTrigger value="monthly">Mensal</TabsTrigger>
-        </TabsList>
-
-        {/* Progress Charts */}
-        <div className="mt-6 space-y-6">
-          {/* Calories Evolution Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Evolução de Calorias</CardTitle>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{getPeriodLabel()}</p>
-            </CardHeader>
-            <CardContent>
-              {historyLoading ? (
-                <div className="h-64 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center">
-                  <div className="text-center text-gray-500 dark:text-gray-400">
-                    <i className="fas fa-spinner fa-spin text-3xl mb-2"></i>
-                    <p className="text-sm">Carregando dados...</p>
-                  </div>
-                </div>
-              ) : chartData.length > 0 ? (
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                      <XAxis 
-                        dataKey="date" 
-                        tick={{ fontSize: 12 }}
-                        className="text-gray-600 dark:text-gray-400"
-                      />
-                      <YAxis 
-                        tick={{ fontSize: 12 }}
-                        className="text-gray-600 dark:text-gray-400"
-                      />
-                      <Tooltip 
-                        contentStyle={{
-                          backgroundColor: 'var(--background)',
-                          border: '1px solid var(--border)',
-                          borderRadius: '8px',
-                          color: 'var(--foreground)'
-                        }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="calories" 
-                        stroke="hsl(142, 71%, 45%)" 
-                        strokeWidth={3}
-                        dot={{ fill: "hsl(142, 71%, 45%)", strokeWidth: 2, r: 4 }}
-                        name="Calorias"
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="goal" 
-                        stroke="hsl(240, 5%, 64.9%)" 
-                        strokeWidth={2}
-                        strokeDasharray="5 5"
-                        dot={false}
-                        name="Meta"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <div className="h-64 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center">
-                  <div className="text-center text-gray-500 dark:text-gray-400">
-                    <i className="fas fa-chart-line text-3xl mb-2"></i>
-                    <p className="text-sm">Sem dados para o período</p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Macros Distribution */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Distribuição de Macros</CardTitle>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Média do período</p>
-            </CardHeader>
-            <CardContent>
-              {nutritionHistory.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="h-48">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={macroData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={40}
-                          outerRadius={80}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          {macroData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          formatter={(value: number) => [`${value.toFixed(0)} kcal`, '']}
-                          contentStyle={{
-                            backgroundColor: 'var(--background)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '8px',
-                            color: 'var(--foreground)'
-                          }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 bg-blue-500 rounded mr-3"></div>
-                        <span className="text-sm">Proteínas</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-semibold">{averages.protein}g</span>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {Math.round((averages.protein * 4 / (averages.protein * 4 + averages.carbs * 4 + averages.fat * 9)) * 100)}%
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 bg-yellow-500 rounded mr-3"></div>
-                        <span className="text-sm">Carboidratos</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-semibold">{averages.carbs}g</span>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {Math.round((averages.carbs * 4 / (averages.protein * 4 + averages.carbs * 4 + averages.fat * 9)) * 100)}%
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 bg-orange-500 rounded mr-3"></div>
-                        <span className="text-sm">Gorduras</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-semibold">{averages.fat}g</span>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {Math.round((averages.fat * 9 / (averages.protein * 4 + averages.carbs * 4 + averages.fat * 9)) * 100)}%
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="h-48 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center">
-                  <div className="text-center text-gray-500 dark:text-gray-400">
-                    <i className="fas fa-chart-pie text-3xl mb-2"></i>
-                    <p className="text-sm">Sem dados para análise</p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Summary Statistics */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Resumo do Período</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">{goalDays}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Dias na meta</p>
-                </div>
-                <div className="text-center p-4 bg-primary/10 rounded-xl">
-                  <p className="text-2xl font-bold text-primary">{averages.calories}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Kcal média</p>
-                </div>
+      {/* Real-time Progress Circles */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <ProgressRing progress={progress.calories} size={80} color="#22c55e">
+              <div className="text-center">
+                <div className="text-lg font-bold">{progress.calories}%</div>
               </div>
-              
-              {nutritionHistory.length > 0 && (
-                <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                  <p>
-                    Taxa de sucesso: {Math.round((goalDays / nutritionHistory.length) * 100)}% •{' '}
-                    {nutritionHistory.length} dias registrados
-                  </p>
-                </div>
-              )}
+            </ProgressRing>
+            <h3 className="font-medium mt-2">Calorias</h3>
+            <p className="text-sm text-gray-600">{dailyNutrition?.calories || 0} / {user?.dailyCalories || 0}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6 text-center">
+            <ProgressRing progress={progress.protein} size={80} color="#3b82f6">
+              <div className="text-center">
+                <div className="text-lg font-bold">{progress.protein}%</div>
+              </div>
+            </ProgressRing>
+            <h3 className="font-medium mt-2">Proteínas</h3>
+            <p className="text-sm text-gray-600">{dailyNutrition?.protein || 0}g / {user?.dailyProtein || 0}g</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6 text-center">
+            <ProgressRing progress={progress.carbs} size={80} color="#f59e0b">
+              <div className="text-center">
+                <div className="text-lg font-bold">{progress.carbs}%</div>
+              </div>
+            </ProgressRing>
+            <h3 className="font-medium mt-2">Carboidratos</h3>
+            <p className="text-sm text-gray-600">{dailyNutrition?.carbs || 0}g / {user?.dailyCarbs || 0}g</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6 text-center">
+            <ProgressRing progress={progress.fat} size={80} color="#ef4444">
+              <div className="text-center">
+                <div className="text-lg font-bold">{progress.fat}%</div>
+              </div>
+            </ProgressRing>
+            <h3 className="font-medium mt-2">Gorduras</h3>
+            <p className="text-sm text-gray-600">{dailyNutrition?.fat || 0}g / {user?.dailyFat || 0}g</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Hourly Chart */}
+      {formatHourlyChart().length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Consumo por Hora
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={formatHourlyChart()}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="time" />
+                <YAxis />
+                <Tooltip 
+                  formatter={(value, name) => [
+                    `${value} ${name === 'calories' ? 'kcal' : 'g'}`,
+                    name === 'calories' ? 'Calorias' : 
+                    name === 'protein' ? 'Proteínas' :
+                    name === 'carbs' ? 'Carboidratos' : 'Gorduras'
+                  ]}
+                />
+                <Area type="monotone" dataKey="calories" stackId="1" stroke="#22c55e" fill="#22c55e" fillOpacity={0.6} />
+                <Area type="monotone" dataKey="protein" stackId="2" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
+                <Area type="monotone" dataKey="carbs" stackId="2" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.6} />
+                <Area type="monotone" dataKey="fat" stackId="2" stroke="#ef4444" fill="#ef4444" fillOpacity={0.6} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Macro Distribution */}
+      {macroDistribution.some(item => item.value > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Distribuição de Macronutrientes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={macroDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {macroDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value}g`, '']} />
+                </PieChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          {/* Macros Trend */}
-          {chartData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Refeições do Dia</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {hourlyData?.filter((hour: any) => hour.meals.length > 0).map((hour: any) => (
+                  <div key={hour.hour} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <div className="font-medium">{hour.hour.toString().padStart(2, '0')}:00</div>
+                      <div className="text-sm text-gray-600">
+                        {hour.meals.map((meal: any) => meal.type).join(', ')}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium">{hour.calories} kcal</div>
+                      <div className="text-sm text-gray-600">{hour.meals.length} refeição(ões)</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderWeeklyView = () => (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">Progresso Semanal</h2>
+        <p className="text-gray-600">Visão dos últimos 7 dias</p>
+      </div>
+
+      {weeklyData && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle>Tendência de Macronutrientes</CardTitle>
+                <CardTitle className="text-sm">Média Semanal - Calorias</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                      <XAxis 
-                        dataKey="date" 
-                        tick={{ fontSize: 12 }}
-                        className="text-gray-600 dark:text-gray-400"
-                      />
-                      <YAxis 
-                        tick={{ fontSize: 12 }}
-                        className="text-gray-600 dark:text-gray-400"
-                      />
-                      <Tooltip 
-                        contentStyle={{
-                          backgroundColor: 'var(--background)',
-                          border: '1px solid var(--border)',
-                          borderRadius: '8px',
-                          color: 'var(--foreground)'
-                        }}
-                      />
-                      <Bar dataKey="protein" fill="#3B82F6" name="Proteína (g)" />
-                      <Bar dataKey="carbs" fill="#FBB827" name="Carboidratos (g)" />
-                      <Bar dataKey="fat" fill="#FB923C" name="Gordura (g)" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="text-2xl font-bold">
+                  {Math.round(weeklyData.reduce((acc: number, day: any) => acc + day.calories, 0) / 7)} kcal
                 </div>
               </CardContent>
             </Card>
-          )}
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Total de Refeições</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {weeklyData.reduce((acc: number, day: any) => acc + day.mealCount, 0)}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Dias Ativos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {weeklyData.filter((day: any) => day.calories > 0).length}/7
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Evolução Semanal</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={weeklyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="dayName" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="calories" stroke="#22c55e" strokeWidth={3} />
+                  <Line type="monotone" dataKey="protein" stroke="#3b82f6" strokeWidth={2} />
+                  <Line type="monotone" dataKey="carbs" stroke="#f59e0b" strokeWidth={2} />
+                  <Line type="monotone" dataKey="fat" stroke="#ef4444" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </>
+      )}
+    </div>
+  );
+
+  const renderMonthlyView = () => (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">Progresso Mensal</h2>
+        <p className="text-gray-600">Análise do mês por semanas</p>
+      </div>
+
+      {monthlyData && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Média Mensal - Calorias</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {Math.round(monthlyData.reduce((acc: number, week: any) => acc + week.calories, 0) / monthlyData.length)} kcal/semana
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Total Mensal de Refeições</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {monthlyData.reduce((acc: number, week: any) => acc + week.mealCount, 0)}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Progresso por Semanas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={monthlyData.map((week: any, index: number) => ({
+                  ...week,
+                  weekNumber: `Sem ${index + 1}`
+                }))}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="weekNumber" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="calories" fill="#22c55e" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard de Progresso</h1>
+          <p className="text-gray-600 dark:text-gray-400">Acompanhamento nutricional em tempo real</p>
         </div>
+        
+        <div className="flex gap-2">
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+        </div>
+      </div>
+
+      <Tabs value={activeView} onValueChange={setActiveView} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="daily" className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            Diário
+          </TabsTrigger>
+          <TabsTrigger value="weekly" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            Semanal
+          </TabsTrigger>
+          <TabsTrigger value="monthly" className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" />
+            Mensal
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="daily">
+          {renderHourlyView()}
+        </TabsContent>
+
+        <TabsContent value="weekly">
+          {renderWeeklyView()}
+        </TabsContent>
+
+        <TabsContent value="monthly">
+          {renderMonthlyView()}
+        </TabsContent>
       </Tabs>
     </div>
   );
