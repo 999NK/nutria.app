@@ -64,13 +64,29 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
 
   // Search user's foods
   const { data: userFoods = [], isLoading: isLoadingUserFoods } = useQuery({
-    queryKey: ["/api/foods", { search: debouncedQuery }],
+    queryKey: ["/api/foods", "search", debouncedQuery],
+    queryFn: async () => {
+      if (!debouncedQuery || debouncedQuery.length < 3) return [];
+      const response = await fetch(`/api/foods?search=${encodeURIComponent(debouncedQuery)}`, {
+        credentials: "include"
+      });
+      if (!response.ok) throw new Error('Failed to search foods');
+      return response.json();
+    },
     enabled: debouncedQuery.length > 2,
   });
 
   // Search USDA foods
   const { data: usdaFoods = [], isLoading: isLoadingUsdaFoods } = useQuery({
-    queryKey: ["/api/foods/search", { query: debouncedQuery }],
+    queryKey: ["/api/foods/search", "usda", debouncedQuery],
+    queryFn: async () => {
+      if (!debouncedQuery || debouncedQuery.length < 3) return [];
+      const response = await fetch(`/api/foods/search?query=${encodeURIComponent(debouncedQuery)}`, {
+        credentials: "include"
+      });
+      if (!response.ok) throw new Error('Failed to search USDA foods');
+      return response.json();
+    },
     enabled: debouncedQuery.length > 2,
   });
 
