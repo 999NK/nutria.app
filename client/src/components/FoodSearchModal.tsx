@@ -54,6 +54,17 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchQuery("");
+      setDebouncedQuery("");
+      setSelectedFood(null);
+      setQuantity(100);
+      setUnit("g");
+    }
+  }, [isOpen]);
+
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -87,7 +98,7 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
         return [];
       }
     },
-    enabled: debouncedQuery.length >= 3,
+    enabled: isOpen && debouncedQuery.length >= 3,
     staleTime: 30 * 1000,
     refetchOnWindowFocus: false,
   });
@@ -122,7 +133,7 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
         return [];
       }
     },
-    enabled: debouncedQuery.length >= 3,
+    enabled: isOpen && debouncedQuery.length >= 3,
     staleTime: 30 * 1000,
     refetchOnWindowFocus: false,
   });
