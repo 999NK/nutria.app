@@ -382,18 +382,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertDailyNutrition(nutrition: InsertDailyNutrition): Promise<DailyNutrition> {
-    const [result] = await db
-      .insert(dailyNutrition)
-      .values(nutrition)
-      .onConflictDoUpdate({
-        target: [dailyNutrition.userId, dailyNutrition.date],
-        set: {
+    // Check if record exists
+    const existing = await this.getDailyNutrition(nutrition.userId, nutrition.date);
+    
+    if (existing) {
+      // Update existing record
+      const [result] = await db
+        .update(dailyNutrition)
+        .set({
           ...nutrition,
           updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return result;
+        })
+        .where(and(eq(dailyNutrition.userId, nutrition.userId), eq(dailyNutrition.date, nutrition.date)))
+        .returning();
+      return result;
+    } else {
+      // Insert new record
+      const [result] = await db
+        .insert(dailyNutrition)
+        .values(nutrition)
+        .returning();
+      return result;
+    }
   }
 
   async getNutritionHistory(userId: string, startDate: string, endDate: string): Promise<DailyNutrition[]> {
