@@ -85,8 +85,13 @@ export function EditMealModal({ meal, isOpen, onClose }: EditMealModalProps) {
         title: "Alimento removido",
         description: "O alimento foi removido da refeição.",
       });
+      // Invalidate all progress-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/meals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/nutrition/daily"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/progress/hourly"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/progress/weekly"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/progress/monthly"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/nutrition/history"] });
       // Refresh the meal foods list
       if (meal) {
         setMealFoods(prev => prev.filter(mf => mf.id !== removeFoodMutation.variables?.foodId));

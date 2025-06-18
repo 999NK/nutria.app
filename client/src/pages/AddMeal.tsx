@@ -174,8 +174,14 @@ export default function AddMeal() {
       return meal;
     },
     onSuccess: () => {
+      // Invalidate all progress-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/meals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/nutrition/daily"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/progress/hourly"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/progress/weekly"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/progress/monthly"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/nutrition/history"] });
+      
       toast({
         title: "Refeição salva!",
         description: "Sua refeição foi adicionada com sucesso",

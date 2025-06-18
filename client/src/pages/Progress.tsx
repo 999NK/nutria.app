@@ -27,22 +27,22 @@ export default function Progress() {
 
   const { data: hourlyData, isLoading: hourlyLoading } = useQuery({
     queryKey: ['/api/progress/hourly', selectedDate],
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    refetchInterval: 10 * 1000, // Refetch every 10 seconds for real-time updates
   });
 
   const { data: weeklyData, isLoading: weeklyLoading } = useQuery({
     queryKey: ['/api/progress/weekly', selectedDate],
-    refetchInterval: 30 * 60 * 1000, // Refetch every 30 minutes
+    refetchInterval: 30 * 1000, // Refetch every 30 seconds
   });
 
   const { data: monthlyData, isLoading: monthlyLoading } = useQuery({
     queryKey: ['/api/progress/monthly', selectedDate],
-    refetchInterval: 60 * 60 * 1000, // Refetch every hour
+    refetchInterval: 60 * 1000, // Refetch every minute
   });
 
   const { data: dailyNutrition } = useQuery({
     queryKey: ['/api/nutrition/daily', selectedDate],
-    refetchInterval: 2 * 60 * 1000, // Refetch every 2 minutes
+    refetchInterval: 10 * 1000, // Refetch every 10 seconds for real-time updates
   });
 
   const calculateDailyProgress = () => {
