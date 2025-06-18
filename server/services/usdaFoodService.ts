@@ -1,7 +1,7 @@
 interface USDANutrient {
-  id: number;
-  name: string;
-  amount: number;
+  nutrientId: number;
+  nutrientName: string;
+  value: number;
   unitName: string;
 }
 
@@ -255,7 +255,7 @@ class USDAFoodService {
   }
 
   private processUSDAFood(food: USDAFood): ProcessedFood {
-    const nutrients = food.foodNutrients;
+    const nutrients = food.foodNutrients || [];
     
     // USDA nutrient IDs for key nutrients
     const energyKcal = this.findNutrient(nutrients, [1008]); // Energy (kcal)
@@ -271,18 +271,18 @@ class USDAFoodService {
       name: food.description,
       brand: food.brandOwner,
       category: food.foodCategory?.description,
-      caloriesPer100g: energyKcal?.amount || 0,
-      proteinPer100g: protein?.amount || 0,
-      carbsPer100g: carbs?.amount || 0,
-      fatPer100g: totalFat?.amount || 0,
-      fiberPer100g: fiber?.amount || 0,
-      sugarPer100g: sugars?.amount || 0,
-      sodiumPer100g: (sodium?.amount || 0) / 1000, // Convert mg to g
+      caloriesPer100g: Math.round(energyKcal?.value || 0),
+      proteinPer100g: Math.round((protein?.value || 0) * 100) / 100,
+      carbsPer100g: Math.round((carbs?.value || 0) * 100) / 100,
+      fatPer100g: Math.round((totalFat?.value || 0) * 100) / 100,
+      fiberPer100g: Math.round((fiber?.value || 0) * 100) / 100,
+      sugarPer100g: Math.round((sugars?.value || 0) * 100) / 100,
+      sodiumPer100g: Math.round((sodium?.value || 0) / 10) / 100, // Convert mg to g
     };
   }
 
   private findNutrient(nutrients: USDANutrient[], ids: number[]): USDANutrient | undefined {
-    return nutrients.find(nutrient => ids.includes(nutrient.id));
+    return nutrients.find(nutrient => ids.includes(nutrient.nutrientId));
   }
 
   private getFallbackFoods(query: string): ProcessedFood[] {
