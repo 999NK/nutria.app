@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Trash2, Edit3 } from "lucide-react";
 import { FoodDropdownSearch } from "./FoodDropdownSearch";
+import { CustomFoodForm } from "./CustomFoodForm";
 
 interface MealFood {
   id: number;
@@ -124,13 +125,24 @@ export function EditMealModal({ meal, isOpen, onClose }: EditMealModalProps) {
 
   const handleAddFood = (food: any) => {
     const foodData = {
-      foodId: food.id || food.usdaFdcId || Date.now(),
+      foodId: food.id || food.usdaFdcId,
+      name: food.name,
+      brand: food.brand,
+      category: food.category || 'Personalizado',
       quantity: food.quantity,
       unit: food.unit,
       calories: food.calories,
       protein: food.protein,
       carbs: food.carbs,
       fat: food.fat,
+      caloriesPer100g: food.caloriesPer100g,
+      proteinPer100g: food.proteinPer100g,
+      carbsPer100g: food.carbsPer100g,
+      fatPer100g: food.fatPer100g,
+      fiberPer100g: food.fiberPer100g,
+      sugarPer100g: food.sugarPer100g,
+      sodiumPer100g: food.sodiumPer100g,
+      usdaFdcId: food.usdaFdcId,
     };
     addFoodMutation.mutate(foodData);
   };
@@ -246,7 +258,10 @@ export function EditMealModal({ meal, isOpen, onClose }: EditMealModalProps) {
           {/* Add More Foods */}
           <div>
             <h3 className="font-medium mb-3">Adicionar Mais Alimentos</h3>
-            <FoodDropdownSearch onAddFood={handleAddFood} />
+            <div className="space-y-3">
+              <FoodDropdownSearch onAddFood={handleAddFood} />
+              <CustomFoodForm onAddFood={handleAddFood} />
+            </div>
           </div>
 
           {/* Actions */}

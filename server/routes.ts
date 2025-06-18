@@ -199,11 +199,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/meals/:mealId/foods', isAuthenticated, async (req: any, res) => {
     try {
       const { mealId } = req.params;
+      const userId = req.user.claims.sub;
+      let foodId = req.body.foodId;
+
+      // If foodId is from AI analysis or USDA (large number), create a proper food record first
+      if (!foodId || foodId > 2147483647 || typeof foodId === 'string') {
+        const foodData = {
+          userId,
+          name: req.body.name || 'Alimento Personalizado',
+          brand: req.body.brand || null,
+          category: req.body.category || 'Personalizado',
+          caloriesPer100g: (parseFloat(req.body.caloriesPer100g) || (parseFloat(req.body.calories) / parseFloat(req.body.quantity)) * 100).toString(),
+          proteinPer100g: (parseFloat(req.body.proteinPer100g) || (parseFloat(req.body.protein) / parseFloat(req.body.quantity)) * 100).toString(),
+          carbsPer100g: (parseFloat(req.body.carbsPer100g) || (parseFloat(req.body.carbs) / parseFloat(req.body.quantity)) * 100).toString(),
+          fatPer100g: (parseFloat(req.body.fatPer100g) || (parseFloat(req.body.fat) / parseFloat(req.body.quantity)) * 100).toString(),
+          fiberPer100g: (parseFloat(req.body.fiberPer100g) || 0).toString(),
+          sugarPer100g: (parseFloat(req.body.sugarPer100g) || 0).toString(),
+          sodiumPer100g: (parseFloat(req.body.sodiumPer100g) || 0).toString(),
+          usdaFdcId: req.body.usdaFdcId || null,
+        };
+
+        const newFood = await storage.createFood(foodData);
+        foodId = newFood.id;
+      }
       
-      // Create a properly formatted meal food object
+      // Create meal food record
       const mealFoodData = {
         mealId: parseInt(mealId),
-        foodId: parseInt(req.body.foodId),
+        foodId: parseInt(foodId),
         quantity: req.body.quantity.toString(),
         unit: req.body.unit,
         calories: req.body.calories.toString(),
