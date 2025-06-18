@@ -121,12 +121,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/foods/search', async (req, res) => {
     try {
       const { query } = req.query;
-      if (!query) {
-        return res.status(400).json({ message: "Search query is required" });
+      if (!query || typeof query !== 'string' || query.trim().length < 3) {
+        return res.status(400).json({ message: "Search query must be at least 3 characters" });
       }
       
       const { usdaFoodService } = await import("./services/usdaFoodService");
-      const foods = await usdaFoodService.searchFoods(query as string);
+      const foods = await usdaFoodService.searchFoods(query.trim());
       res.json(foods);
     } catch (error) {
       console.error("Error searching USDA foods:", error);

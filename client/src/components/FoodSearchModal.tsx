@@ -57,7 +57,11 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
+      if (searchQuery.trim().length > 2) {
+        setDebouncedQuery(searchQuery.trim());
+      } else {
+        setDebouncedQuery("");
+      }
     }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
