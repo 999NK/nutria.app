@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import type { User } from "@shared/schema";
 
 export default function Profile() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -135,7 +136,7 @@ export default function Profile() {
     }
   }, []);
 
-  const formatWeight = (weight: string | null) => {
+  const formatWeight = (weight: string | null | undefined) => {
     if (!weight) return '0';
     // Remove leading zeros and fix the weight display issue
     const numWeight = parseFloat(weight);
@@ -143,7 +144,7 @@ export default function Profile() {
   };
 
   const calculateBMI = () => {
-    const weight = parseFloat(user?.weight || "0");
+    const weight = parseFloat((user?.weight as string) || "0");
     const height = user?.height || 0;
     
     if (weight > 0 && height > 0) {
