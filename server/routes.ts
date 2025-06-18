@@ -539,6 +539,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currentDate.setDate(weekStart.getDate() + i);
         const dateStr = currentDate.toISOString().split('T')[0];
         
+        // Get nutritional day range (5AM to 5AM)
+        const { start, end } = getNutritionalDayRange(dateStr);
+        
         const dayMeals = await db
           .select({
             totalCalories: sql<number>`COALESCE(SUM(${meals.totalCalories}), 0)`,
@@ -551,7 +554,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(
             and(
               eq(meals.userId, userId),
-              eq(meals.date, dateStr)
+              gte(meals.createdAt, start),
+              lt(meals.createdAt, end)
             )
           );
 
