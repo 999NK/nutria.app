@@ -81,7 +81,7 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
     },
     enabled: !!debouncedQuery && debouncedQuery.trim().length > 2,
     staleTime: 0,
-    cacheTime: 0,
+    gcTime: 0,
   });
 
   // Search USDA foods
@@ -103,7 +103,7 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
     },
     enabled: !!debouncedQuery && debouncedQuery.trim().length > 2,
     staleTime: 0,
-    cacheTime: 0,
+    gcTime: 0,
   });
 
   const addUsdaFoodMutation = useMutation({
@@ -279,6 +279,49 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
                 ) : searchQuery.length > 2 ? (
                   <div className="text-center py-4 text-muted-foreground">
                     Nenhum alimento encontrado na base USDA
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-muted-foreground">
+                    Digite pelo menos 3 caracteres para buscar
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="my-foods" className="max-h-60 overflow-y-auto">
+                {isLoadingUserFoods ? (
+                  <div className="text-center py-4">Buscando...</div>
+                ) : userFoods.length > 0 ? (
+                  <div className="space-y-2">
+                    {userFoods.map((food: Food) => (
+                      <Card
+                        key={food.id}
+                        className="cursor-pointer hover:bg-accent transition-colors"
+                        onClick={() => handleSelectFood(food)}
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="font-medium">{food.name}</h4>
+                              {food.brand && (
+                                <p className="text-sm text-muted-foreground">{food.brand}</p>
+                              )}
+                              <div className="flex gap-2 mt-1">
+                                <Badge variant="outline">
+                                  {food.caloriesPer100g} kcal/100g
+                                </Badge>
+                                {food.isCustom && (
+                                  <Badge variant="secondary">Personalizado</Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : searchQuery.length > 2 ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    Nenhum alimento encontrado em sua lista
                   </div>
                 ) : (
                   <div className="text-center py-4 text-muted-foreground">
