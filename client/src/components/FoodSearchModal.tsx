@@ -66,28 +66,44 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
   const { data: userFoods = [], isLoading: isLoadingUserFoods } = useQuery({
     queryKey: ["/api/foods", "search", debouncedQuery],
     queryFn: async () => {
-      if (!debouncedQuery || debouncedQuery.length < 3) return [];
-      const response = await fetch(`/api/foods?search=${encodeURIComponent(debouncedQuery)}`, {
+      if (!debouncedQuery || debouncedQuery.trim().length < 3) return [];
+      console.log('Searching user foods with query:', debouncedQuery);
+      const response = await fetch(`/api/foods?search=${encodeURIComponent(debouncedQuery.trim())}`, {
         credentials: "include"
       });
-      if (!response.ok) throw new Error('Failed to search foods');
-      return response.json();
+      if (!response.ok) {
+        console.error('User foods search failed:', response.status, response.statusText);
+        return [];
+      }
+      const result = await response.json();
+      console.log('User foods result:', result);
+      return result;
     },
-    enabled: debouncedQuery.length > 2,
+    enabled: !!debouncedQuery && debouncedQuery.trim().length > 2,
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   // Search USDA foods
   const { data: usdaFoods = [], isLoading: isLoadingUsdaFoods } = useQuery({
     queryKey: ["/api/foods/search", "usda", debouncedQuery],
     queryFn: async () => {
-      if (!debouncedQuery || debouncedQuery.length < 3) return [];
-      const response = await fetch(`/api/foods/search?query=${encodeURIComponent(debouncedQuery)}`, {
+      if (!debouncedQuery || debouncedQuery.trim().length < 3) return [];
+      console.log('Searching USDA foods with query:', debouncedQuery);
+      const response = await fetch(`/api/foods/search?query=${encodeURIComponent(debouncedQuery.trim())}`, {
         credentials: "include"
       });
-      if (!response.ok) throw new Error('Failed to search USDA foods');
-      return response.json();
+      if (!response.ok) {
+        console.error('USDA foods search failed:', response.status, response.statusText);
+        return [];
+      }
+      const result = await response.json();
+      console.log('USDA foods result:', result);
+      return result;
     },
-    enabled: debouncedQuery.length > 2,
+    enabled: !!debouncedQuery && debouncedQuery.trim().length > 2,
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   const addUsdaFoodMutation = useMutation({
