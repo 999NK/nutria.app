@@ -53,6 +53,9 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Debug state
+  console.log('🔍 Search state:', { searchQuery, debouncedQuery });
 
   // Debounce search query
   useEffect(() => {
@@ -71,7 +74,7 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
     queryKey: ["user-foods", debouncedQuery],
     queryFn: async () => {
       try {
-        const response = await fetch(`/api/foods?search=${encodeURIComponent(debouncedQuery.trim())}`, {
+        const response = await fetch(`/api/foods?search=${encodeURIComponent(debouncedQuery)}`, {
           credentials: "include"
         });
         if (!response.ok) {
@@ -83,8 +86,8 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
         return [];
       }
     },
-    enabled: !!debouncedQuery && debouncedQuery.trim().length > 2,
-    staleTime: 30 * 1000, // 30 seconds
+    enabled: !!debouncedQuery && debouncedQuery.length >= 3,
+    staleTime: 30 * 1000,
     refetchOnWindowFocus: false,
   });
 
@@ -93,20 +96,23 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
     queryKey: ["usda-foods", debouncedQuery],
     queryFn: async () => {
       try {
-        const response = await fetch(`/api/foods/search?query=${encodeURIComponent(debouncedQuery.trim())}`, {
+        console.log('🔍 Searching USDA for:', debouncedQuery);
+        const response = await fetch(`/api/foods/search?query=${encodeURIComponent(debouncedQuery)}`, {
           credentials: "include"
         });
         if (!response.ok) {
           throw new Error(`Erro ${response.status}`);
         }
-        return await response.json();
+        const result = await response.json();
+        console.log('🌍 USDA results:', result.length, 'foods found');
+        return result;
       } catch (error) {
         console.error("Erro ao buscar alimentos USDA:", error);
         return [];
       }
     },
-    enabled: !!debouncedQuery && debouncedQuery.trim().length > 2,
-    staleTime: 30 * 1000, // 30 seconds
+    enabled: !!debouncedQuery && debouncedQuery.length >= 3,
+    staleTime: 30 * 1000,
     refetchOnWindowFocus: false,
   });
 
@@ -241,6 +247,7 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
               </TabsList>
 
               <TabsContent value="usda-foods" className="max-h-60 overflow-y-auto">
+                {console.log('🌍 USDA Tab - Loading:', isLoadingUsdaFoods, 'Foods:', usdaFoods.length)}
                 {isLoadingUsdaFoods ? (
                   <div className="text-center py-4">Buscando na base mundial...</div>
                 ) : usdaFoods.length > 0 ? (
