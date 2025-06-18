@@ -134,27 +134,10 @@ export default function Dashboard() {
             <span className="text-sm text-gray-500 dark:text-gray-400">{todayFormatted}</span>
           </div>
           
-          {/* Calories Progress Ring */}
-          <div className="flex items-center justify-center mb-6">
-            <ProgressRing 
-              progress={caloriesProgress}
-              size={128}
-              strokeWidth={3}
-            >
-              <div className="text-center">
-                <span className="text-2xl font-bold">{caloriesConsumed}</span>
-                <div className="text-xs text-gray-500 dark:text-gray-400">kcal</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {caloriesRemaining} restantes
-                </div>
-              </div>
-            </ProgressRing>
-          </div>
-
-          {/* Macros Progress - 2x2 Grid Layout */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Nutrition Metrics - 2x2 Grid Layout */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {/* Calories Card */}
-            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
+            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-3 sm:p-4 rounded-lg border border-green-200 dark:border-green-700">
               <div className="text-center">
                 <div className="w-full bg-green-200 dark:bg-green-700 rounded-full h-2 mb-2">
                   <div 
@@ -163,12 +146,13 @@ export default function Dashboard() {
                   />
                 </div>
                 <p className="text-xs text-green-600 dark:text-green-400 font-medium">Calorias</p>
-                <p className="text-sm font-bold text-green-700 dark:text-green-300">{caloriesConsumed} kcal</p>
+                <p className="text-sm font-bold text-green-700 dark:text-green-300">{caloriesConsumed}</p>
+                <p className="text-xs text-green-600 dark:text-green-400">de {caloriesGoal} kcal</p>
               </div>
             </div>
 
             {/* Protein Card */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-3 sm:p-4 rounded-lg border border-blue-200 dark:border-blue-700">
               <div className="text-center">
                 <div className="w-full bg-blue-200 dark:bg-blue-700 rounded-full h-2 mb-2">
                   <div 
@@ -178,11 +162,12 @@ export default function Dashboard() {
                 </div>
                 <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Proteína</p>
                 <p className="text-sm font-bold text-blue-700 dark:text-blue-300">{proteinConsumed.toFixed(0)}g</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400">de {proteinGoal}g</p>
               </div>
             </div>
 
             {/* Carbs Card */}
-            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-700">
+            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 p-3 sm:p-4 rounded-lg border border-yellow-200 dark:border-yellow-700">
               <div className="text-center">
                 <div className="w-full bg-yellow-200 dark:bg-yellow-700 rounded-full h-2 mb-2">
                   <div 
@@ -192,11 +177,12 @@ export default function Dashboard() {
                 </div>
                 <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">Carboidratos</p>
                 <p className="text-sm font-bold text-yellow-700 dark:text-yellow-300">{carbsConsumed.toFixed(0)}g</p>
+                <p className="text-xs text-yellow-600 dark:text-yellow-400">de {carbsGoal}g</p>
               </div>
             </div>
 
             {/* Fat Card */}
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 p-3 sm:p-4 rounded-lg border border-orange-200 dark:border-orange-700">
               <div className="text-center">
                 <div className="w-full bg-orange-200 dark:bg-orange-700 rounded-full h-2 mb-2">
                   <div 
@@ -206,6 +192,7 @@ export default function Dashboard() {
                 </div>
                 <p className="text-xs text-orange-600 dark:text-orange-400 font-medium">Gordura</p>
                 <p className="text-sm font-bold text-orange-700 dark:text-orange-300">{fatConsumed.toFixed(0)}g</p>
+                <p className="text-xs text-orange-600 dark:text-orange-400">de {fatGoal}g</p>
               </div>
             </div>
           </div>
