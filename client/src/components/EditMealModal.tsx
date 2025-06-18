@@ -116,8 +116,13 @@ export function EditMealModal({ meal, isOpen, onClose }: EditMealModalProps) {
         title: "Alimento adicionado",
         description: "O alimento foi adicionado à refeição.",
       });
+      // Invalidate all progress-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/meals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/nutrition/daily"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/progress/hourly"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/progress/weekly"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/progress/monthly"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/nutrition/history"] });
     },
     onError: () => {
       toast({
