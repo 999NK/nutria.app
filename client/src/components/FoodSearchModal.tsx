@@ -86,24 +86,24 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
 
   // Search USDA foods
   const { data: usdaFoods = [], isLoading: isLoadingUsdaFoods } = useQuery({
-    queryKey: ["/api/foods/search", "usda", debouncedQuery],
+    queryKey: ["usda-foods", debouncedQuery],
     queryFn: async () => {
-      if (!debouncedQuery || debouncedQuery.trim().length < 3) return [];
-      console.log('Searching USDA foods with query:', debouncedQuery);
-      const response = await fetch(`/api/foods/search?query=${encodeURIComponent(debouncedQuery.trim())}`, {
-        credentials: "include"
-      });
-      if (!response.ok) {
-        console.error('USDA foods search failed:', response.status, response.statusText);
+      try {
+        const response = await fetch(`/api/foods/search?query=${encodeURIComponent(debouncedQuery.trim())}`, {
+          credentials: "include"
+        });
+        if (!response.ok) {
+          throw new Error(`Erro ${response.status}`);
+        }
+        return await response.json();
+      } catch (error) {
+        console.error("Erro ao buscar alimentos USDA:", error);
         return [];
       }
-      const result = await response.json();
-      console.log('USDA foods result:', result);
-      return result;
     },
     enabled: !!debouncedQuery && debouncedQuery.trim().length > 2,
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 30 * 1000, // 30 seconds
+    refetchOnWindowFocus: false,
   });
 
   const addUsdaFoodMutation = useMutation({
@@ -203,6 +203,11 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
               placeholder="Busque por alimentos (ex: arroz, frango, banana)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchQuery.trim().length > 2) {
+                  setDebouncedQuery(searchQuery.trim());
+                }
+              }}
               className="pl-10"
             />
           </div>
