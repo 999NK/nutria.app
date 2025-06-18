@@ -7,8 +7,35 @@ import { aiService } from "./services/aiService";
 import { pdfService } from "./services/pdfService";
 import { notificationService } from "./services/notificationService";
 import { db } from "./db";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, gte, lt } from "drizzle-orm";
 import { z } from "zod";
+
+// Utility functions for nutritional day calculation (5AM to 5AM)
+function getNutritionalDay(date: Date): string {
+  const nutritionalDate = new Date(date);
+  
+  // If it's before 5 AM, it belongs to the previous day
+  if (date.getHours() < 5) {
+    nutritionalDate.setDate(nutritionalDate.getDate() - 1);
+  }
+  
+  return nutritionalDate.toISOString().split('T')[0];
+}
+
+function getNutritionalDayRange(dateString: string): { start: Date, end: Date } {
+  const baseDate = new Date(dateString + 'T00:00:00Z');
+  
+  // Start at 5 AM of the given date
+  const start = new Date(baseDate);
+  start.setUTCHours(5, 0, 0, 0);
+  
+  // End at 5 AM of the next date  
+  const end = new Date(baseDate);
+  end.setUTCDate(end.getUTCDate() + 1);
+  end.setUTCHours(5, 0, 0, 0);
+  
+  return { start, end };
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -318,33 +345,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/nutrition/daily', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
+      const requestedDate = (req.query.date as string) || new Date().toISOString().split('T')[0];
       
-      // Get all meals for today
-      const meals = await storage.getMeals(userId, date);
+      // Get the nutritional day range (5AM to 5AM)
+      const { start, end } = getNutritionalDayRange(requestedDate);
       
-      // Calculate total nutrition from all meals
+      // Get all meals within the nutritional day range
+      const dayMeals = await db
+        .select({
+          id: meals.id,
+          totalCalories: meals.totalCalories,
+          totalProtein: meals.totalProtein,
+          totalCarbs: meals.totalCarbs,
+          totalFat: meals.totalFat,
+          createdAt: meals.createdAt
+        })
+        .from(meals)
+        .where(
+          and(
+            eq(meals.userId, userId),
+            gte(meals.createdAt, start),
+            lt(meals.createdAt, end)
+          )
+        );
+      
+      // Calculate total nutrition from all meals in the nutritional day
       let totalCalories = 0;
       let totalProtein = 0;
       let totalCarbs = 0;
       let totalFat = 0;
       
-      for (const meal of meals) {
-        for (const mealFood of meal.mealFoods) {
-          totalCalories += parseFloat(mealFood.calories?.toString() || "0");
-          totalProtein += parseFloat(mealFood.protein?.toString() || "0");
-          totalCarbs += parseFloat(mealFood.carbs?.toString() || "0");
-          totalFat += parseFloat(mealFood.fat?.toString() || "0");
-        }
+      for (const meal of dayMeals) {
+        totalCalories += parseFloat(meal.totalCalories?.toString() || "0");
+        totalProtein += parseFloat(meal.totalProtein?.toString() || "0");
+        totalCarbs += parseFloat(meal.totalCarbs?.toString() || "0");
+        totalFat += parseFloat(meal.totalFat?.toString() || "0");
       }
       
       const nutrition = {
-        date,
+        date: requestedDate,
         calories: Math.round(totalCalories),
         protein: Math.round(totalProtein),
         carbs: Math.round(totalCarbs),
         fat: Math.round(totalFat),
       };
+      
+      // Save to daily nutrition table for historical tracking
+      try {
+        await storage.upsertDailyNutrition({
+          userId,
+          date: requestedDate,
+          totalCalories: nutrition.calories,
+          totalProtein: nutrition.protein.toString(),
+          totalCarbs: nutrition.carbs.toString(),
+          totalFat: nutrition.fat.toString(),
+        });
+      } catch (upsertError) {
+        console.error("Error saving daily nutrition:", upsertError);
+      }
       
       res.json(nutrition);
     } catch (error) {
@@ -402,7 +460,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
       
-      // Get meals for the day with timestamps
+      // Get the nutritional day range (5AM to 5AM)
+      const { start, end } = getNutritionalDayRange(date);
+      
+      // Get meals within the nutritional day range
       const dayMeals = await db
         .select({
           id: meals.id,
@@ -422,12 +483,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(meals.userId, userId),
-            eq(meals.date, date)
+            gte(meals.createdAt, start),
+            lt(meals.createdAt, end)
           )
         )
         .orderBy(meals.createdAt);
 
-      // Group by hour
+      // Group by hour (adjusted for nutritional day)
       const hourlyData = Array.from({ length: 24 }, (_, hour) => ({
         hour,
         calories: 0,
@@ -438,17 +500,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }));
 
       dayMeals.forEach(meal => {
-        const hour = new Date(meal.createdAt).getHours();
-        hourlyData[hour].calories += meal.totalCalories || 0;
-        hourlyData[hour].protein += parseFloat(meal.totalProtein || '0');
-        hourlyData[hour].carbs += parseFloat(meal.totalCarbs || '0');
-        hourlyData[hour].fat += parseFloat(meal.totalFat || '0');
-        hourlyData[hour].meals.push({
-          id: meal.id,
-          type: meal.mealType?.name,
-          icon: meal.mealType?.icon,
-          calories: meal.totalCalories
-        });
+        if (meal.createdAt) {
+          const mealDate = new Date(meal.createdAt);
+          const hour = mealDate.getHours();
+          hourlyData[hour].calories += parseFloat(meal.totalCalories?.toString() || "0");
+          hourlyData[hour].protein += parseFloat(meal.totalProtein?.toString() || "0");
+          hourlyData[hour].carbs += parseFloat(meal.totalCarbs?.toString() || "0");
+          hourlyData[hour].fat += parseFloat(meal.totalFat?.toString() || "0");
+          hourlyData[hour].meals.push({
+            id: meal.id,
+            type: meal.mealType?.name,
+            icon: meal.mealType?.icon,
+            calories: meal.totalCalories
+          });
+        }
       });
 
       res.json(hourlyData);
