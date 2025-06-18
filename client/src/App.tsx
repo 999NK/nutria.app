@@ -13,6 +13,7 @@ import Profile from "@/pages/Profile";
 import Onboarding from "@/pages/Onboarding";
 import Layout from "@/components/Layout";
 import NotFound from "@/pages/not-found";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 function Router() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -56,6 +57,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <InstallPrompt />
       </TooltipProvider>
     </QueryClientProvider>
   );
