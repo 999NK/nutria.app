@@ -76,12 +76,9 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
 
   // Manual search function
   const performSearch = async (query: string) => {
-    console.log("DROPDOWN SEARCH - Raw query:", `"${query}"`, "Type:", typeof query, "Length:", query?.length);
     const trimmedQuery = query?.trim() || "";
-    console.log("DROPDOWN SEARCH - Trimmed query:", `"${trimmedQuery}"`, "Length:", trimmedQuery.length);
     
     if (!trimmedQuery || trimmedQuery.length < 3) {
-      console.log("DROPDOWN SEARCH - Query too short, skipping API calls");
       setFoods([]);
       setUsdaFoods([]);
       return;
@@ -90,17 +87,13 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
     setIsLoading(true);
     try {
       // Search user foods
-      const userUrl = `/api/foods?search=${encodeURIComponent(trimmedQuery)}`;
-      console.log("DROPDOWN SEARCH - User foods URL:", userUrl);
-      const userResponse = await fetch(userUrl, {
+      const userResponse = await fetch(`/api/foods?search=${encodeURIComponent(trimmedQuery)}`, {
         credentials: "include"
       });
       const userFoods = userResponse.ok ? await userResponse.json() : [];
 
       // Search USDA foods
-      const usdaUrl = `/api/foods/search?query=${encodeURIComponent(trimmedQuery)}`;
-      console.log("DROPDOWN SEARCH - USDA foods URL:", usdaUrl);
-      const usdaResponse = await fetch(usdaUrl, {
+      const usdaResponse = await fetch(`/api/foods/search?query=${encodeURIComponent(trimmedQuery)}`, {
         credentials: "include"
       });
       const usdaResults = usdaResponse.ok ? await usdaResponse.json() : [];
@@ -118,14 +111,10 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
 
   // Trigger search when debounced query changes
   useEffect(() => {
-    console.log("DROPDOWN SEARCH - useEffect triggered with debouncedQuery:", `"${debouncedQuery}"`, "Length:", debouncedQuery?.length, "hasUserInteracted:", hasUserInteracted);
-    
     // Only perform search if query is valid, not empty, and user has interacted
     if (hasUserInteracted && debouncedQuery && debouncedQuery.trim().length >= 3) {
-      console.log("DROPDOWN SEARCH - Calling performSearch with:", `"${debouncedQuery}"`);
       performSearch(debouncedQuery);
     } else {
-      console.log("DROPDOWN SEARCH - Clearing results, reason:", !hasUserInteracted ? "no user interaction" : "query too short or empty");
       setFoods([]);
       setUsdaFoods([]);
     }
