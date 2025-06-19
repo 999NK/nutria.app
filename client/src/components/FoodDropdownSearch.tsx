@@ -68,17 +68,53 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Search foods (both user's and USDA)
-  const { data: foods = [], isLoading } = useQuery({
-    queryKey: ["/api/foods", debouncedQuery],
-    enabled: debouncedQuery.length >= 3,
-  });
+  // Search foods manually to prevent empty queries
+  const [foods, setFoods] = useState<Food[]>([]);
+  const [usdaFoods, setUsdaFoods] = useState<Food[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Search USDA foods
-  const { data: usdaFoods = [] } = useQuery({
-    queryKey: ["/api/foods/search", debouncedQuery],
-    enabled: debouncedQuery.length >= 3,
-  });
+  // Manual search function
+  const performSearch = async (query: string) => {
+    if (!query || query.length < 3) {
+      setFoods([]);
+      setUsdaFoods([]);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Search user foods
+      const userResponse = await fetch(`/api/foods?search=${encodeURIComponent(query)}`, {
+        credentials: "include"
+      });
+      const userFoods = userResponse.ok ? await userResponse.json() : [];
+
+      // Search USDA foods
+      const usdaResponse = await fetch(`/api/foods/search?query=${encodeURIComponent(query)}`, {
+        credentials: "include"
+      });
+      const usdaResults = usdaResponse.ok ? await usdaResponse.json() : [];
+
+      setFoods(userFoods);
+      setUsdaFoods(usdaResults);
+    } catch (error) {
+      console.error("Search error:", error);
+      setFoods([]);
+      setUsdaFoods([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Trigger search when debounced query changes
+  useEffect(() => {
+    if (debouncedQuery.length >= 3) {
+      performSearch(debouncedQuery);
+    } else {
+      setFoods([]);
+      setUsdaFoods([]);
+    }
+  }, [debouncedQuery]);
 
   // Combine both food sources
   const allFoods = [...(foods as Food[]), ...(usdaFoods as Food[])];
