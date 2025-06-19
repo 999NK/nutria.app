@@ -33,10 +33,8 @@ export default function AddMeal() {
   const [selectedMealType, setSelectedMealType] = useState<number | null>(null);
   const [aiDescription, setAiDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [foodSearch, setFoodSearch] = useState("");
   const [addedFoods, setAddedFoods] = useState<FoodItem[]>([]);
   const [showCustomFood, setShowCustomFood] = useState(false);
-  const [showFoodSearch, setShowFoodSearch] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -59,11 +57,7 @@ export default function AddMeal() {
     enabled: isAuthenticated,
   });
 
-  // Fetch foods for search
-  const { data: foods = [] } = useQuery({
-    queryKey: ["/api/foods", { search: foodSearch }],
-    enabled: foodSearch.length > 2,
-  });
+  // Removed redundant food search query - FoodDropdownSearch handles its own search
 
   // AI meal analysis mutation
   const aiAnalysisMutation = useMutation({
