@@ -54,18 +54,15 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
   const [quantity, setQuantity] = useState(100);
   const [unit, setUnit] = useState("g");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
   // Debounce search query with validation
   useEffect(() => {
-    console.log("DROPDOWN SEARCH - Debounce input searchQuery:", `"${searchQuery}"`, "Type:", typeof searchQuery, "Length:", searchQuery?.length);
     const timer = setTimeout(() => {
       const trimmed = searchQuery.trim();
-      console.log("DROPDOWN SEARCH - After trim:", `"${trimmed}"`, "Length:", trimmed.length);
       if (trimmed.length >= 3) {
-        console.log("DROPDOWN SEARCH - Setting debouncedQuery to:", `"${trimmed}"`);
         setDebouncedQuery(trimmed);
       } else {
-        console.log("DROPDOWN SEARCH - Setting debouncedQuery to empty string");
         setDebouncedQuery("");
       }
     }, 300);
@@ -121,16 +118,18 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
 
   // Trigger search when debounced query changes
   useEffect(() => {
-    console.log("DROPDOWN SEARCH - useEffect triggered with debouncedQuery:", `"${debouncedQuery}"`, "Length:", debouncedQuery?.length);
-    if (debouncedQuery && debouncedQuery.length >= 3) {
+    console.log("DROPDOWN SEARCH - useEffect triggered with debouncedQuery:", `"${debouncedQuery}"`, "Length:", debouncedQuery?.length, "hasUserInteracted:", hasUserInteracted);
+    
+    // Only perform search if query is valid, not empty, and user has interacted
+    if (hasUserInteracted && debouncedQuery && debouncedQuery.trim().length >= 3) {
       console.log("DROPDOWN SEARCH - Calling performSearch with:", `"${debouncedQuery}"`);
       performSearch(debouncedQuery);
     } else {
-      console.log("DROPDOWN SEARCH - Clearing results, query too short or empty");
+      console.log("DROPDOWN SEARCH - Clearing results, reason:", !hasUserInteracted ? "no user interaction" : "query too short or empty");
       setFoods([]);
       setUsdaFoods([]);
     }
-  }, [debouncedQuery]);
+  }, [debouncedQuery, hasUserInteracted]);
 
   // Combine both food sources
   const allFoods = [...(foods as Food[]), ...(usdaFoods as Food[])];
@@ -188,7 +187,12 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
               <CommandInput
                 placeholder="Digite o nome do alimento..."
                 value={searchQuery}
-                onValueChange={setSearchQuery}
+                onValueChange={(value) => {
+                  setSearchQuery(value);
+                  if (value.length > 0) {
+                    setHasUserInteracted(true);
+                  }
+                }}
               />
               <CommandList>
                 <CommandEmpty>
