@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import { Search, Globe, User, Plus } from "lucide-react";
 
 interface Food {
@@ -52,7 +50,6 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
   const [unit, setUnit] = useState("g");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   // Reset state when modal closes
   useEffect(() => {
@@ -183,14 +180,34 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
     }
   }, [debouncedQuery, isOpen]);
 
-  const addUsdaFoodMutation = useMutation({
-    mutationFn: async (usdaFood: Food) => {
-      return await apiRequest("POST", "/api/foods/from-usda", { usdaFood });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/foods"] });
-    },
-  });
+  const addUsdaFood = async (usdaFood: Food) => {
+    try {
+      const response = await fetch("/api/foods/from-usda", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ usdaFood }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add food");
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Alimento adicionado aos seus favoritos!",
+      });
+    } catch (error) {
+      console.error("Error adding USDA food:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar alimento",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSelectFood = (food: Food) => {
     setSelectedFood(food);
@@ -250,18 +267,10 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
 
   const handleAddUsdaFood = async (usdaFood: Food) => {
     try {
-      await addUsdaFoodMutation.mutateAsync(usdaFood);
+      await addUsdaFood(usdaFood);
       setSelectedFood(usdaFood);
-      toast({
-        title: "Alimento adicionado",
-        description: "O alimento foi adicionado à sua lista pessoal.",
-      });
     } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível adicionar o alimento.",
-        variant: "destructive",
-      });
+      // Error handling is already done in addUsdaFood function
     }
   };
 
@@ -342,7 +351,7 @@ export function FoodSearchModal({ isOpen, onClose, onSelectFood }: FoodSearchMod
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleAddUsdaFood(food)}
-                                disabled={addUsdaFoodMutation.isPending}
+                                disabled={false}
                               >
                                 <Plus className="h-3 w-3" />
                               </Button>
