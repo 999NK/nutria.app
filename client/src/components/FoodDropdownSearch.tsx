@@ -57,11 +57,15 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
 
   // Debounce search query with validation
   useEffect(() => {
+    console.log("DROPDOWN SEARCH - Debounce input searchQuery:", `"${searchQuery}"`, "Type:", typeof searchQuery, "Length:", searchQuery?.length);
     const timer = setTimeout(() => {
       const trimmed = searchQuery.trim();
+      console.log("DROPDOWN SEARCH - After trim:", `"${trimmed}"`, "Length:", trimmed.length);
       if (trimmed.length >= 3) {
+        console.log("DROPDOWN SEARCH - Setting debouncedQuery to:", `"${trimmed}"`);
         setDebouncedQuery(trimmed);
       } else {
+        console.log("DROPDOWN SEARCH - Setting debouncedQuery to empty string");
         setDebouncedQuery("");
       }
     }, 300);
@@ -75,7 +79,12 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
 
   // Manual search function
   const performSearch = async (query: string) => {
-    if (!query || query.length < 3) {
+    console.log("DROPDOWN SEARCH - Raw query:", `"${query}"`, "Type:", typeof query, "Length:", query?.length);
+    const trimmedQuery = query?.trim() || "";
+    console.log("DROPDOWN SEARCH - Trimmed query:", `"${trimmedQuery}"`, "Length:", trimmedQuery.length);
+    
+    if (!trimmedQuery || trimmedQuery.length < 3) {
+      console.log("DROPDOWN SEARCH - Query too short, skipping API calls");
       setFoods([]);
       setUsdaFoods([]);
       return;
@@ -84,13 +93,17 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
     setIsLoading(true);
     try {
       // Search user foods
-      const userResponse = await fetch(`/api/foods?search=${encodeURIComponent(query)}`, {
+      const userUrl = `/api/foods?search=${encodeURIComponent(trimmedQuery)}`;
+      console.log("DROPDOWN SEARCH - User foods URL:", userUrl);
+      const userResponse = await fetch(userUrl, {
         credentials: "include"
       });
       const userFoods = userResponse.ok ? await userResponse.json() : [];
 
       // Search USDA foods
-      const usdaResponse = await fetch(`/api/foods/search?query=${encodeURIComponent(query)}`, {
+      const usdaUrl = `/api/foods/search?query=${encodeURIComponent(trimmedQuery)}`;
+      console.log("DROPDOWN SEARCH - USDA foods URL:", usdaUrl);
+      const usdaResponse = await fetch(usdaUrl, {
         credentials: "include"
       });
       const usdaResults = usdaResponse.ok ? await usdaResponse.json() : [];
@@ -108,9 +121,12 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
 
   // Trigger search when debounced query changes
   useEffect(() => {
-    if (debouncedQuery.length >= 3) {
+    console.log("DROPDOWN SEARCH - useEffect triggered with debouncedQuery:", `"${debouncedQuery}"`, "Length:", debouncedQuery?.length);
+    if (debouncedQuery && debouncedQuery.length >= 3) {
+      console.log("DROPDOWN SEARCH - Calling performSearch with:", `"${debouncedQuery}"`);
       performSearch(debouncedQuery);
     } else {
+      console.log("DROPDOWN SEARCH - Clearing results, query too short or empty");
       setFoods([]);
       setUsdaFoods([]);
     }
