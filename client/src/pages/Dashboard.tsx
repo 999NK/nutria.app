@@ -341,6 +341,9 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
+      {/* Personalized Recipe Recommendations */}
+      <PersonalizedRecommendations />
+
       {/* Edit Meal Modal */}
       <EditMealModal
         meal={selectedMeal}
