@@ -11,6 +11,7 @@ import { ptBR } from "date-fns/locale";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useToast } from "@/hooks/use-toast";
 import { getNutritionalDay } from "@/lib/nutritionalDay";
+import { PersonalizedRecommendations } from "@/components/PersonalizedRecommendations";
 
 export default function Dashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();

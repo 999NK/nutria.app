@@ -665,6 +665,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Personalized recipe recommendations based on nutrition goals
+  app.post('/api/ai/personalized-recommendations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { availableIngredients } = req.body;
+      
+      // Get user's nutrition goals
+      const user = await storage.getUser(userId);
+      if (!user || !user.isProfileComplete) {
+        return res.status(400).json({ message: "Complete your profile to get personalized recommendations" });
+      }
+
+      // Get current daily nutrition
+      const today = getNutritionalDay(new Date());
+      const currentNutrition = await storage.getDailyNutrition(userId, today);
+      
+      const nutritionGoals = {
+        dailyCalories: user.dailyCalories || 2000,
+        dailyProtein: user.dailyProtein || 150,
+        dailyCarbs: user.dailyCarbs || 250,
+        dailyFat: user.dailyFat || 67
+      };
+
+      const currentValues = {
+        calories: currentNutrition?.totalCalories || 0,
+        protein: parseFloat(currentNutrition?.totalProtein || '0'),
+        carbs: parseFloat(currentNutrition?.totalCarbs || '0'),
+        fat: parseFloat(currentNutrition?.totalFat || '0')
+      };
+
+      const recommendations = await aiService.getPersonalizedRecommendations(
+        currentValues,
+        nutritionGoals,
+        availableIngredients
+      );
+      
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error generating personalized recommendations:", error);
+      res.status(500).json({ message: "Failed to generate personalized recommendations" });
+    }
+  });
+
   // PDF Export routes
   app.post('/api/export/pdf', isAuthenticated, async (req: any, res) => {
     try {

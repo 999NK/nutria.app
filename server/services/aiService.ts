@@ -27,6 +27,27 @@ export interface RecipeSuggestion {
   difficulty: 'easy' | 'medium' | 'hard';
 }
 
+export interface NutritionGoals {
+  dailyCalories: number;
+  dailyProtein: number;
+  dailyCarbs: number;
+  dailyFat: number;
+}
+
+export interface CurrentNutrition {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export interface PersonalizedRecommendation {
+  recipe: RecipeSuggestion;
+  reason: string;
+  nutritionMatch: 'calories' | 'protein' | 'carbs' | 'fat' | 'balanced';
+  priority: 'high' | 'medium' | 'low';
+}
+
 class AIService {
   private readonly apiKey: string;
 
@@ -125,6 +146,42 @@ class AIService {
     }
   }
 
+  async getPersonalizedRecommendations(
+    currentNutrition: CurrentNutrition,
+    nutritionGoals: NutritionGoals,
+    availableIngredients?: string[]
+  ): Promise<PersonalizedRecommendation[]> {
+    try {
+      const recommendations: PersonalizedRecommendation[] = [];
+      
+      // Calculate remaining nutrition needs
+      const remaining = {
+        calories: Math.max(0, nutritionGoals.dailyCalories - currentNutrition.calories),
+        protein: Math.max(0, nutritionGoals.dailyProtein - currentNutrition.protein),
+        carbs: Math.max(0, nutritionGoals.dailyCarbs - currentNutrition.carbs),
+        fat: Math.max(0, nutritionGoals.dailyFat - currentNutrition.fat)
+      };
+
+      // Get recipe suggestions based on nutrition gaps
+      const recipes = this.generatePersonalizedRecipes(remaining, availableIngredients);
+      
+      for (const recipe of recipes) {
+        const recommendation = this.analyzeRecipeMatch(recipe, remaining, nutritionGoals);
+        recommendations.push(recommendation);
+      }
+
+      // Sort by priority and nutritional relevance
+      return recommendations.sort((a, b) => {
+        const priorityOrder = { high: 3, medium: 2, low: 1 };
+        return priorityOrder[b.priority] - priorityOrder[a.priority];
+      });
+      
+    } catch (error) {
+      console.error('Error generating personalized recommendations:', error);
+      throw new Error('Failed to generate personalized recommendations');
+    }
+  }
+
   // Placeholder parsing logic - replace with AI integration
   private parseMealDescription(description: string): MealAnalysis['foods'] {
     const foods: MealAnalysis['foods'] = [];
@@ -191,6 +248,190 @@ class AIService {
     }
 
     return suggestions;
+  }
+
+  private generatePersonalizedRecipes(
+    remaining: CurrentNutrition,
+    availableIngredients?: string[]
+  ): RecipeSuggestion[] {
+    const recipes: RecipeSuggestion[] = [];
+
+    // High protein needs
+    if (remaining.protein > 25) {
+      recipes.push({
+        name: 'Salmão Grelhado com Quinoa',
+        description: 'Rico em proteína de alta qualidade e aminoácidos essenciais',
+        ingredients: ['salmão', 'quinoa', 'brócolis', 'azeite', 'limão'],
+        estimatedCalories: 520,
+        estimatedProtein: 42,
+        estimatedCarbs: 35,
+        estimatedFat: 22,
+        cookingTime: 25,
+        difficulty: 'medium'
+      });
+
+      recipes.push({
+        name: 'Frango com Batata Doce',
+        description: 'Combinação perfeita para ganho de massa muscular',
+        ingredients: ['peito de frango', 'batata doce', 'espinafre', 'alho'],
+        estimatedCalories: 480,
+        estimatedProtein: 45,
+        estimatedCarbs: 42,
+        estimatedFat: 8,
+        cookingTime: 30,
+        difficulty: 'easy'
+      });
+    }
+
+    // High carb needs (energy)
+    if (remaining.carbs > 40) {
+      recipes.push({
+        name: 'Bowl de Açaí com Granola',
+        description: 'Energia rápida e duradoura para treinos intensos',
+        ingredients: ['açaí', 'banana', 'granola', 'mel', 'castanhas'],
+        estimatedCalories: 420,
+        estimatedProtein: 8,
+        estimatedCarbs: 65,
+        estimatedFat: 15,
+        cookingTime: 5,
+        difficulty: 'easy'
+      });
+
+      recipes.push({
+        name: 'Macarrão Integral com Vegetais',
+        description: 'Carboidratos complexos para energia sustentada',
+        ingredients: ['macarrão integral', 'abobrinha', 'tomate', 'manjericão'],
+        estimatedCalories: 380,
+        estimatedProtein: 14,
+        estimatedCarbs: 68,
+        estimatedFat: 6,
+        cookingTime: 20,
+        difficulty: 'easy'
+      });
+    }
+
+    // Low calorie needs (weight loss)
+    if (remaining.calories < 300) {
+      recipes.push({
+        name: 'Salada de Quinoa com Legumes',
+        description: 'Baixa caloria, alta saciedade e nutrientes',
+        ingredients: ['quinoa', 'pepino', 'tomate cereja', 'rúcula', 'limão'],
+        estimatedCalories: 220,
+        estimatedProtein: 8,
+        estimatedCarbs: 35,
+        estimatedFat: 6,
+        cookingTime: 15,
+        difficulty: 'easy'
+      });
+
+      recipes.push({
+        name: 'Peixe ao Vapor com Legumes',
+        description: 'Refeição leve e nutritiva para controle de peso',
+        ingredients: ['tilápia', 'brócolis', 'cenoura', 'temperos'],
+        estimatedCalories: 180,
+        estimatedProtein: 28,
+        estimatedCarbs: 8,
+        estimatedFat: 4,
+        cookingTime: 20,
+        difficulty: 'medium'
+      });
+    }
+
+    // Balanced nutrition
+    recipes.push({
+      name: 'Omelete com Vegetais',
+      description: 'Refeição balanceada para qualquer hora do dia',
+      ingredients: ['ovos', 'espinafre', 'tomate', 'queijo cottage'],
+      estimatedCalories: 320,
+      estimatedProtein: 24,
+      estimatedCarbs: 8,
+      estimatedFat: 22,
+      cookingTime: 10,
+      difficulty: 'easy'
+    });
+
+    recipes.push({
+      name: 'Bowl Brasileiro',
+      description: 'Combinação tradicional rica em fibras e proteínas',
+      ingredients: ['arroz integral', 'feijão preto', 'couve', 'abacate'],
+      estimatedCalories: 450,
+      estimatedProtein: 18,
+      estimatedCarbs: 55,
+      estimatedFat: 16,
+      cookingTime: 25,
+      difficulty: 'easy'
+    });
+
+    // Filter by available ingredients if provided
+    if (availableIngredients && availableIngredients.length > 0) {
+      return recipes.filter(recipe => {
+        return recipe.ingredients.some(ingredient => 
+          availableIngredients.some(available => 
+            ingredient.toLowerCase().includes(available.toLowerCase()) ||
+            available.toLowerCase().includes(ingredient.toLowerCase())
+          )
+        );
+      });
+    }
+
+    return recipes;
+  }
+
+  private analyzeRecipeMatch(
+    recipe: RecipeSuggestion,
+    remaining: CurrentNutrition,
+    goals: NutritionGoals
+  ): PersonalizedRecommendation {
+    const reasons: string[] = [];
+    let nutritionMatch: PersonalizedRecommendation['nutritionMatch'] = 'balanced';
+    let priority: PersonalizedRecommendation['priority'] = 'medium';
+
+    // Analyze protein needs
+    const proteinPercent = (remaining.protein / goals.dailyProtein) * 100;
+    if (proteinPercent > 30 && recipe.estimatedProtein > 20) {
+      reasons.push(`Rica em proteína (${recipe.estimatedProtein}g) para suas metas`);
+      nutritionMatch = 'protein';
+      priority = 'high';
+    }
+
+    // Analyze calorie needs
+    const caloriePercent = (remaining.calories / goals.dailyCalories) * 100;
+    if (caloriePercent > 40 && recipe.estimatedCalories > 400) {
+      reasons.push(`Fornece energia substancial (${recipe.estimatedCalories} kcal)`);
+      if (nutritionMatch === 'balanced') nutritionMatch = 'calories';
+      priority = 'high';
+    } else if (caloriePercent < 20 && recipe.estimatedCalories < 300) {
+      reasons.push(`Opção leve (${recipe.estimatedCalories} kcal) para controle calórico`);
+      if (nutritionMatch === 'balanced') nutritionMatch = 'calories';
+      priority = 'high';
+    }
+
+    // Analyze carb needs
+    const carbPercent = (remaining.carbs / goals.dailyCarbs) * 100;
+    if (carbPercent > 30 && recipe.estimatedCarbs > 30) {
+      reasons.push(`Boa fonte de carboidratos (${recipe.estimatedCarbs}g) para energia`);
+      if (nutritionMatch === 'balanced') nutritionMatch = 'carbs';
+    }
+
+    // Analyze fat needs
+    const fatPercent = (remaining.fat / goals.dailyFat) * 100;
+    if (fatPercent > 30 && recipe.estimatedFat > 15) {
+      reasons.push(`Contém gorduras saudáveis (${recipe.estimatedFat}g)`);
+      if (nutritionMatch === 'balanced') nutritionMatch = 'fat';
+    }
+
+    // Default reason if no specific matches
+    if (reasons.length === 0) {
+      reasons.push('Refeição balanceada que complementa seu plano nutricional');
+      priority = 'low';
+    }
+
+    return {
+      recipe,
+      reason: reasons.join('. '),
+      nutritionMatch,
+      priority
+    };
   }
 }
 
