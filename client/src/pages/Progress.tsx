@@ -8,6 +8,7 @@ import { Calendar, TrendingUp, Target, Activity, Clock, BarChart3, Zap, Download
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, RadialBarChart, RadialBar, Legend } from "recharts";
 import { ProgressRing } from "@/components/ProgressRing";
 import { useToast } from "@/hooks/use-toast";
+import { getNutritionalDay } from "@/lib/nutritionalDay";
 
 interface HourlyData {
   hour: number;
@@ -36,7 +37,7 @@ interface MonthlyData {
 }
 
 export default function Progress() {
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(getNutritionalDay());
   const [activeView, setActiveView] = useState("daily");
   const [currentTime, setCurrentTime] = useState(new Date());
 

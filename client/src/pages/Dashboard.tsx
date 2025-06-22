@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useToast } from "@/hooks/use-toast";
+import { getNutritionalDay } from "@/lib/nutritionalDay";
 
 export default function Dashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentNutritionalDay, setCurrentNutritionalDay] = useState(getNutritionalDay());
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -34,8 +36,8 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  // Get today's date
-  const today = format(new Date(), "yyyy-MM-dd");
+  // Get nutritional day (5AM-5AM cycle)
+  const today = getNutritionalDay();
   const todayFormatted = format(new Date(), "d MMM", { locale: ptBR });
 
   // Fetch today's meals

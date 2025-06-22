@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { CustomFoodModal } from "@/components/CustomFoodModal";
 import { FoodDropdownSearch } from "@/components/FoodDropdownSearch";
+import { getNutritionalDay } from "@/lib/nutritionalDay";
 
 interface FoodItem {
   id: number;
@@ -116,7 +117,7 @@ export default function AddMeal() {
         throw new Error("Selecione um tipo de refeição e adicione alimentos");
       }
 
-      const today = new Date().toISOString().split('T')[0];
+      const today = getNutritionalDay();
       
       // Create meal
       const mealResponse = await fetch("/api/meals", {
