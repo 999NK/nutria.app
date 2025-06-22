@@ -67,10 +67,11 @@ export default function MyFoods() {
       return response.json();
     },
     onSuccess: (data) => {
-      setGeneratedRecipes(data.recipes || []);
+      setGeneratedRecipes(data || []);
+      setIsGeneratingRecipes(false);
       toast({
         title: "Receitas geradas!",
-        description: `${data.recipes?.length || 0} receitas criadas com os ingredientes selecionados`,
+        description: `${data?.length || 0} receitas criadas com os ingredientes selecionados`,
       });
     },
     onError: (error) => {
@@ -340,8 +341,9 @@ export default function MyFoods() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="recipes">Receitas</TabsTrigger>
+          <TabsTrigger value="foods">Alimentos</TabsTrigger>
           <TabsTrigger value="ingredients">Ingredientes</TabsTrigger>
         </TabsList>
 
@@ -375,9 +377,9 @@ export default function MyFoods() {
                 </Card>
               ))}
             </div>
-          ) : recipes.length > 0 ? (
+          ) : (recipes as any[]).length > 0 ? (
             <div className="space-y-4">
-              {recipes.map((recipe: any) => (
+              {(recipes as any[]).map((recipe: any) => (
                 <Card key={recipe.id}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
@@ -497,6 +499,186 @@ export default function MyFoods() {
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
                   Clique em "Buscar" para obter sugestões baseadas nos seus ingredientes
                 </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="foods" className="space-y-4 mt-6">
+          {/* Food Selection for Recipe Generation */}
+          {selectedFoods.length > 0 && (
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-medium text-blue-900">
+                    {selectedFoods.length} ingredientes selecionados
+                  </h3>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleGenerateRecipes}
+                      disabled={selectedFoods.length < 2 || generateRecipesMutation.isPending}
+                      size="sm"
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {generateRecipesMutation.isPending ? "Gerando..." : "Gerar Receitas"}
+                    </Button>
+                    <Button
+                      onClick={clearSelection}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Limpar
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedFoods.map((food) => (
+                    <Badge key={food} variant="secondary" className="bg-blue-100 text-blue-800">
+                      {food}
+                      <Button
+                        onClick={() => handleFoodSelection(food)}
+                        variant="ghost"
+                        size="sm"
+                        className="ml-1 h-4 w-4 p-0 hover:bg-blue-200"
+                      >
+                        ×
+                      </Button>
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Generated Recipes Display */}
+          {generatedRecipes.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Receitas Geradas pela IA</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {generatedRecipes.map((recipe: any, index: number) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-lg">{recipe.name}</h4>
+                          <p className="text-sm text-gray-600 mb-2">{recipe.description}</p>
+                          <div className="flex items-center gap-4 mb-2">
+                            <Badge className={`${
+                              recipe.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
+                              recipe.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {recipe.difficulty === 'easy' ? 'Fácil' : 
+                               recipe.difficulty === 'medium' ? 'Médio' : 'Difícil'}
+                            </Badge>
+                            <span className="text-sm text-gray-500">{recipe.cookingTime} min</span>
+                          </div>
+                        </div>
+                        <Button 
+                          size="sm"
+                          onClick={() => {
+                            // Create recipe from AI suggestion
+                            createRecipeMutation.mutate({
+                              name: recipe.name,
+                              description: recipe.description,
+                              servings: 1,
+                            });
+                          }}
+                        >
+                          Salvar Receita
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-4 gap-4 text-center mb-3">
+                        <div>
+                          <div className="font-semibold text-orange-600">{recipe.estimatedCalories}</div>
+                          <div className="text-xs text-gray-500">kcal</div>
+                        </div>
+                        <div>
+                          <div className="font-semibold text-blue-600">{recipe.estimatedProtein}g</div>
+                          <div className="text-xs text-gray-500">proteína</div>
+                        </div>
+                        <div>
+                          <div className="font-semibold text-green-600">{recipe.estimatedCarbs}g</div>
+                          <div className="text-xs text-gray-500">carbos</div>
+                        </div>
+                        <div>
+                          <div className="font-semibold text-red-600">{recipe.estimatedFat}g</div>
+                          <div className="text-xs text-gray-500">gordura</div>
+                        </div>
+                      </div>
+                      <div>
+                        <h5 className="font-medium mb-1">Ingredientes:</h5>
+                        <div className="flex flex-wrap gap-1">
+                          {recipe.ingredients?.map((ingredient: string, i: number) => (
+                            <Badge key={i} variant="outline" className="text-xs">
+                              {ingredient}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* All Foods List with Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Selecionar Alimentos para Receitas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(allFoods as any[]).length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  Nenhum alimento cadastrado ainda. Adicione seu primeiro alimento personalizado!
+                </p>
+              ) : (
+                <div className="grid gap-3">
+                  {allFoods.map((food: any) => (
+                    <div 
+                      key={food.id} 
+                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                        selectedFoods.includes(food.name) 
+                          ? 'border-blue-500 bg-blue-50' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => handleFoodSelection(food.name)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedFoods.includes(food.name)}
+                            onChange={() => handleFoodSelection(food.name)}
+                            className="rounded border-gray-300"
+                          />
+                          <div className="flex-1">
+                            <h4 className="font-medium">{food.name}</h4>
+                            {food.brand && (
+                              <p className="text-sm text-gray-600">{food.brand}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="text-orange-600 font-medium">
+                            {food.caloriesPer100g} kcal/100g
+                          </span>
+                          {food.isCustom && (
+                            <Badge variant="secondary">Personalizado</Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 text-xs text-gray-500 mt-2 ml-6">
+                        <span>Prot: {food.proteinPer100g}g</span>
+                        <span>Carbs: {food.carbsPer100g}g</span>
+                        <span>Gord: {food.fatPer100g}g</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
