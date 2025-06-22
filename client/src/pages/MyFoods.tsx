@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -251,6 +251,13 @@ export default function MyFoods() {
     setIsGeneratingRecipes(true);
     generateRecipesMutation.mutate(selectedFoods);
   };
+
+  // Update the effect to handle mutation completion
+  useEffect(() => {
+    if (!generateRecipesMutation.isPending) {
+      setIsGeneratingRecipes(false);
+    }
+  }, [generateRecipesMutation.isPending]);
 
   const clearSelection = () => {
     setSelectedFoods([]);
@@ -637,7 +644,7 @@ export default function MyFoods() {
                 </p>
               ) : (
                 <div className="grid gap-3">
-                  {allFoods.map((food: any) => (
+                  {(allFoods as any[]).map((food: any) => (
                     <div 
                       key={food.id} 
                       className={`border rounded-lg p-3 cursor-pointer transition-colors ${
@@ -731,9 +738,9 @@ export default function MyFoods() {
               <CardTitle>Alimentos Personalizados</CardTitle>
             </CardHeader>
             <CardContent>
-              {customFoods.length > 0 ? (
+              {(allFoods as any[]).filter((food: any) => food.isCustom).length > 0 ? (
                 <div className="space-y-2">
-                  {customFoods.map((food: any) => (
+                  {(allFoods as any[]).filter((food: any) => food.isCustom).map((food: any) => (
                     <div key={food.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                       <div>
                         <p className="font-medium">{food.name}</p>
