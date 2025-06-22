@@ -57,11 +57,11 @@ export default function MyFoods() {
   // Generate recipes with AI
   const generateRecipesMutation = useMutation({
     mutationFn: async (selectedIngredients: string[]) => {
-      const response = await fetch("/api/ai/generate-recipes", {
+      const response = await fetch("/api/ai/suggest-recipes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ ingredients: selectedIngredients }),
+        body: JSON.stringify({ availableIngredients: selectedIngredients }),
       });
       if (!response.ok) throw new Error("Failed to generate recipes");
       return response.json();
@@ -226,6 +226,34 @@ export default function MyFoods() {
       setAvailableIngredients(prev => [...prev, newIngredient.trim()]);
       setNewIngredient("");
     }
+  };
+
+  // Handler functions for food selection and recipe generation
+  const handleFoodSelection = (foodName: string) => {
+    setSelectedFoods(prev => 
+      prev.includes(foodName) 
+        ? prev.filter(name => name !== foodName)
+        : [...prev, foodName]
+    );
+  };
+
+  const handleGenerateRecipes = () => {
+    if (selectedFoods.length < 2) {
+      toast({
+        title: "Ingredientes insuficientes",
+        description: "Selecione pelo menos 2 ingredientes para gerar receitas",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsGeneratingRecipes(true);
+    generateRecipesMutation.mutate(selectedFoods);
+  };
+
+  const clearSelection = () => {
+    setSelectedFoods([]);
+    setGeneratedRecipes([]);
   };
 
   const removeIngredient = (ingredient: string) => {
