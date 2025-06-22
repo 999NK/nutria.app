@@ -40,13 +40,21 @@ export default function Progress() {
   const [selectedDate, setSelectedDate] = useState(getNutritionalDay());
   const [activeView, setActiveView] = useState("daily");
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentNutritionalDay, setCurrentNutritionalDay] = useState(getNutritionalDay());
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
+      
+      // Check for nutritional day changes
+      const newNutritionalDay = getNutritionalDay();
+      if (newNutritionalDay !== currentNutritionalDay) {
+        setCurrentNutritionalDay(newNutritionalDay);
+        setSelectedDate(newNutritionalDay);
+      }
     }, 60000);
     return () => clearInterval(timer);
-  }, []);
+  }, [currentNutritionalDay]);
 
   const { data: user } = useQuery({
     queryKey: ['/api/auth/user']

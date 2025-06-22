@@ -36,8 +36,29 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
+  // Check for nutritional day changes and refresh data
+  useEffect(() => {
+    const checkNutritionalDay = () => {
+      const newNutritionalDay = getNutritionalDay();
+      if (newNutritionalDay !== currentNutritionalDay) {
+        setCurrentNutritionalDay(newNutritionalDay);
+        // Invalidate all queries to refresh data for the new day
+        queryClient.invalidateQueries({ queryKey: ["/api/meals"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/nutrition/daily"] });
+        toast({
+          title: "Novo dia nutricional",
+          description: "Os dados foram atualizados para o novo dia (5h às 5h)",
+        });
+      }
+    };
+
+    // Check every minute for nutritional day changes
+    const interval = setInterval(checkNutritionalDay, 60000);
+    return () => clearInterval(interval);
+  }, [currentNutritionalDay, queryClient, toast]);
+
   // Get nutritional day (5AM-5AM cycle)
-  const today = getNutritionalDay();
+  const today = currentNutritionalDay;
   const todayFormatted = format(new Date(), "d MMM", { locale: ptBR });
 
   // Fetch today's meals
