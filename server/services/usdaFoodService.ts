@@ -149,7 +149,9 @@ class USDAFoodService {
     'chocolate': 'chocolate',
     'bolo': 'cake',
     'sorvete': 'ice cream',
-    'doce': 'candy',
+    'pudim': 'pudding',
+    'brigadeiro': 'chocolate truffle',
+    'beijinho': 'coconut candy',
     
     // Bebidas
     'água': 'water',
@@ -159,18 +161,33 @@ class USDAFoodService {
     'refrigerante': 'soda',
     'cerveja': 'beer',
     'vinho': 'wine',
+    'cachaça': 'cachaca',
     
-    // Temperos
+    // Temperos e Ervas
     'sal': 'salt',
     'pimenta': 'pepper',
-    'açafrão': 'turmeric',
-    'canela': 'cinnamon',
-    'orégano': 'oregano',
+    'oregano': 'oregano',
     'manjericão': 'basil',
     'salsa': 'parsley',
     'coentro': 'cilantro',
+    'tomilho': 'thyme',
     'alecrim': 'rosemary',
-    'tomilho': 'thyme'
+    'canela': 'cinnamon',
+    'gengibre': 'ginger',
+    
+    // Pratos Brasileiros (aproximações)
+    'farofa': 'breadcrumbs',
+    'tapioca': 'tapioca',
+    'açaí': 'acai',
+    'guaraná': 'guarana',
+    'coxinha': 'chicken croquette',
+    'pastel': 'pastry',
+    'pão de açúcar': 'sugar bread',
+    'mandioca': 'cassava',
+    'inhame': 'yam',
+    'batata doce': 'sweet potato',
+    'doce': 'candy',
+    'açafrão': 'turmeric'
   };
 
   constructor() {

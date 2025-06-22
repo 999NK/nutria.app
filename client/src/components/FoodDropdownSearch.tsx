@@ -77,7 +77,7 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
   // Manual search function
   const performSearch = async (query: string) => {
     const trimmedQuery = query?.trim() || "";
-    
+
     if (!trimmedQuery || trimmedQuery.length < 3) {
       setFoods([]);
       setUsdaFoods([]);
@@ -146,7 +146,7 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
     };
 
     onAddFood(foodWithNutrition);
-    
+
     // Reset form
     setSelectedFood(null);
     setSearchQuery("");
@@ -182,12 +182,17 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
                     setHasUserInteracted(true);
                   }
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    performSearch(searchQuery);
+                  }
+                }}
               />
               <CommandList>
                 <CommandEmpty>
                   {isLoading ? "Buscando..." : "Nenhum alimento encontrado."}
                 </CommandEmpty>
-                
+
                 {allFoods.length > 0 && (
                   <CommandGroup heading="Alimentos">
                     {allFoods.slice(0, 10).map((food, index) => (
@@ -311,3 +316,4 @@ export function FoodDropdownSearch({ onAddFood }: FoodDropdownSearchProps) {
     </div>
   );
 }
+

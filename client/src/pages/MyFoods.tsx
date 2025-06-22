@@ -17,12 +17,15 @@ export default function MyFoods() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [activeTab, setActiveTab] = useState("recipes");
+  const [activeTab, setActiveTab] = useState("foods");
   const [showAddRecipe, setShowAddRecipe] = useState(false);
   const [recipeName, setRecipeName] = useState("");
   const [recipeDescription, setRecipeDescription] = useState("");
   const [availableIngredients, setAvailableIngredients] = useState<string[]>([]);
   const [newIngredient, setNewIngredient] = useState("");
+  const [selectedFoods, setSelectedFoods] = useState<string[]>([]);
+  const [generatedRecipes, setGeneratedRecipes] = useState<any[]>([]);
+  const [isGeneratingRecipes, setIsGeneratingRecipes] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -45,10 +48,49 @@ export default function MyFoods() {
     enabled: isAuthenticated,
   });
 
-  // Fetch custom foods (ingredients)
-  const { data: customFoods = [] } = useQuery({
-    queryKey: ["/api/foods", { custom: true }],
+  // Fetch all foods (both custom and USDA)
+  const { data: allFoods = [] } = useQuery({
+    queryKey: ["/api/foods"],
     enabled: isAuthenticated,
+  });
+
+  // Generate recipes with AI
+  const generateRecipesMutation = useMutation({
+    mutationFn: async (selectedIngredients: string[]) => {
+      const response = await fetch("/api/ai/generate-recipes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ ingredients: selectedIngredients }),
+      });
+      if (!response.ok) throw new Error("Failed to generate recipes");
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setGeneratedRecipes(data.recipes || []);
+      toast({
+        title: "Receitas geradas!",
+        description: `${data.recipes?.length || 0} receitas criadas com os ingredientes selecionados`,
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Não autorizado",
+          description: "Você precisa fazer login novamente...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Erro",
+        description: "Não foi possível gerar as receitas",
+        variant: "destructive",
+      });
+    },
   });
 
   // Create recipe mutation
