@@ -39,7 +39,37 @@ function getNutritionalDayRange(dateString: string): { start: Date, end: Date } 
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupAuth(app);
+  if (process.env.LOCAL_DEV_MODE === 'true') {
+    // Modo desenvolvimento local - cria usuário automaticamente
+    app.use(async (req: any, res, next) => {
+      if (!req.user) {
+        req.user = {
+          claims: {
+            sub: process.env.LOCAL_DEV_USER_ID || 'dev-user-123',
+            email: 'dev@local.com',
+            first_name: 'Dev',
+            last_name: 'User'
+          }
+        };
+        
+        // Garante que o usuário existe no banco
+        try {
+          await storage.upsertUser({
+            id: req.user.claims.sub,
+            email: req.user.claims.email,
+            firstName: req.user.claims.first_name,
+            lastName: req.user.claims.last_name,
+            profileImageUrl: null
+          });
+        } catch (error) {
+          console.error('Erro ao criar usuário de desenvolvimento:', error);
+        }
+      }
+      next();
+    });
+  } else {
+    await setupAuth(app);
+  }
 
   // Initialize default meal types
   const initializeMealTypes = async () => {
@@ -66,8 +96,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   await initializeMealTypes();
 
+  // Middleware simplificado para desenvolvimento local
+  const localAuthMiddleware = (req: any, res: any, next: any) => {
+    if (process.env.LOCAL_DEV_MODE === 'true') {
+      // Para desenvolvimento local, sempre permitir acesso
+      next();
+    } else {
+      // Para produção, usar autenticação Replit
+      isAuthenticated(req, res, next);
+    }
+  };
+
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -79,7 +120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User routes
-  app.patch('/api/user/goals', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/user/goals', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const updateSchema = z.object({
@@ -135,7 +176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add USDA food to user's foods
-  app.post('/api/foods/from-usda', isAuthenticated, async (req: any, res) => {
+  app.post('/api/foods/from-usda', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { usdaFood } = req.body;
@@ -164,7 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/foods', isAuthenticated, async (req: any, res) => {
+  app.post('/api/foods', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const foodData = insertFoodSchema.parse({ ...req.body, userId });
