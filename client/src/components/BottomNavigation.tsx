@@ -1,16 +1,26 @@
 import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
 
 export default function BottomNavigation() {
   const [location, setLocation] = useLocation();
+  const [forceUpdate, setForceUpdate] = useState(0);
+
+  // Force re-render every 2 seconds to overcome cache issues
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setForceUpdate(prev => prev + 1);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Force re-render with unique timestamp
-  const timestamp = Date.now() + Math.random();
+  const timestamp = Date.now() + Math.random() + forceUpdate;
 
   const navItems = [
     { path: "/", icon: "home", label: "Início" },
     { path: "/ai-chat", icon: "robot", label: "IA Chat" },
     { path: "/my-plan", icon: "calendar", label: "Meu Plano" },
-    { path: "/progress", icon: "chart-bar", label: "Progresso2" },
+    { path: "/progress", icon: "chart-bar", label: "Progresso2 ATUALIZADO" },
     { path: "/profile", icon: "user", label: "Perfil" },
   ];
 
