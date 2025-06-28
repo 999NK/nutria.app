@@ -23,7 +23,7 @@ export default function BottomNavigation() {
       <div className="grid grid-cols-5 h-16">
         {navItems.map((item) => (
           <button
-            key={item.path}
+            key={`${item.path}-${timestamp}`}
             className={`flex flex-col items-center justify-center transition-colors ${
               isActive(item.path)
                 ? "text-primary"
