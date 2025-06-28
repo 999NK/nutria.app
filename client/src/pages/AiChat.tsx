@@ -1,19 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Brain, 
-  Send, 
-  MessageSquare, 
-  Lightbulb,
-  Sparkles,
-  Bell
-} from "lucide-react";
+import { Brain, Send } from "lucide-react";
 
 interface Message {
   id: string;
@@ -29,17 +19,13 @@ export default function AiChat() {
       id: '1',
       content: `Olá! Sou seu assistente nutricional com IA. Posso ajudar você com dúvidas sobre alimentação, sugestões de substituições, análise de refeições e muito mais.
 
-💡 **Dicas úteis:**
-• Como posso melhorar minha alimentação? - Foque em alimentos naturais, mantenha horários regulares e hidrate-se bem
-• Quantas refeições por dia? - Recomendo 5-6 refeições pequenas: café da manhã, lanche, almoço, lanche da tarde, jantar e ceia
-• Como controlar compulsão alimentar? - Mantenha horários regulares, pratique mindfulness e identifique gatilhos emocionais
-
 Como posso ajudar hoje?`,
       role: 'assistant',
       timestamp: new Date(),
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -50,90 +36,8 @@ Como posso ajudar hoje?`,
     scrollToBottom();
   }, [messages]);
 
-  // No authentication check needed for local development
-
-  const sendMessageMutation = useMutation({
-    mutationFn: async (message: string) => {
-      const response = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`${response.status}: ${response.statusText}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: (data: any) => {
-      // Split long responses into multiple messages
-      const response = data.response;
-      const maxLength = 300; // Maximum characters per message
-      
-      if (response.length <= maxLength) {
-        const assistantMessage: Message = {
-          id: Date.now().toString(),
-          content: response,
-          role: 'assistant',
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-      } else {
-        // Split by sentences, respecting maxLength
-        const sentences = response.split(/[.!?]\s+/).filter((s: string) => s.trim());
-        let currentMessage = '';
-        let messageCount = 0;
-        
-        sentences.forEach((sentence: string, index: number) => {
-          const sentenceWithPunctuation = sentence + (index < sentences.length - 1 ? '.' : '');
-          
-          if (currentMessage.length + sentenceWithPunctuation.length + 1 > maxLength && currentMessage) {
-            // Send current message
-            setTimeout(() => {
-              const assistantMessage: Message = {
-                id: `${Date.now()}-${messageCount}`,
-                content: currentMessage.trim(),
-                role: 'assistant',
-                timestamp: new Date(),
-              };
-              setMessages(prev => [...prev, assistantMessage]);
-            }, messageCount * 1500); // Delay each message by 1.5 seconds
-            
-            messageCount++;
-            currentMessage = sentenceWithPunctuation;
-          } else {
-            currentMessage += (currentMessage ? ' ' : '') + sentenceWithPunctuation;
-          }
-          
-          // Send last message
-          if (index === sentences.length - 1 && currentMessage) {
-            setTimeout(() => {
-              const assistantMessage: Message = {
-                id: `${Date.now()}-${messageCount}`,
-                content: currentMessage.trim(),
-                role: 'assistant',
-                timestamp: new Date(),
-              };
-              setMessages(prev => [...prev, assistantMessage]);
-            }, messageCount * 1500);
-          }
-        });
-      }
-    },
-    onError: (error) => {
-      toast({
-        title: "Erro na conversa",
-        description: "Não foi possível obter resposta da IA. Tente novamente.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -143,8 +47,42 @@ Como posso ajudar hoje?`,
     };
 
     setMessages(prev => [...prev, userMessage]);
-    sendMessageMutation.mutate(inputMessage);
+    const currentMessage = inputMessage;
     setInputMessage('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: currentMessage }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: data.response,
+        role: 'assistant',
+        timestamp: new Date(),
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      toast({
+        title: "Erro na conversa",
+        description: "Não foi possível obter resposta da IA. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -161,8 +99,6 @@ Como posso ajudar hoje?`,
     "Quais são os melhores lanches saudáveis?",
   ];
 
-  // Component loads directly without authentication checks
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col pb-32 lg:pb-0">
       {/* Fixed Header - Mobile */}
@@ -170,16 +106,13 @@ Como posso ajudar hoje?`,
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">N</span>
+              <Brain className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900 dark:text-white">NutrIA</h1>
-              <p className="text-xs text-gray-600 dark:text-gray-400">ter., 24 de junho</p>
+              <h1 className="text-lg font-bold text-gray-900 dark:text-white">IA Chat</h1>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Assistente Nutricional</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="w-8 h-8">
-            <Bell className="w-4 h-4" />
-          </Button>
         </div>
       </div>
 
@@ -232,7 +165,7 @@ Como posso ajudar hoje?`,
                   </div>
                 </div>
               ))}
-              {sendMessageMutation.isPending && (
+              {isLoading && (
                 <div className="flex justify-start mb-4">
                   <div className="flex space-x-3 max-w-[85%] lg:max-w-2xl">
                     <Avatar className="w-8 h-8 flex-shrink-0">
@@ -262,11 +195,11 @@ Como posso ajudar hoje?`,
                   onKeyPress={handleKeyPress}
                   placeholder="Digite sua pergunta sobre nutrição..."
                   className="flex-1 min-h-[44px] max-h-32 resize-none border-gray-300 dark:border-gray-600 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  disabled={sendMessageMutation.isPending}
+                  disabled={isLoading}
                 />
                 <Button
                   onClick={handleSendMessage}
-                  disabled={!inputMessage.trim() || sendMessageMutation.isPending}
+                  disabled={!inputMessage.trim() || isLoading}
                   size="icon"
                   className="h-11 w-11 rounded-full bg-green-500 hover:bg-green-600 disabled:opacity-50"
                 >
@@ -277,53 +210,31 @@ Como posso ajudar hoje?`,
           </div>
 
           {/* Sidebar with suggestions - Desktop Only */}
-          <div className="hidden lg:block w-80 border-l border-border p-4 space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center">
-                  <Lightbulb className="h-4 w-4 mr-2" />
-                  Perguntas Sugeridas
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {suggestedQuestions.map((question, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-left justify-start h-auto py-3 px-3 whitespace-normal"
-                    onClick={() => {
-                      setInputMessage(question);
-                      setTimeout(() => {
-                        handleSendMessage();
-                      }, 100);
-                    }}
-                    disabled={sendMessageMutation.isPending}
-                  >
-                    <MessageSquare className="h-3 w-3 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-xs">{question}</span>
-                  </Button>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center">
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Recursos Disponíveis
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-xs text-muted-foreground space-y-2">
-                  <p>• Análise nutricional de refeições</p>
-                  <p>• Sugestões de substituições</p>
-                  <p>• Receitas personalizadas</p>
-                  <p>• Dicas de alimentação saudável</p>
-                  <p>• Orientações sobre macronutrientes</p>
+          <div className="hidden lg:block w-80 border-l border-border p-4">
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-sm mb-3">Perguntas Sugeridas</h3>
+                <div className="space-y-2">
+                  {suggestedQuestions.map((question, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-left justify-start h-auto py-3 px-3 whitespace-normal"
+                      onClick={() => {
+                        setInputMessage(question);
+                        setTimeout(() => {
+                          handleSendMessage();
+                        }, 100);
+                      }}
+                      disabled={isLoading}
+                    >
+                      <span className="text-xs">{question}</span>
+                    </Button>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -337,11 +248,11 @@ Como posso ajudar hoje?`,
             onKeyPress={handleKeyPress}
             placeholder="Digite sua pergunta..."
             className="flex-1 min-h-[44px] max-h-24 resize-none border-gray-300 dark:border-gray-600 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            disabled={sendMessageMutation.isPending}
+            disabled={isLoading}
           />
           <Button
             onClick={handleSendMessage}
-            disabled={!inputMessage.trim() || sendMessageMutation.isPending}
+            disabled={!inputMessage.trim() || isLoading}
             size="icon"
             className="h-11 w-11 rounded-full bg-green-500 hover:bg-green-600 disabled:opacity-50 flex-shrink-0"
           >
