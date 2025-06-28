@@ -8,7 +8,7 @@ export default function BottomNavigation() {
   // Force re-render every 2 seconds to overcome cache issues
   useEffect(() => {
     const interval = setInterval(() => {
-      setForceUpdate(prev => prev + 1);
+      setForceUpdate((prev) => prev + 1);
     }, 2000);
     return () => clearInterval(interval);
   }, []);
@@ -20,7 +20,7 @@ export default function BottomNavigation() {
     { path: "/", icon: "home", label: "Início" },
     { path: "/ai-chat", icon: "robot", label: "IA Chat" },
     { path: "/my-plan", icon: "calendar", label: "Meu Plano" },
-    { path: "/progress", icon: "chart-bar", label: "Progresso2 ATUALIZADO" },
+    { path: "/progress", icon: "chart-bar", label: "Progresso3" },
     { path: "/profile", icon: "user", label: "Perfil" },
   ];
 

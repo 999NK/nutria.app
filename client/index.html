@@ -86,10 +86,34 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <meta name="cache-bust" content="20250628-053300" />
-    <meta name="timestamp" content="1735354380000" />
+    <meta name="cache-bust" content="20250628-055700" />
+    <meta name="timestamp" content="1735354620000" />
   </head>
   <body>
+    <script>
+      // Force aggressive cache clearing
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          names.forEach(function(name) {
+            caches.delete(name);
+          });
+        });
+      }
+      
+      // Clear local storage selectively (keep auth)
+      const authKeys = ['darkMode'];
+      const toKeep = {};
+      authKeys.forEach(key => {
+        if (localStorage.getItem(key)) {
+          toKeep[key] = localStorage.getItem(key);
+        }
+      });
+      localStorage.clear();
+      sessionStorage.clear();
+      Object.keys(toKeep).forEach(key => {
+        localStorage.setItem(key, toKeep[key]);
+      });
+    </script>
     <div id="root">
       <!-- Loading fallback -->
       <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; flex-direction: column;">
@@ -102,7 +126,7 @@
       </div>
     </div>
     
-    <script type="module" src="/src/main.tsx?v=20250628023620"></script>
+    <script type="module" src="/src/main.tsx?v=20250628055700"></script>
 
     
     <!-- Service Worker Registration for PWA -->

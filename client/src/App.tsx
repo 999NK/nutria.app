@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -18,6 +18,7 @@ import { InstallPrompt } from "@/components/InstallPrompt";
 
 function AppRouter() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [location] = useLocation();
 
   if (isLoading) {
     return (
@@ -32,6 +33,7 @@ function AppRouter() {
     );
   }
 
+  // Handle authentication routes
   if (!isAuthenticated) {
     return <Landing />;
   }
@@ -40,17 +42,29 @@ function AppRouter() {
     return <Onboarding />;
   }
 
+  // Route to specific components based on location
+  const renderPage = () => {
+    switch (location) {
+      case '/':
+        return <Dashboard />;
+      case '/add-meal':
+        return <AddMeal />;
+      case '/my-plan':
+        return <MyPlan />;
+      case '/progress':
+        return <Progress />;
+      case '/profile':
+        return <Profile />;
+      case '/ai-chat':
+        return <AiChat />;
+      default:
+        return <NotFound />;
+    }
+  };
+
   return (
     <Layout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/add-meal" component={AddMeal} />
-        <Route path="/my-plan" component={MyPlan} />
-        <Route path="/progress" component={Progress} />
-        <Route path="/profile" component={Profile} />
-        <Route path="/ai-chat" component={AiChat} />
-        <Route component={NotFound} />
-      </Switch>
+      {renderPage()}
     </Layout>
   );
 }
