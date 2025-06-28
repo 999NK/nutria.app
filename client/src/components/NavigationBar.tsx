@@ -1,16 +1,11 @@
 import { useLocation } from "wouter";
-import { useState, useEffect } from "react";
 
-export default function BottomNavigation() {
+// NOVO COMPONENTE: NavigationBar (substituindo BottomNavigation)
+// Cache buster: forçar carregamento completo sem cache
+export default function NavigationBar() {
   const [location, setLocation] = useLocation();
-  const [renderKey, setRenderKey] = useState(0);
 
-  // Force re-render on mount to bypass cache
-  useEffect(() => {
-    setRenderKey(Date.now());
-  }, []);
-
-  const navItems = [
+  const navigationItems = [
     { path: "/", icon: "home", label: "Início" },
     { path: "/ai-chat", icon: "robot", label: "IA Chat" },
     { path: "/my-plan", icon: "calendar", label: "Meu Plano" },
@@ -25,9 +20,9 @@ export default function BottomNavigation() {
   return (
     <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600 z-50">
       <div className="grid grid-cols-5 h-16">
-        {navItems.map((item) => (
+        {navigationItems.map((item) => (
           <button
-            key={`${item.path}-${renderKey}`}
+            key={item.path}
             className={`flex flex-col items-center justify-center transition-colors ${
               isActive(item.path)
                 ? "text-primary"
