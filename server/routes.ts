@@ -38,7 +38,14 @@ function getNutritionalDayRange(dateString: string): { start: Date, end: Date } 
 }
 
 function generateNutritionResponse(message: string): string {
-  const lowerMessage = message.toLowerCase();
+  const lowerMessage = message.toLowerCase().trim();
+  
+  // Greetings and casual conversation
+  if (lowerMessage.includes('oi') || lowerMessage.includes('olá') || lowerMessage.includes('boa tarde') || 
+      lowerMessage.includes('bom dia') || lowerMessage.includes('boa noite') || lowerMessage.includes('e aí') ||
+      lowerMessage === 'oi' || lowerMessage === 'olá' || lowerMessage === 'hello' || lowerMessage === 'hi') {
+    return `Olá! Como vai? Sou seu assistente nutricional e estou aqui para ajudar com suas dúvidas sobre alimentação saudável. No que posso te auxiliar hoje? Posso sugerir receitas, explicar sobre nutrientes, dar dicas de substituições ou qualquer outra questão nutricional!`;
+  }
   
   // Protein-related questions
   if (lowerMessage.includes('proteína') || lowerMessage.includes('protein')) {
