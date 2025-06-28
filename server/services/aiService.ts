@@ -48,6 +48,25 @@ export interface PersonalizedRecommendation {
   priority: 'high' | 'medium' | 'low';
 }
 
+export interface MealPlanGeneration {
+  name: string;
+  description: string;
+  dailyCalories: number;
+  macroCarbs: number;
+  macroProtein: number;
+  macroFat: number;
+  meals: {
+    [day: string]: {
+      [mealType: string]: {
+        name: string;
+        description: string;
+        calories: number;
+        ingredients?: string[];
+      };
+    };
+  };
+}
+
 class AIService {
   private readonly geminiApiKey: string;
   private readonly baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
@@ -244,6 +263,110 @@ class AIService {
     } catch (error) {
       console.error('Error generating personalized recommendations:', error);
       throw new Error('Failed to generate personalized recommendations');
+    }
+  }
+
+  async generateMealPlan(description: string): Promise<MealPlanGeneration> {
+    try {
+      const prompt = `Você é um nutricionista especializado. Crie um plano alimentar semanal COMPLETO em português brasileiro baseado na descrição: "${description}".
+
+FORMATO EXATO DA RESPOSTA (JSON válido):
+{
+  "name": "Nome do Plano",
+  "description": "Descrição detalhada do plano",
+  "dailyCalories": 2000,
+  "macroCarbs": 50,
+  "macroProtein": 25,
+  "macroFat": 25,
+  "meals": {
+    "segunda": {
+      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
+      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
+      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
+      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
+      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
+    },
+    "terca": {
+      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
+      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
+      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
+      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
+      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
+    },
+    "quarta": {
+      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
+      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
+      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
+      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
+      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
+    },
+    "quinta": {
+      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
+      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
+      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
+      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
+      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
+    },
+    "sexta": {
+      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
+      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
+      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
+      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
+      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
+    },
+    "sabado": {
+      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
+      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
+      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
+      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
+      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
+    },
+    "domingo": {
+      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
+      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
+      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
+      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
+      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
+    }
+  }
+}
+
+Use alimentos brasileiros e considere restrições alimentares mencionadas. Retorne APENAS o JSON válido.`;
+
+      const response = await fetch(`${this.baseUrl}/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!content) {
+        throw new Error('No content received from Gemini API');
+      }
+
+      // Parse JSON from the response
+      const jsonStart = content.indexOf('{');
+      const jsonEnd = content.lastIndexOf('}') + 1;
+      const jsonContent = content.substring(jsonStart, jsonEnd);
+      
+      return JSON.parse(jsonContent);
+    } catch (error) {
+      console.error('Error generating meal plan with AI:', error);
+      throw new Error('Failed to generate meal plan');
     }
   }
 
