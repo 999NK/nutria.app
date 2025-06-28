@@ -119,22 +119,18 @@ export default function Profile() {
   };
 
   const toggleDarkMode = () => {
-    document.documentElement.classList.toggle('dark');
     const isDark = document.documentElement.classList.contains('dark');
-    localStorage.setItem('darkMode', isDark.toString());
+    const newTheme = isDark ? 'light' : 'dark';
+    
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(newTheme);
+    localStorage.setItem('nutria-ui-theme', newTheme);
+    
     toast({
-      title: isDark ? "Modo escuro ativado" : "Modo claro ativado",
+      title: newTheme === 'dark' ? "Modo escuro ativado" : "Modo claro ativado",
       description: "Sua preferência foi salva",
     });
   };
-
-  // Initialize dark mode from localStorage
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem('darkMode');
-    if (savedDarkMode === 'true') {
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
 
   const formatWeight = (weight: string | null | undefined) => {
     if (!weight) return '0';

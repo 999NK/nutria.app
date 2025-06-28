@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import NavigationBar from "./NavigationBar";
 
 interface LayoutProps {
@@ -6,13 +5,7 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  // Initialize dark mode from localStorage on app start
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem('darkMode');
-    if (savedDarkMode === 'true') {
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
