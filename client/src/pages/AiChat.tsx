@@ -1,14 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import { 
   Brain, 
   Send, 
@@ -26,7 +23,6 @@ interface Message {
 }
 
 export default function AiChat() {
-  const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -54,10 +50,7 @@ Como posso ajudar hoje?`,
     scrollToBottom();
   }, [messages]);
 
-  // Skip authentication redirect for local development
-  useEffect(() => {
-    // Authentication check disabled for local development
-  }, [isAuthenticated, isLoading, toast]);
+  // No authentication check needed for local development
 
   const sendMessageMutation = useMutation({
     mutationFn: async (message: string) => {
@@ -131,18 +124,6 @@ Como posso ajudar hoje?`,
       }
     },
     onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Sessão expirada",
-          description: "Faça login novamente para continuar.",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 2000);
-        return;
-      }
-      
       toast({
         title: "Erro na conversa",
         description: "Não foi possível obter resposta da IA. Tente novamente.",
@@ -180,16 +161,7 @@ Como posso ajudar hoje?`,
     "Quais são os melhores lanches saudáveis?",
   ];
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
+  // Component loads directly without authentication checks
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col pb-32 lg:pb-0">

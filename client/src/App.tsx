@@ -41,11 +41,11 @@ function Router() {
       ) : (
         <Layout>
           <Route path="/" component={Dashboard} />
-          <Route path="/add-meal" component={AddMeal} />
+          <Route path="/ai-chat" component={AiChat} />
           <Route path="/my-foods" component={MyFoods} />
           <Route path="/progress" component={Progress} />
           <Route path="/profile" component={Profile} />
-          <Route path="/ai-chat" component={AiChat} />
+          <Route path="/add-meal" component={AddMeal} />
         </Layout>
       )}
       <Route component={NotFound} />
