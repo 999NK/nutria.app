@@ -956,11 +956,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Description is required" });
       }
 
-      // First test a simple AI response
-      console.log("Testing simple AI response...");
-      const testResponse = await aiService.getChatResponse("Diga apenas 'funcionando' se você conseguir me responder.");
-      console.log("AI test response:", testResponse);
-
       // Generate meal plan using Gemini AI
       console.log("Calling AI service to generate meal plan...");
       const aiPlan = await aiService.generateMealPlan(description);

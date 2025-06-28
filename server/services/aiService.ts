@@ -355,79 +355,35 @@ Use exercícios apropriados para o nível e objetivos mencionados. Retorne APENA
 
   async generateMealPlan(description: string): Promise<MealPlanGeneration> {
     console.log("Starting meal plan generation with description:", description);
-    console.log("Using Gemini API key (first 10 chars):", this.geminiApiKey.substring(0, 10) + "...");
     
     try {
-      const prompt = `Você é um nutricionista especializado. Crie um plano alimentar semanal COMPLETO em português brasileiro baseado na descrição: "${description}".
+      const prompt = `Você é um nutricionista especializado. Crie um plano alimentar semanal baseado em: "${description}".
 
-FORMATO EXATO DA RESPOSTA (JSON válido):
+Responda com um JSON válido seguindo EXATAMENTE este formato:
 {
-  "name": "Nome do Plano",
-  "description": "Descrição detalhada do plano",
+  "name": "Plano Nutricional Personalizado",
+  "description": "Plano alimentar baseado nos seus objetivos",
   "dailyCalories": 2000,
   "macroCarbs": 50,
   "macroProtein": 25,
   "macroFat": 25,
   "meals": {
     "segunda": {
-      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
-      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
-      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
-      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
-      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
+      "breakfast": {"name": "Ovos mexidos com pão integral", "description": "2 ovos mexidos com 2 fatias de pão integral", "calories": 350},
+      "lunch": {"name": "Arroz, feijão e frango grelhado", "description": "Prato completo com salada", "calories": 550},
+      "dinner": {"name": "Peixe grelhado com legumes", "description": "Salmão com abobrinha e cenoura", "calories": 450}
     },
     "terca": {
-      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
-      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
-      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
-      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
-      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
-    },
-    "quarta": {
-      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
-      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
-      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
-      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
-      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
-    },
-    "quinta": {
-      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
-      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
-      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
-      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
-      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
-    },
-    "sexta": {
-      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
-      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
-      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
-      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
-      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
-    },
-    "sabado": {
-      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
-      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
-      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
-      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
-      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
-    },
-    "domingo": {
-      "breakfast": {"name": "Nome", "description": "Descrição", "calories": 400},
-      "lunch": {"name": "Nome", "description": "Descrição", "calories": 600},
-      "dinner": {"name": "Nome", "description": "Descrição", "calories": 500},
-      "snack1": {"name": "Nome", "description": "Descrição", "calories": 200},
-      "snack2": {"name": "Nome", "description": "Descrição", "calories": 300}
+      "breakfast": {"name": "Aveia com frutas", "description": "Aveia com banana e morango", "calories": 300},
+      "lunch": {"name": "Macarrão com molho de tomate", "description": "Massa integral com vegetais", "calories": 500},
+      "dinner": {"name": "Frango assado", "description": "Peito de frango com batata doce", "calories": 400}
     }
   }
 }
 
-Use alimentos brasileiros e considere restrições alimentares mencionadas. Retorne APENAS o JSON válido.`;
+Use apenas alimentos brasileiros comuns. Retorne SOMENTE o JSON, sem texto adicional.`;
 
-      console.log("Making request to Gemini API...");
-      const apiUrl = `${this.baseUrl}/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`;
-      console.log("API URL:", apiUrl.replace(this.geminiApiKey, 'HIDDEN_KEY'));
-
-      const response = await fetch(apiUrl, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -437,47 +393,49 @@ Use alimentos brasileiros e considere restrições alimentares mencionadas. Reto
             parts: [{
               text: prompt
             }]
-          }]
+          }],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 2000,
+          }
         })
       });
 
-      console.log("Gemini API response status:", response.status);
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Gemini API error response:", errorText);
-        throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+        console.error("Gemini API error:", errorText);
+        throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("Gemini API response received, parsing content...");
-      
       const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!content) {
-        console.error("No content in Gemini response:", JSON.stringify(data, null, 2));
-        throw new Error('No content received from Gemini API');
+        throw new Error('No content received from AI');
       }
 
-      console.log("Content received from Gemini:", content.substring(0, 200) + "...");
-
-      // Parse JSON from the response
-      const jsonStart = content.indexOf('{');
-      const jsonEnd = content.lastIndexOf('}') + 1;
-      const jsonContent = content.substring(jsonStart, jsonEnd);
+      // Clean and parse JSON
+      let cleanContent = content.trim();
+      if (cleanContent.startsWith('```json')) {
+        cleanContent = cleanContent.replace(/```json\s*/, '').replace(/```\s*$/, '');
+      }
       
-      console.log("Parsing JSON content...");
+      const jsonStart = cleanContent.indexOf('{');
+      const jsonEnd = cleanContent.lastIndexOf('}') + 1;
+      
+      if (jsonStart === -1 || jsonEnd === 0) {
+        throw new Error('No valid JSON found in response');
+      }
+      
+      const jsonContent = cleanContent.substring(jsonStart, jsonEnd);
       const parsedPlan = JSON.parse(jsonContent);
-      console.log("Meal plan parsed successfully:", parsedPlan.name);
       
+      console.log("Meal plan generated successfully:", parsedPlan.name);
       return parsedPlan;
+      
     } catch (error) {
-      console.error('Error generating meal plan with AI:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      if (error instanceof SyntaxError) {
-        console.error('JSON parsing error - invalid response format from Gemini');
-      }
-      throw new Error(`Failed to generate meal plan: ${errorMessage}`);
+      console.error('Error generating meal plan:', error);
+      throw new Error('Failed to generate meal plan');
     }
   }
 
