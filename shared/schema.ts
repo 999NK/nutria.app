@@ -147,7 +147,7 @@ export const mealPlans = pgTable("meal_plans", {
   userId: varchar("user_id").notNull().references(() => users.id),
   name: varchar("name").notNull(),
   description: text("description"),
-  meals: json("meals"), // JSON structure with daily meal plans
+  meals: jsonb("meals"), // JSON structure with daily meal plans
   dailyCalories: integer("daily_calories").default(0),
   macroCarbs: integer("macro_carbs").default(0),
   macroProtein: integer("macro_protein").default(0),
@@ -164,6 +164,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   recipes: many(recipes),
   mealTypes: many(mealTypes),
   dailyNutrition: many(dailyNutrition),
+  mealPlans: many(mealPlans),
 }));
 
 export const foodsRelations = relations(foods, ({ one, many }) => ({
@@ -200,6 +201,10 @@ export const recipeIngredientsRelations = relations(recipeIngredients, ({ one })
 
 export const dailyNutritionRelations = relations(dailyNutrition, ({ one }) => ({
   user: one(users, { fields: [dailyNutrition.userId], references: [users.id] }),
+}));
+
+export const mealPlansRelations = relations(mealPlans, ({ one }) => ({
+  user: one(users, { fields: [mealPlans.userId], references: [users.id] }),
 }));
 
 // Insert Schemas
@@ -241,6 +246,12 @@ export const insertDailyNutritionSchema = createInsertSchema(dailyNutrition).omi
   updatedAt: true,
 });
 
+export const insertMealPlanSchema = createInsertSchema(mealPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -258,3 +269,5 @@ export type RecipeIngredient = typeof recipeIngredients.$inferSelect;
 export type InsertRecipeIngredient = z.infer<typeof insertRecipeIngredientSchema>;
 export type DailyNutrition = typeof dailyNutrition.$inferSelect;
 export type InsertDailyNutrition = z.infer<typeof insertDailyNutritionSchema>;
+export type MealPlan = typeof mealPlans.$inferSelect;
+export type InsertMealPlan = z.infer<typeof insertMealPlanSchema>;
