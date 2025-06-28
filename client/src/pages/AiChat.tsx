@@ -3,25 +3,31 @@ import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { 
-  Brain, 
-  Send, 
-  MessageSquare, 
+import {
+  Brain,
+  Send,
+  MessageSquare,
   Lightbulb,
   Sparkles,
-  Bell
+  Bell,
 } from "lucide-react";
 
 interface Message {
   id: string;
   content: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   timestamp: Date;
 }
 
@@ -30,13 +36,13 @@ export default function AiChat() {
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: '1',
+      id: "1",
       content: `Olá! Sou seu assistente nutricional com IA. Posso ajudar você com dúvidas sobre alimentação, sugestões de substituições, análise de refeições e muito mais.`,
-      role: 'assistant',
+      role: "assistant",
       timestamp: new Date(),
-    }
+    },
   ]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -52,22 +58,23 @@ export default function AiChat() {
     if (isAuthenticated && messages.length === 1) {
       const introSequence = [
         "💡 Perguntas comuns:",
-        "• Como posso melhorar minha alimentação?",
-        "• Quantas refeições por dia?",
-        "• Como controlar compulsão alimentar?",
-        "Como posso ajudar hoje?"
+        "• Como posso melhorar minha alimentação? 🥕\n• Quantas refeições por dia? 🍽️\n• Como posso substituir o açúcar nas receitas? 🍎",
+        "Como posso ajudar hoje? 😄",
       ];
 
       introSequence.forEach((message, index) => {
-        setTimeout(() => {
-          const introMessage: Message = {
-            id: `intro-${index + 2}`,
-            content: message,
-            role: 'assistant',
-            timestamp: new Date(),
-          };
-          setMessages(prev => [...prev, introMessage]);
-        }, (index + 1) * 1500); // 1.5 seconds between each message
+        setTimeout(
+          () => {
+            const introMessage: Message = {
+              id: `intro-${index + 2}`,
+              content: message,
+              role: "assistant",
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, introMessage]);
+          },
+          (index + 1) * 500,
+        ); // 1.5 seconds between each message
       });
     }
   }, [isAuthenticated, messages.length]);
@@ -103,10 +110,10 @@ export default function AiChat() {
       const assistantMessage: Message = {
         id: Date.now().toString(),
         content: data.response,
-        role: 'assistant',
+        role: "assistant",
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -120,7 +127,7 @@ export default function AiChat() {
         }, 2000);
         return;
       }
-      
+
       toast({
         title: "Erro na conversa",
         description: "Não foi possível obter resposta da IA. Tente novamente.",
@@ -135,17 +142,17 @@ export default function AiChat() {
     const userMessage: Message = {
       id: Date.now().toString(),
       content: inputMessage,
-      role: 'user',
+      role: "user",
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     sendMessageMutation.mutate(inputMessage);
-    setInputMessage('');
+    setInputMessage("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -179,8 +186,12 @@ export default function AiChat() {
               <span className="text-white font-bold text-sm">N</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900 dark:text-white">NutrIA</h1>
-              <p className="text-xs text-gray-600 dark:text-gray-400">ter., 24 de junho</p>
+              <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                NutrIA
+              </h1>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                ter., 24 de junho
+              </p>
             </div>
           </div>
           <Button variant="ghost" size="icon" className="w-8 h-8">
@@ -198,7 +209,9 @@ export default function AiChat() {
                 <Brain className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">Assistente IA Nutricional</h2>
+                <h2 className="text-2xl font-bold text-foreground">
+                  Assistente IA Nutricional
+                </h2>
                 <p className="text-muted-foreground">
                   Tire suas dúvidas sobre nutrição e alimentação
                 </p>
@@ -215,24 +228,41 @@ export default function AiChat() {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} mb-4`}
                 >
-                  <div className={`flex space-x-3 max-w-[85%] lg:max-w-2xl ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                  <div
+                    className={`flex space-x-3 max-w-[85%] lg:max-w-2xl ${message.role === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
+                  >
                     <Avatar className="w-8 h-8 flex-shrink-0">
-                      <AvatarFallback className={message.role === 'assistant' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'}>
-                        {message.role === 'assistant' ? <Brain className="w-4 h-4" /> : 'U'}
+                      <AvatarFallback
+                        className={
+                          message.role === "assistant"
+                            ? "bg-green-500 text-white"
+                            : "bg-blue-500 text-white"
+                        }
+                      >
+                        {message.role === "assistant" ? (
+                          <Brain className="w-4 h-4" />
+                        ) : (
+                          "U"
+                        )}
                       </AvatarFallback>
                     </Avatar>
                     <div
                       className={`rounded-2xl px-4 py-3 break-words ${
-                        message.role === 'user'
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+                        message.role === "user"
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                        {message.content}
+                      </p>
                       <p className="text-xs opacity-70 mt-1">
-                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </p>
                     </div>
                   </div>
@@ -249,8 +279,14 @@ export default function AiChat() {
                     <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl px-4 py-3">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div
+                          className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.1s" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        ></div>
                       </div>
                     </div>
                   </div>
@@ -272,7 +308,9 @@ export default function AiChat() {
                 />
                 <Button
                   onClick={handleSendMessage}
-                  disabled={!inputMessage.trim() || sendMessageMutation.isPending}
+                  disabled={
+                    !inputMessage.trim() || sendMessageMutation.isPending
+                  }
                   size="icon"
                   className="h-11 w-11 rounded-full bg-green-500 hover:bg-green-600 disabled:opacity-50"
                 >
@@ -316,15 +354,24 @@ export default function AiChat() {
                 <div className="space-y-3 text-sm text-muted-foreground">
                   <div className="flex items-start space-x-2">
                     <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                    <p>Seja específico em suas perguntas para respostas mais precisas</p>
+                    <p>
+                      Seja específico em suas perguntas para respostas mais
+                      precisas
+                    </p>
                   </div>
                   <div className="flex items-start space-x-2">
                     <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                    <p>Posso ajudar com substituições alimentares e análise nutricional</p>
+                    <p>
+                      Posso ajudar com substituições alimentares e análise
+                      nutricional
+                    </p>
                   </div>
                   <div className="flex items-start space-x-2">
                     <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                    <p>Para orientações médicas específicas, consulte sempre um profissional</p>
+                    <p>
+                      Para orientações médicas específicas, consulte sempre um
+                      profissional
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -332,7 +379,7 @@ export default function AiChat() {
           </div>
         </div>
       </main>
-      
+
       {/* Fixed Input Area - Mobile Only */}
       <div className="lg:hidden fixed bottom-16 left-0 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-50">
         <div className="flex space-x-3 items-center">

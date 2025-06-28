@@ -34,7 +34,7 @@ import {
   type InsertDailyProgress,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, sql, gte, lte } from "drizzle-orm";
+import { eq, and, desc, sql, gte, lte, or, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -149,21 +149,26 @@ export class DatabaseStorage implements IStorage {
 
   // Food operations
   async getFoods(userId?: string, search?: string): Promise<Food[]> {
-    let query = db.select().from(foods);
-    
-    if (userId) {
-      query = query.where(
-        sql`${foods.userId} IS NULL OR ${foods.userId} = ${userId}`
-      );
+    if (userId && search) {
+      return await db.select().from(foods)
+        .where(
+          and(
+            or(isNull(foods.userId), eq(foods.userId, userId)),
+            sql`LOWER(${foods.name}) LIKE LOWER(${'%' + search + '%'})`
+          )
+        )
+        .orderBy(foods.name);
+    } else if (userId) {
+      return await db.select().from(foods)
+        .where(or(isNull(foods.userId), eq(foods.userId, userId)))
+        .orderBy(foods.name);
+    } else if (search) {
+      return await db.select().from(foods)
+        .where(sql`LOWER(${foods.name}) LIKE LOWER(${'%' + search + '%'})`)
+        .orderBy(foods.name);
     }
     
-    if (search) {
-      query = query.where(
-        sql`LOWER(${foods.name}) LIKE LOWER(${'%' + search + '%'})`
-      );
-    }
-    
-    return query.orderBy(foods.name);
+    return await db.select().from(foods).orderBy(foods.name);
   }
 
   async createFood(food: InsertFood): Promise<Food> {
@@ -215,7 +220,19 @@ export class DatabaseStorage implements IStorage {
       .where(eq(meals.userId, userId));
 
     if (date) {
-      query = query.where(and(eq(meals.userId, userId), eq(meals.date, date)));
+      const baseConditions = [eq(meals.userId, userId), eq(meals.date, date)];
+      query = db
+        .select({
+          meal: meals,
+          mealType: mealTypes,
+          mealFood: mealFoods,
+          food: foods,
+        })
+        .from(meals)
+        .leftJoin(mealTypes, eq(meals.mealTypeId, mealTypes.id))
+        .leftJoin(mealFoods, eq(meals.id, mealFoods.mealId))
+        .leftJoin(foods, eq(mealFoods.foodId, foods.id))
+        .where(and(...baseConditions));
     }
 
     const results = await query.orderBy(desc(meals.createdAt));
