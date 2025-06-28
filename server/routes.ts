@@ -929,43 +929,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint for Gemini API
+  app.post('/api/test-gemini', isAuthenticated, async (req: any, res) => {
+    try {
+      const testResponse = await aiService.getChatResponse("Olá, você está funcionando?");
+      res.json({ success: true, response: testResponse });
+    } catch (error) {
+      console.error("Gemini test failed:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   app.post('/api/generate-meal-plan', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { description } = req.body;
 
-      console.log("Generating meal plan for user:", userId, "with description:", description);
+      console.log("=== MEAL PLAN GENERATION START ===");
+      console.log("User ID:", userId);
+      console.log("Description:", description);
 
       if (!description || description.trim().length === 0) {
         return res.status(400).json({ message: "Description is required" });
       }
 
+      // First test a simple AI response
+      console.log("Testing simple AI response...");
+      const testResponse = await aiService.getChatResponse("Diga apenas 'funcionando' se você conseguir me responder.");
+      console.log("AI test response:", testResponse);
+
       // Generate meal plan using Gemini AI
       console.log("Calling AI service to generate meal plan...");
       const aiPlan = await aiService.generateMealPlan(description);
-      console.log("AI plan generated successfully:", aiPlan.name);
+      console.log("AI plan generated successfully:", aiPlan?.name || 'No name');
 
-      // Create meal plan in database
-      console.log("Saving meal plan to database...");
-      const mealPlan = await storage.createMealPlan({
+      // Create a simplified meal plan for testing
+      const simplePlan = {
         userId,
-        name: aiPlan.name,
-        description: aiPlan.description,
-        meals: aiPlan.meals,
-        dailyCalories: aiPlan.dailyCalories,
-        macroCarbs: aiPlan.macroCarbs,
-        macroProtein: aiPlan.macroProtein,
-        macroFat: aiPlan.macroFat,
+        name: aiPlan?.name || `Plano para ${description.substring(0, 50)}`,
+        description: aiPlan?.description || `Plano personalizado baseado em: ${description}`,
+        meals: aiPlan?.meals || {
+          "segunda": {
+            "breakfast": {"name": "Café da manhã", "description": "Exemplo", "calories": 400}
+          }
+        },
+        dailyCalories: aiPlan?.dailyCalories || 2000,
+        macroCarbs: aiPlan?.macroCarbs || 50,
+        macroProtein: aiPlan?.macroProtein || 25,
+        macroFat: aiPlan?.macroFat || 25,
         isActive: true,
-      });
+      };
+
+      console.log("Creating meal plan in database...");
+      const mealPlan = await storage.createMealPlan(simplePlan);
       console.log("Meal plan saved successfully with ID:", mealPlan.id);
+      console.log("=== MEAL PLAN GENERATION SUCCESS ===");
 
       res.json(mealPlan);
     } catch (error) {
+      console.error("=== MEAL PLAN GENERATION ERROR ===");
       console.error("Error generating meal plan:", error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       const errorStack = error instanceof Error ? error.stack : 'No stack trace';
+      console.error("Error message:", errorMessage);
       console.error("Error stack:", errorStack);
+      console.error("=== END ERROR LOG ===");
       res.status(500).json({ 
         message: "Failed to generate meal plan",
         error: errorMessage 

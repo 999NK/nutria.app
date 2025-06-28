@@ -473,10 +473,11 @@ Use alimentos brasileiros e considere restrições alimentares mencionadas. Reto
       return parsedPlan;
     } catch (error) {
       console.error('Error generating meal plan with AI:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       if (error instanceof SyntaxError) {
         console.error('JSON parsing error - invalid response format from Gemini');
       }
-      throw new Error(`Failed to generate meal plan: ${error.message}`);
+      throw new Error(`Failed to generate meal plan: ${errorMessage}`);
     }
   }
 
