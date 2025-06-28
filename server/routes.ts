@@ -39,14 +39,17 @@ function getNutritionalDayRange(dateString: string): { start: Date, end: Date } 
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  if (process.env.LOCAL_DEV_MODE === 'true') {
-    // Modo desenvolvimento local - cria usuário automaticamente
+  // Check if running in Replit environment or local dev
+  const isLocal = !process.env.REPLIT_DOMAINS;
+  
+  // Auth middleware - always use local auth for this environment
+  if (isLocal) {
+    // Local development mode - create user automatically
     app.use(async (req: any, res, next) => {
       if (!req.user) {
         req.user = {
           claims: {
-            sub: process.env.LOCAL_DEV_USER_ID || 'dev-user-123',
+            sub: '43962121', // Use the existing user ID
             email: 'dev@local.com',
             first_name: 'Dev',
             last_name: 'User'
@@ -99,7 +102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Middleware simplificado para desenvolvimento local
   const authMiddleware = (req: any, res: any, next: any) => {
-    if (process.env.LOCAL_DEV_MODE === 'true') {
+    if (isLocal) {
       // Para desenvolvimento local, sempre permitir acesso
       req.isAuthenticated = () => true;
       next();
@@ -872,10 +875,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let contextualInfo = '';
       if (dailyNutrition && user) {
-        const remainingCalories = (user.dailyCalories || 2000) - (dailyNutrition.calories || 0);
-        const remainingProtein = (user.dailyProtein || 150) - (dailyNutrition.protein || 0);
+        const remainingCalories = (user.dailyCalories || 2000) - (dailyNutrition.totalCalories || 0);
+        const remainingProtein = (user.dailyProtein || 150) - (parseFloat(dailyNutrition.totalProtein || "0"));
         
-        contextualInfo = `Contexto do usuário: Meta calórica diária ${user.dailyCalories || 2000}kcal, já consumiu ${dailyNutrition.calories || 0}kcal hoje (restam ${Math.max(0, remainingCalories)}kcal). Meta de proteína ${user.dailyProtein || 150}g, já consumiu ${dailyNutrition.protein || 0}g hoje (restam ${Math.max(0, remainingProtein)}g).`;
+        contextualInfo = `Contexto do usuário: Meta calórica diária ${user.dailyCalories || 2000}kcal, já consumiu ${dailyNutrition.totalCalories || 0}kcal hoje (restam ${Math.max(0, remainingCalories)}kcal). Meta de proteína ${user.dailyProtein || 150}g, já consumiu ${parseFloat(dailyNutrition.totalProtein || "0")}g hoje (restam ${Math.max(0, remainingProtein)}g).`;
       }
 
       // Simple AI response based on message content

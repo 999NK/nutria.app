@@ -71,10 +71,19 @@ Como posso ajudar hoje?`,
 
   const sendMessageMutation = useMutation({
     mutationFn: async (message: string) => {
-      return apiRequest("/api/ai/chat", {
+      const response = await fetch("/api/ai/chat", {
         method: "POST",
-        body: { message },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message }),
       });
+      
+      if (!response.ok) {
+        throw new Error(`${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: (data: any) => {
       // Split long responses into multiple messages
