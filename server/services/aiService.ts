@@ -354,6 +354,9 @@ Use exercícios apropriados para o nível e objetivos mencionados. Retorne APENA
   }
 
   async generateMealPlan(description: string): Promise<MealPlanGeneration> {
+    console.log("Starting meal plan generation with description:", description);
+    console.log("Using Gemini API key (first 10 chars):", this.geminiApiKey.substring(0, 10) + "...");
+    
     try {
       const prompt = `Você é um nutricionista especializado. Crie um plano alimentar semanal COMPLETO em português brasileiro baseado na descrição: "${description}".
 
@@ -420,7 +423,11 @@ FORMATO EXATO DA RESPOSTA (JSON válido):
 
 Use alimentos brasileiros e considere restrições alimentares mencionadas. Retorne APENAS o JSON válido.`;
 
-      const response = await fetch(`${this.baseUrl}/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
+      console.log("Making request to Gemini API...");
+      const apiUrl = `${this.baseUrl}/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`;
+      console.log("API URL:", apiUrl.replace(this.geminiApiKey, 'HIDDEN_KEY'));
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -434,26 +441,42 @@ Use alimentos brasileiros e considere restrições alimentares mencionadas. Reto
         })
       });
 
+      console.log("Gemini API response status:", response.status);
+
       if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.status}`);
+        const errorText = await response.text();
+        console.error("Gemini API error response:", errorText);
+        throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
+      console.log("Gemini API response received, parsing content...");
+      
       const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!content) {
+        console.error("No content in Gemini response:", JSON.stringify(data, null, 2));
         throw new Error('No content received from Gemini API');
       }
+
+      console.log("Content received from Gemini:", content.substring(0, 200) + "...");
 
       // Parse JSON from the response
       const jsonStart = content.indexOf('{');
       const jsonEnd = content.lastIndexOf('}') + 1;
       const jsonContent = content.substring(jsonStart, jsonEnd);
       
-      return JSON.parse(jsonContent);
+      console.log("Parsing JSON content...");
+      const parsedPlan = JSON.parse(jsonContent);
+      console.log("Meal plan parsed successfully:", parsedPlan.name);
+      
+      return parsedPlan;
     } catch (error) {
       console.error('Error generating meal plan with AI:', error);
-      throw new Error('Failed to generate meal plan');
+      if (error instanceof SyntaxError) {
+        console.error('JSON parsing error - invalid response format from Gemini');
+      }
+      throw new Error(`Failed to generate meal plan: ${error.message}`);
     }
   }
 
