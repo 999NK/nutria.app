@@ -61,26 +61,8 @@ class AIService {
 
   async getChatResponse(message: string): Promise<string> {
     try {
-      const systemPrompt = `Você é um assistente nutricional especializado em alimentação saudável brasileira. 
-      
-      DIRETRIZES:
-      - Responda sempre em português brasileiro
-      - Foque em nutrição, alimentação saudável e receitas
-      - Seja amigável e educativo
-      - Use exemplos de alimentos comuns no Brasil
-      - Para saudações, seja caloroso e ofereça ajuda
-      - Mantenha respostas concisas (máximo 300 caracteres)
-      - Nunca dê conselhos médicos específicos
-      - Encoraje consulta com nutricionista quando necessário
-      
-      TÓPICOS PRINCIPAIS:
-      - Planejamento alimentar
-      - Substituições saudáveis
-      - Receitas nutritivas
-      - Informações nutricionais
-      - Dicas práticas de alimentação`;
-
-      const response = await fetch(`${this.baseUrl}/models/gemini-pro:generateContent?key=${this.geminiApiKey}`, {
+      // Test with basic model name first
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,29 +70,34 @@ class AIService {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `${systemPrompt}\n\nPergunta do usuário: ${message}`
+              text: `Você é um assistente nutricional especializado em alimentação saudável brasileira. Responda sempre em português brasileiro, seja amigável e educativo. Mantenha respostas concisas e focadas em nutrição.
+
+Pergunta: ${message}`
             }]
           }],
           generationConfig: {
             temperature: 0.7,
-            topK: 40,
-            topP: 0.8,
-            maxOutputTokens: 500,
+            maxOutputTokens: 400,
           }
         })
       });
 
+      console.log(`Gemini API response status: ${response.status}`);
+      
       if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Gemini API error details:', errorText);
+        throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('Gemini API response:', JSON.stringify(data, null, 2));
       
-      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
         return data.candidates[0].content.parts[0].text;
       }
       
-      throw new Error('Invalid response from Gemini API');
+      throw new Error('Invalid response structure from Gemini API');
     } catch (error) {
       console.error('Error calling Gemini API:', error);
       
