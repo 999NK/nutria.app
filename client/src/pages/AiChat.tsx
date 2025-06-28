@@ -81,59 +81,14 @@ Como posso ajudar hoje?`,
       return response.json();
     },
     onSuccess: (data: { response: string }) => {
-      // Split long responses into multiple messages
-      const response = data.response;
-      const maxLength = 300; // Maximum characters per message
-      
-      if (response.length <= maxLength) {
-        const assistantMessage: Message = {
-          id: Date.now().toString(),
-          content: response,
-          role: 'assistant',
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-      } else {
-        // Split by sentences, respecting maxLength
-        const sentences = response.split(/[.!?]\s+/).filter((s: string) => s.trim());
-        let currentMessage = '';
-        let messageCount = 0;
-        
-        sentences.forEach((sentence: string, index: number) => {
-          const sentenceWithPunctuation = sentence + (index < sentences.length - 1 ? '.' : '');
-          
-          if (currentMessage.length + sentenceWithPunctuation.length + 1 > maxLength && currentMessage) {
-            // Send current message
-            setTimeout(() => {
-              const assistantMessage: Message = {
-                id: `${Date.now()}-${messageCount}`,
-                content: currentMessage.trim(),
-                role: 'assistant',
-                timestamp: new Date(),
-              };
-              setMessages(prev => [...prev, assistantMessage]);
-            }, messageCount * 1500); // Delay each message by 1.5 seconds
-            
-            messageCount++;
-            currentMessage = sentenceWithPunctuation;
-          } else {
-            currentMessage += (currentMessage ? ' ' : '') + sentenceWithPunctuation;
-          }
-          
-          // Send last message
-          if (index === sentences.length - 1 && currentMessage) {
-            setTimeout(() => {
-              const assistantMessage: Message = {
-                id: `${Date.now()}-${messageCount}`,
-                content: currentMessage.trim(),
-                role: 'assistant',
-                timestamp: new Date(),
-              };
-              setMessages(prev => [...prev, assistantMessage]);
-            }, messageCount * 1500);
-          }
-        });
-      }
+      // Always show complete response in a single message
+      const assistantMessage: Message = {
+        id: Date.now().toString(),
+        content: data.response,
+        role: 'assistant',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, assistantMessage]);
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
