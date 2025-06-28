@@ -33,11 +33,6 @@ export default function AiChat() {
       id: '1',
       content: `Olá! Sou seu assistente nutricional com IA. Posso ajudar você com dúvidas sobre alimentação, sugestões de substituições, análise de refeições e muito mais.
 
-💡 **Dicas úteis:**
-• Como posso melhorar minha alimentação? - Foque em alimentos naturais, mantenha horários regulares e hidrate-se bem
-• Quantas refeições por dia? - Recomendo 5-6 refeições pequenas: café da manhã, lanche, almoço, lanche da tarde, jantar e ceia
-• Como controlar compulsão alimentar? - Mantenha horários regulares, pratique mindfulness e identifique gatilhos emocionais
-
 Como posso ajudar hoje?`,
       role: 'assistant',
       timestamp: new Date(),
@@ -53,6 +48,29 @@ Como posso ajudar hoje?`,
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Send helpful tips as separate messages after initial load
+  useEffect(() => {
+    if (isAuthenticated && messages.length === 1) {
+      const tips = [
+        "💡 **Dica 1:** Como melhorar minha alimentação?\nFoque em alimentos naturais, mantenha horários regulares e hidrate-se bem.",
+        "💡 **Dica 2:** Quantas refeições por dia?\nRecomendo 5-6 refeições pequenas: café da manhã, lanche, almoço, lanche da tarde, jantar e ceia.",
+        "💡 **Dica 3:** Como controlar compulsão alimentar?\nMantenha horários regulares, pratique mindfulness e identifique gatilhos emocionais."
+      ];
+
+      tips.forEach((tip, index) => {
+        setTimeout(() => {
+          const tipMessage: Message = {
+            id: `tip-${index + 1}`,
+            content: tip,
+            role: 'assistant',
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, tipMessage]);
+        }, (index + 1) * 2000); // 2 seconds between each tip
+      });
+    }
+  }, [isAuthenticated, messages.length]);
 
   // Redirect if not authenticated
   useEffect(() => {
