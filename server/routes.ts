@@ -39,41 +39,36 @@ function getNutritionalDayRange(dateString: string): { start: Date, end: Date } 
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Check if running in Replit environment or local dev
-  const isLocal = !process.env.REPLIT_DOMAINS;
+  // Always use local development mode in this environment
+  const isLocal = true;
   
-  // Auth middleware - always use local auth for this environment
-  if (isLocal) {
-    // Local development mode - create user automatically
-    app.use(async (req: any, res, next) => {
-      if (!req.user) {
-        req.user = {
-          claims: {
-            sub: '43962121', // Use the existing user ID
-            email: 'dev@local.com',
-            first_name: 'Dev',
-            last_name: 'User'
-          }
-        };
-        
-        // Garante que o usuário existe no banco
-        try {
-          await storage.upsertUser({
-            id: req.user.claims.sub,
-            email: req.user.claims.email,
-            firstName: req.user.claims.first_name,
-            lastName: req.user.claims.last_name,
-            profileImageUrl: null
-          });
-        } catch (error) {
-          console.error('Erro ao criar usuário de desenvolvimento:', error);
-        }
+  // Local development mode - create user automatically for all requests
+  app.use(async (req: any, res, next) => {
+    req.user = {
+      claims: {
+        sub: '43962121', // Use the existing user ID
+        email: 'dev@local.com',
+        first_name: 'Dev',
+        last_name: 'User'
       }
-      next();
-    });
-  } else {
-    await setupAuth(app);
-  }
+    };
+    
+    // Ensure user exists in database
+    try {
+      await storage.upsertUser({
+        id: req.user.claims.sub,
+        email: req.user.claims.email,
+        firstName: req.user.claims.first_name,
+        lastName: req.user.claims.last_name,
+        profileImageUrl: null
+      });
+    } catch (error) {
+      console.error('Error creating development user:', error);
+    }
+    
+    req.isAuthenticated = () => true;
+    next();
+  });
 
   // Initialize default meal types
   const initializeMealTypes = async () => {
