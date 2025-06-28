@@ -11,61 +11,40 @@ import { Calendar, Target, Trash2, Plus, Check, X, Dumbbell, Utensils } from "lu
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
-interface UserPlan {
+interface MealPlan {
   id: number;
   name: string;
   description: string;
-  type: 'diet' | 'workout' | 'combined';
-  content: any;
-  dailyCalories?: number;
-  macroCarbs?: number;
-  macroProtein?: number;
-  macroFat?: number;
+  meals?: any;
+  dailyCalories: number;
+  macroCarbs: number;
+  macroProtein: number;
+  macroFat: number;
   isActive: boolean;
-  isCustom: boolean;
   createdAt: string;
-}
-
-interface DailyProgress {
-  id: number;
-  planId: number;
-  date: string;
-  dietCompleted: boolean;
-  workoutCompleted: boolean;
-  notes?: string;
 }
 
 export default function MyPlan() {
   const [activeTab, setActiveTab] = useState("current");
   const [selectedPlanType, setSelectedPlanType] = useState<'diet' | 'workout'>('diet');
   const [userDescription, setUserDescription] = useState("");
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [customPlanData, setCustomPlanData] = useState({
-    name: "",
-    description: "",
-    type: 'diet' as 'diet' | 'workout',
-    content: {}
+  const [progressData, setProgressData] = useState({
+    dietCompleted: false,
+    workoutCompleted: false
   });
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Fetch active plan
-  const { data: activePlan } = useQuery({
+  const { data: activePlan } = useQuery<MealPlan | null>({
     queryKey: ['/api/user-plans/active'],
     retry: false,
   });
 
   // Fetch plan history
-  const { data: planHistory = [] } = useQuery({
+  const { data: planHistory = [] } = useQuery<MealPlan[]>({
     queryKey: ['/api/user-plans/history'],
-    retry: false,
-  });
-
-  // Fetch today's progress
-  const today = new Date().toISOString().split('T')[0];
-  const { data: todayProgress } = useQuery({
-    queryKey: ['/api/daily-progress', today],
     retry: false,
   });
 
@@ -73,10 +52,7 @@ export default function MyPlan() {
   const generatePlanMutation = useMutation({
     mutationFn: async (data: { description: string; type: 'diet' | 'workout' }) => {
       const endpoint = data.type === 'diet' ? '/api/generate-meal-plan' : '/api/generate-workout-plan';
-      return await apiRequest(endpoint, {
-        method: 'POST',
-        body: JSON.stringify({ description: data.description })
-      });
+      return await apiRequest(endpoint, 'POST', { description: data.description });
     },
     onSuccess: () => {
       toast({
@@ -95,31 +71,10 @@ export default function MyPlan() {
     },
   });
 
-  // Create custom plan mutation
-  const createCustomPlanMutation = useMutation({
-    mutationFn: async (planData: any) => {
-      return await apiRequest('/api/user-plans/custom', {
-        method: 'POST',
-        body: JSON.stringify(planData)
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Plano personalizado criado!",
-        description: "Seu plano personalizado foi salvo com sucesso.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/user-plans'] });
-      setShowCreateForm(false);
-      setCustomPlanData({ name: "", description: "", type: 'diet', content: {} });
-    },
-  });
-
   // Delete plan mutation
   const deletePlanMutation = useMutation({
     mutationFn: async (planId: number) => {
-      return await apiRequest(`/api/user-plans/${planId}`, {
-        method: 'DELETE'
-      });
+      return await apiRequest(`/api/user-plans/${planId}`, 'DELETE');
     },
     onSuccess: () => {
       toast({
@@ -130,29 +85,10 @@ export default function MyPlan() {
     },
   });
 
-  // Update daily progress mutation
-  const updateProgressMutation = useMutation({
-    mutationFn: async (data: { planId: number; date: string; type: 'diet' | 'workout'; completed: boolean }) => {
-      return await apiRequest('/api/daily-progress', {
-        method: 'POST',
-        body: JSON.stringify(data)
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/daily-progress'] });
-      toast({
-        title: "Progresso atualizado!",
-        description: "Seu progresso foi salvo com sucesso.",
-      });
-    },
-  });
-
   // Activate plan mutation
   const activatePlanMutation = useMutation({
     mutationFn: async (planId: number) => {
-      return await apiRequest(`/api/user-plans/${planId}/activate`, {
-        method: 'PATCH'
-      });
+      return await apiRequest(`/api/user-plans/${planId}/activate`, 'PATCH');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/user-plans'] });
@@ -180,25 +116,25 @@ export default function MyPlan() {
   };
 
   const handleProgressUpdate = (type: 'diet' | 'workout', completed: boolean) => {
-    if (!activePlan) return;
+    setProgressData(prev => ({
+      ...prev,
+      [type === 'diet' ? 'dietCompleted' : 'workoutCompleted']: completed
+    }));
 
-    updateProgressMutation.mutate({
-      planId: activePlan.id,
-      date: today,
-      type,
-      completed
+    toast({
+      title: "Progresso atualizado!",
+      description: `${type === 'diet' ? 'Dieta' : 'Treino'} marcado como ${completed ? 'concluído' : 'não concluído'}.`,
     });
   };
 
   const getWeekProgress = () => {
-    if (!todayProgress) return 0;
-    
-    const totalTasks = activePlan?.type === 'combined' ? 14 : 7; // 7 days * 2 tasks or 1 task
-    const completedTasks = todayProgress.filter((p: DailyProgress) => 
-      p.dietCompleted || p.workoutCompleted
-    ).length;
-    
-    return Math.round((completedTasks / totalTasks) * 100);
+    const completed = (progressData.dietCompleted ? 1 : 0) + (progressData.workoutCompleted ? 1 : 0);
+    const total = activePlan ? 2 : 1; // Assume both diet and workout for active plan
+    return Math.round((completed / total) * 100);
+  };
+
+  const isPlanDiet = (plan: MealPlan) => {
+    return plan.dailyCalories && plan.dailyCalories > 0;
   };
 
   return (
@@ -225,7 +161,7 @@ export default function MyPlan() {
                     <div className="flex items-center justify-between">
                       <div>
                         <CardTitle className="flex items-center gap-2">
-                          {activePlan.type === 'diet' ? <Utensils className="w-5 h-5" /> : <Dumbbell className="w-5 h-5" />}
+                          {isPlanDiet(activePlan) ? <Utensils className="w-5 h-5" /> : <Dumbbell className="w-5 h-5" />}
                           {activePlan.name}
                         </CardTitle>
                         <CardDescription>{activePlan.description}</CardDescription>
@@ -249,55 +185,51 @@ export default function MyPlan() {
                       <div className="space-y-3">
                         <h4 className="font-medium">Progresso de Hoje</h4>
                         
-                        {(activePlan.type === 'diet' || activePlan.type === 'combined') && (
-                          <div className="flex items-center justify-between p-3 border rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <Utensils className="w-5 h-5 text-green-600" />
-                              <span>Dieta seguida hoje</span>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant={todayProgress?.dietCompleted ? "default" : "outline"}
-                                onClick={() => handleProgressUpdate('diet', true)}
-                              >
-                                <Check className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant={!todayProgress?.dietCompleted ? "default" : "outline"}
-                                onClick={() => handleProgressUpdate('diet', false)}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Utensils className="w-5 h-5 text-green-600" />
+                            <span>Dieta seguida hoje</span>
                           </div>
-                        )}
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant={progressData.dietCompleted ? "default" : "outline"}
+                              onClick={() => handleProgressUpdate('diet', true)}
+                            >
+                              <Check className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant={!progressData.dietCompleted ? "default" : "outline"}
+                              onClick={() => handleProgressUpdate('diet', false)}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
 
-                        {(activePlan.type === 'workout' || activePlan.type === 'combined') && (
-                          <div className="flex items-center justify-between p-3 border rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <Dumbbell className="w-5 h-5 text-blue-600" />
-                              <span>Treino realizado hoje</span>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant={todayProgress?.workoutCompleted ? "default" : "outline"}
-                                onClick={() => handleProgressUpdate('workout', true)}
-                              >
-                                <Check className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant={!todayProgress?.workoutCompleted ? "default" : "outline"}
-                                onClick={() => handleProgressUpdate('workout', false)}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Dumbbell className="w-5 h-5 text-blue-600" />
+                            <span>Treino realizado hoje</span>
                           </div>
-                        )}
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant={progressData.workoutCompleted ? "default" : "outline"}
+                              onClick={() => handleProgressUpdate('workout', true)}
+                            >
+                              <Check className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant={!progressData.workoutCompleted ? "default" : "outline"}
+                              onClick={() => handleProgressUpdate('workout', false)}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -375,7 +307,10 @@ export default function MyPlan() {
               <CardContent className="pt-6">
                 <Button
                   variant="outline"
-                  onClick={() => setShowCreateForm(true)}
+                  onClick={() => toast({
+                    title: "Em desenvolvimento",
+                    description: "Criação de planos personalizados manuais será implementada em breve.",
+                  })}
                   className="w-full flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
@@ -388,19 +323,18 @@ export default function MyPlan() {
           <TabsContent value="history" className="space-y-4">
             {planHistory.length > 0 ? (
               <div className="space-y-4">
-                {planHistory.map((plan: UserPlan) => (
+                {planHistory.map((plan: MealPlan) => (
                   <Card key={plan.id}>
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div>
                           <CardTitle className="flex items-center gap-2">
-                            {plan.type === 'diet' ? <Utensils className="w-5 h-5" /> : <Dumbbell className="w-5 h-5" />}
+                            {isPlanDiet(plan) ? <Utensils className="w-5 h-5" /> : <Dumbbell className="w-5 h-5" />}
                             {plan.name}
                           </CardTitle>
                           <CardDescription>{plan.description}</CardDescription>
                         </div>
                         <div className="flex gap-2">
-                          {plan.isCustom && <Badge variant="secondary">Personalizado</Badge>}
                           <Button
                             size="sm"
                             onClick={() => activatePlanMutation.mutate(plan.id)}
