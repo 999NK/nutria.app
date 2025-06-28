@@ -16,7 +16,7 @@ import Layout from "@/components/Layout";
 import NotFound from "@/pages/not-found";
 import { InstallPrompt } from "@/components/InstallPrompt";
 
-function Router() {
+function AppRouter() {
   const { user, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
@@ -60,7 +60,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Router />
+        <AppRouter />
         <InstallPrompt />
       </TooltipProvider>
     </QueryClientProvider>
