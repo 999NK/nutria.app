@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import BottomNavigation from "./BottomNavigation";
+import NavigationBar from "./NavigationBar";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -48,7 +48,7 @@ export default function Layout({ children }: LayoutProps) {
         </main>
 
         {/* Bottom Navigation */}
-        <BottomNavigation />
+        <NavigationBar />
 
         {/* Floating Action Button */}
         <button 
