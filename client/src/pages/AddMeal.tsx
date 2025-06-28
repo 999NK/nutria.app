@@ -63,7 +63,7 @@ export default function AddMeal() {
   }, [isAuthenticated, isLoading, toast]);
 
   // Fetch meal types
-  const { data: mealTypes = [] } = useQuery({
+  const { data: mealTypes = [] } = useQuery<any[]>({
     queryKey: ["/api/meal-types"],
     enabled: isAuthenticated,
   });
@@ -235,7 +235,6 @@ export default function AddMeal() {
       fat: parseFloat(food.fatPer100g),
     };
     setAddedFoods(prev => [...prev, newFood]);
-    setFoodSearch("");
   };
 
   const handleAddFoodFromSearch = (food: any) => {
@@ -305,7 +304,7 @@ export default function AddMeal() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            {mealTypes.map((mealType: any) => (
+            {(mealTypes as any[]).map((mealType: any) => (
               <Button
                 key={mealType.id}
                 variant={selectedMealType === mealType.id ? "default" : "outline"}
