@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -32,28 +32,56 @@ function AppRouter() {
     );
   }
 
-  // Handle different authentication states
-  if (!isAuthenticated) {
-    return <Landing />;
-  }
-  
-  if (user && !(user as any).isProfileComplete) {
-    return <Onboarding />;
-  }
-
-  // Authenticated user with complete profile
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/add-meal" component={AddMeal} />
-        <Route path="/my-plan" component={MyPlan} />
-        <Route path="/progress" component={Progress} />
-        <Route path="/profile" component={Profile} />
-        <Route path="/ai-chat" component={AiChat} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      <Route path="/">
+        {!isAuthenticated ? (
+          <Landing />
+        ) : user && !(user as any).isProfileComplete ? (
+          <Onboarding />
+        ) : (
+          <Layout><Dashboard /></Layout>
+        )}
+      </Route>
+      <Route path="/add-meal">
+        {isAuthenticated && user && (user as any).isProfileComplete ? (
+          <Layout><AddMeal /></Layout>
+        ) : (
+          <Landing />
+        )}
+      </Route>
+      <Route path="/my-plan">
+        {isAuthenticated && user && (user as any).isProfileComplete ? (
+          <Layout><MyPlan /></Layout>
+        ) : (
+          <Landing />
+        )}
+      </Route>
+      <Route path="/progress">
+        {isAuthenticated && user && (user as any).isProfileComplete ? (
+          <Layout><Progress /></Layout>
+        ) : (
+          <Landing />
+        )}
+      </Route>
+      <Route path="/profile">
+        {isAuthenticated && user && (user as any).isProfileComplete ? (
+          <Layout><Profile /></Layout>
+        ) : (
+          <Landing />
+        )}
+      </Route>
+      <Route path="/ai-chat">
+        {isAuthenticated && user && (user as any).isProfileComplete ? (
+          <Layout><AiChat /></Layout>
+        ) : (
+          <Landing />
+        )}
+      </Route>
+      <Route>
+        <NotFound />
+      </Route>
+    </Switch>
   );
 }
 
