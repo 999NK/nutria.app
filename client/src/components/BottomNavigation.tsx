@@ -1,14 +1,7 @@
 import { useLocation } from "wouter";
-import { useState, useEffect } from "react";
 
 export default function BottomNavigation() {
   const [location, setLocation] = useLocation();
-  const [renderKey, setRenderKey] = useState(0);
-
-  // Force re-render on mount to bypass cache
-  useEffect(() => {
-    setRenderKey(Date.now());
-  }, []);
 
   const navItems = [
     { path: "/", icon: "home", label: "Início" },
@@ -27,7 +20,7 @@ export default function BottomNavigation() {
       <div className="grid grid-cols-5 h-16">
         {navItems.map((item) => (
           <button
-            key={`${item.path}-${renderKey}`}
+            key={item.path}
             className={`flex flex-col items-center justify-center transition-colors ${
               isActive(item.path)
                 ? "text-primary"
