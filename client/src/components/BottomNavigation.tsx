@@ -10,7 +10,7 @@ export default function BottomNavigation() {
     { path: "/", icon: "home", label: "Início" },
     { path: "/ai-chat", icon: "robot", label: "IA Chat" },
     { path: "/my-foods", icon: "utensils", label: "Alimentos" },
-    { path: "/progress", icon: "chart-bar", label: "Progresso" },
+    { path: "/progress", icon: "chart-bar", label: "Progresso0" },
     { path: "/profile", icon: "user", label: "Perfil" },
   ];
 

@@ -66,12 +66,16 @@ export default function Dashboard() {
   const { data: meals = [], isLoading: mealsLoading } = useQuery<any[]>({
     queryKey: ["/api/meals", { date: today }],
     enabled: isAuthenticated,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Fetch daily nutrition
   const { data: dailyNutrition } = useQuery({
     queryKey: ["/api/nutrition/daily", { date: today }],
     enabled: isAuthenticated,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Calculate progress from actual meals
@@ -95,10 +99,10 @@ export default function Dashboard() {
       mealSum + parseFloat(mf.fat || "0"), 0) || 0);
   }, 0);
 
-  const caloriesGoal = user?.dailyCalories || 2000;
-  const proteinGoal = user?.dailyProtein || 120;
-  const carbsGoal = user?.dailyCarbs || 225;
-  const fatGoal = user?.dailyFat || 67;
+  const caloriesGoal = (user as any)?.dailyCalories || 2000;
+  const proteinGoal = (user as any)?.dailyProtein || 120;
+  const carbsGoal = (user as any)?.dailyCarbs || 225;
+  const fatGoal = (user as any)?.dailyFat || 67;
 
   const caloriesRemaining = Math.max(0, caloriesGoal - caloriesConsumed);
   const caloriesProgress = Math.min(100, (caloriesConsumed / caloriesGoal) * 100);
@@ -128,12 +132,14 @@ export default function Dashboard() {
     },
   });
 
-  // Schedule notification on component mount
+  // Schedule notification only once per session
   useEffect(() => {
-    if (isAuthenticated && user?.notificationsEnabled) {
+    const hasScheduled = sessionStorage.getItem('notification-scheduled');
+    if (isAuthenticated && (user as any)?.notificationsEnabled && !hasScheduled) {
       scheduleNotificationMutation.mutate();
+      sessionStorage.setItem('notification-scheduled', 'true');
     }
-  }, [isAuthenticated, user?.notificationsEnabled]);
+  }, [isAuthenticated, (user as any)?.notificationsEnabled]);
 
   const getMealIcon = (mealName: string) => {
     const name = mealName.toLowerCase();
