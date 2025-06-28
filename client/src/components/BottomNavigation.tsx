@@ -7,7 +7,7 @@ export default function BottomNavigation() {
     { path: "/", icon: "home", label: "Início" },
     { path: "/add-meal", icon: "plus-circle", label: "Adicionar" },
     { path: "/my-foods", icon: "utensils", label: "Alimentos" },
-    { path: "/progress", icon: "chart-bar", label: "Progresso" },
+    { path: "/progress", icon: "chart-bar", label: "Progresso5" },
     { path: "/profile", icon: "user", label: "Perfil" },
   ];
 

@@ -11,6 +11,7 @@ import MyFoods from "@/pages/MyFoods";
 import Progress from "@/pages/Progress";
 import Profile from "@/pages/Profile";
 import Onboarding from "@/pages/Onboarding";
+import AiChat from "@/pages/AiChat";
 import Layout from "@/components/Layout";
 import NotFound from "@/pages/not-found";
 import { InstallPrompt } from "@/components/InstallPrompt";

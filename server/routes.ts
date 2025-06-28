@@ -37,6 +37,43 @@ function getNutritionalDayRange(dateString: string): { start: Date, end: Date } 
   return { start, end };
 }
 
+function generateNutritionResponse(message: string): string {
+  const lowerMessage = message.toLowerCase();
+  
+  // Protein-related questions
+  if (lowerMessage.includes('proteína') || lowerMessage.includes('protein')) {
+    return `Excelente pergunta sobre proteína! As melhores fontes incluem: frango, peixe, ovos, feijões, lentilhas, quinoa e iogurte grego. Distribua o consumo ao longo do dia (20-30g por refeição) para melhor absorção. Qual é seu objetivo com a proteína?`;
+  }
+  
+  // Sugar substitution
+  if (lowerMessage.includes('açúcar') || lowerMessage.includes('substituir') || lowerMessage.includes('doce')) {
+    return `Ótima iniciativa reduzir o açúcar! Alternativas naturais: banana amassada, tâmaras, mel, xilitol, stevia. Use frutas secas em receitas e experimente chocolate 70%+ cacau. Reduza gradualmente para adaptar o paladar.`;
+  }
+  
+  // Water intake
+  if (lowerMessage.includes('água') || lowerMessage.includes('hidrat')) {
+    return `A hidratação é fundamental! Recomendação: 35ml por kg de peso corporal (pessoa de 70kg = 2,5L/dia). Beba um copo ao acordar, mantenha garrafa sempre à vista. Sinais de boa hidratação: urina amarelo claro e energia estável.`;
+  }
+  
+  // Healthy snacks
+  if (lowerMessage.includes('lanche') || lowerMessage.includes('snack') || lowerMessage.includes('beliscar')) {
+    return `Lanches saudáveis essenciais! Opções: mix de oleaginosas, maçã com pasta de amendoim, vegetais com húmus, iogurte grego com frutas. Para levar: barrinhas caseiras de aveia, ovos cozidos. Timing ideal: a cada 3-4 horas.`;
+  }
+  
+  // Weight loss
+  if (lowerMessage.includes('emagrec') || lowerMessage.includes('peso') || lowerMessage.includes('dieta')) {
+    return `Perda de peso saudável: déficit calórico moderado (300-500 kcal), alimentos integrais, hidratação, exercícios. Prato ideal: 50% vegetais, 25% proteína, 25% carboidratos complexos. Evite dietas extremas. Ritmo saudável: 0,5-1kg/semana.`;
+  }
+  
+  // General nutrition
+  if (lowerMessage.includes('alimentação') || lowerMessage.includes('nutrição') || lowerMessage.includes('saudável')) {
+    return `Alimentação equilibrada: variedade de cores no prato, 5-6 refeições menores, alimentos minimamente processados, água como bebida principal. Estrutura: café da manhã com proteína + carboidrato + fruta. Cozinhe mais em casa e leia rótulos.`;
+  }
+  
+  // Default response
+  return `Sou especializado em orientações nutricionais. Posso ajudar com planejamento alimentar, informações nutricionais, dicas práticas e sugestões de receitas. Poderia ser mais específico? Ex: "Como aumentar proteína?", "Substitutos para doces", "Lanches para trabalho". Para orientações médicas, consulte um profissional.`;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
@@ -705,6 +742,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating personalized recommendations:", error);
       res.status(500).json({ message: "Failed to generate personalized recommendations" });
+    }
+  });
+
+  // AI Chat endpoint
+  app.post('/api/ai/chat', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { message } = req.body;
+      
+      // Simple AI response logic for nutrition questions
+      const response = generateNutritionResponse(message);
+      
+      res.json({ response });
+    } catch (error) {
+      console.error("Error in AI chat:", error);
+      res.status(500).json({ message: "Failed to process chat message" });
     }
   });
 
