@@ -51,10 +51,17 @@ export default function MyPlan() {
   // Generate AI plan mutation
   const generatePlanMutation = useMutation({
     mutationFn: async (data: { description: string; type: 'diet' | 'workout' }) => {
+      console.log("Frontend: Starting plan generation", data);
       const endpoint = data.type === 'diet' ? '/api/generate-meal-plan' : '/api/generate-workout-plan';
-      return await apiRequest(endpoint, 'POST', { description: data.description });
+      console.log("Frontend: Calling endpoint", endpoint);
+      console.log("Frontend: Request data", { description: data.description });
+      
+      const result = await apiRequest(endpoint, 'POST', { description: data.description });
+      console.log("Frontend: API request successful", result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Frontend: Plan generation success", data);
       toast({
         title: "Plano gerado com sucesso!",
         description: "Seu novo plano foi criado pela IA e está pronto para uso.",
@@ -62,7 +69,8 @@ export default function MyPlan() {
       queryClient.invalidateQueries({ queryKey: ['/api/user-plans'] });
       setUserDescription("");
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Frontend: Plan generation error", error);
       toast({
         title: "Erro ao gerar plano",
         description: "Não foi possível gerar o plano. Tente novamente.",
