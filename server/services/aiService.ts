@@ -49,14 +49,74 @@ export interface PersonalizedRecommendation {
 }
 
 class AIService {
-  private readonly apiKey: string;
+  private readonly geminiApiKey: string;
+  private readonly baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
 
   constructor() {
-    // Get API key from environment variables with fallbacks
-    this.apiKey = process.env.DEEPSEEK_API_KEY || 
-                  process.env.AI_API_KEY || 
-                  process.env.OPENAI_API_KEY || 
-                  "your-deepseek-api-key-here";
+    this.geminiApiKey = process.env.GEMINI_API_KEY!;
+    if (!this.geminiApiKey) {
+      throw new Error('GEMINI_API_KEY environment variable is required');
+    }
+  }
+
+  async getChatResponse(message: string): Promise<string> {
+    try {
+      const systemPrompt = `Você é um assistente nutricional especializado em alimentação saudável brasileira. 
+      
+      DIRETRIZES:
+      - Responda sempre em português brasileiro
+      - Foque em nutrição, alimentação saudável e receitas
+      - Seja amigável e educativo
+      - Use exemplos de alimentos comuns no Brasil
+      - Para saudações, seja caloroso e ofereça ajuda
+      - Mantenha respostas concisas (máximo 300 caracteres)
+      - Nunca dê conselhos médicos específicos
+      - Encoraje consulta com nutricionista quando necessário
+      
+      TÓPICOS PRINCIPAIS:
+      - Planejamento alimentar
+      - Substituições saudáveis
+      - Receitas nutritivas
+      - Informações nutricionais
+      - Dicas práticas de alimentação`;
+
+      const response = await fetch(`${this.baseUrl}/models/gemini-pro:generateContent?key=${this.geminiApiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `${systemPrompt}\n\nPergunta do usuário: ${message}`
+            }]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.8,
+            maxOutputTokens: 500,
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+        return data.candidates[0].content.parts[0].text;
+      }
+      
+      throw new Error('Invalid response from Gemini API');
+    } catch (error) {
+      console.error('Error calling Gemini API:', error);
+      
+      // Fallback to simple response if API fails
+      return 'Desculpe, estou com dificuldades técnicas no momento. Que tal tentar novamente em alguns instantes? Posso ajudar com dicas de alimentação saudável, receitas nutritivas ou planejamento de refeições.';
+    }
   }
 
   async analyzeMealDescription(description: string): Promise<MealAnalysis> {

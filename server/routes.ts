@@ -758,8 +758,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { message } = req.body;
       
-      // Simple AI response logic for nutrition questions
-      const response = generateNutritionResponse(message);
+      // Use Gemini AI for real responses
+      const response = await aiService.getChatResponse(message);
       
       res.json({ response });
     } catch (error) {
