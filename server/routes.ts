@@ -934,14 +934,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { description } = req.body;
 
-      if (!description) {
+      console.log("Generating meal plan for user:", userId, "with description:", description);
+
+      if (!description || description.trim().length === 0) {
         return res.status(400).json({ message: "Description is required" });
       }
 
       // Generate meal plan using Gemini AI
+      console.log("Calling AI service to generate meal plan...");
       const aiPlan = await aiService.generateMealPlan(description);
+      console.log("AI plan generated successfully:", aiPlan.name);
 
       // Create meal plan in database
+      console.log("Saving meal plan to database...");
       const mealPlan = await storage.createMealPlan({
         userId,
         name: aiPlan.name,
@@ -953,11 +958,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         macroFat: aiPlan.macroFat,
         isActive: true,
       });
+      console.log("Meal plan saved successfully with ID:", mealPlan.id);
 
       res.json(mealPlan);
     } catch (error) {
       console.error("Error generating meal plan:", error);
-      res.status(500).json({ message: "Failed to generate meal plan" });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : 'No stack trace';
+      console.error("Error stack:", errorStack);
+      res.status(500).json({ 
+        message: "Failed to generate meal plan",
+        error: errorMessage 
+      });
     }
   });
 
@@ -966,14 +978,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { description } = req.body;
 
-      if (!description) {
+      console.log("Generating workout plan for user:", userId, "with description:", description);
+
+      if (!description || description.trim().length === 0) {
         return res.status(400).json({ message: "Description is required" });
       }
 
       // Generate workout plan using Gemini AI
+      console.log("Calling AI service to generate workout plan...");
       const aiPlan = await aiService.generateWorkoutPlan(description);
+      console.log("AI workout plan generated successfully:", aiPlan.name);
 
       // Create workout plan as meal plan for now (until userPlans is implemented)
+      console.log("Saving workout plan to database...");
       const workoutPlan = await storage.createMealPlan({
         userId,
         name: aiPlan.name,
@@ -985,11 +1002,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         macroFat: 0,
         isActive: true,
       });
+      console.log("Workout plan saved successfully with ID:", workoutPlan.id);
 
       res.json(workoutPlan);
     } catch (error) {
       console.error("Error generating workout plan:", error);
-      res.status(500).json({ message: "Failed to generate workout plan" });
+      console.error("Error stack:", error.stack);
+      res.status(500).json({ 
+        message: "Failed to generate workout plan",
+        error: error.message 
+      });
     }
   });
 
