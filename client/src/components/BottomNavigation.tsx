@@ -2,12 +2,15 @@ import { useLocation } from "wouter";
 
 export default function BottomNavigation() {
   const [location, setLocation] = useLocation();
+  
+  // Force re-render with unique timestamp
+  const timestamp = Date.now();
 
   const navItems = [
     { path: "/", icon: "home", label: "Início" },
-    { path: "/aichat", icon: "message", label: "Chat IA" },
+    { path: "/ai-chat", icon: "robot", label: "IA Chat" },
     { path: "/my-foods", icon: "utensils", label: "Alimentos" },
-    { path: "/progress", icon: "chart-bar", label: "Progresso8" },
+    { path: "/progress", icon: "chart-bar", label: "Progresso" },
     { path: "/profile", icon: "user", label: "Perfil" },
   ];
 
