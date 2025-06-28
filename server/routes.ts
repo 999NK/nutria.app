@@ -1007,10 +1007,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(workoutPlan);
     } catch (error) {
       console.error("Error generating workout plan:", error);
-      console.error("Error stack:", error.stack);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : 'No stack trace';
+      console.error("Error stack:", errorStack);
       res.status(500).json({ 
         message: "Failed to generate workout plan",
-        error: error.message 
+        error: errorMessage 
       });
     }
   });
