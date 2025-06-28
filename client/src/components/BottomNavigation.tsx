@@ -3,6 +3,9 @@ import { useLocation } from "wouter";
 export default function BottomNavigation() {
   const [location, setLocation] = useLocation();
 
+  // Force re-render with unique timestamp
+  const timestamp = Date.now();
+
   const navItems = [
     { path: "/", icon: "home", label: "Início" },
     { path: "/ai-chat", icon: "robot", label: "IA Chat" },
@@ -20,7 +23,7 @@ export default function BottomNavigation() {
       <div className="grid grid-cols-5 h-16">
         {navItems.map((item) => (
           <button
-            key={item.path}
+            key={`${item.path}-${timestamp}`}
             className={`flex flex-col items-center justify-center transition-colors ${
               isActive(item.path)
                 ? "text-primary"
@@ -29,7 +32,7 @@ export default function BottomNavigation() {
             onClick={() => setLocation(item.path)}
           >
             <i className={`fas fa-${item.icon} text-lg mb-1`}></i>
-            <span className="text-xs font-medium">{item.label}</span>
+            <span className="text-xs">{item.label}</span>
           </button>
         ))}
       </div>

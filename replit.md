@@ -10,27 +10,13 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
-**2025-06-28 03:55**
-- ✓ Fixed Hot Module Replacement (HMR) and real-time updates
-- ✓ Removed problematic useEffect in BottomNavigation causing constant page reloads
-- ✓ Created robust ThemeProvider to prevent light/dark mode flashing
-- ✓ Fixed database connection issues (switched to HTTP-based Neon connection)
-- ✓ Resolved authentication session persistence problems
-- ✓ Added proper theme initialization script in HTML to prevent UI flashing
-
-**2025-06-28 03:40**
-- ✓ Resolved Replit preview cache synchronization issue completely
-- ✓ Created new NavigationBar component to replace BottomNavigation
-- ✓ Fixed persistent "Progresso" label display across all preview instances
-- ✓ Implemented aggressive cache busting with meta tags and timestamps
-- ✓ All navigation labels now display correctly: "Início", "IA Chat", "Meu Plano", "Progresso", "Perfil"
-
 **2025-06-28 03:30**
 - ✓ Replaced "Alimentos" page with "Meu Plano" page in navigation
 - ✓ Implemented complete meal plan system with Gemini AI integration
 - ✓ Added meal_plans database table with full CRUD operations
 - ✓ Created comprehensive Gemini AI meal plan generation service
 - ✓ Added 5 meal plan API endpoints with authentication
+- ✓ Fixed navigation label "Progresso" (removed duplicate numbers)
 - ✓ Updated schema with mealPlans table and relationships
 
 ## Recent Debug Fixes

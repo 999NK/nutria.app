@@ -1,11 +1,18 @@
-import NavigationBar from "./NavigationBar";
+import { useEffect } from "react";
+import BottomNavigation from "./BottomNavigation";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
-
+  // Initialize dark mode from localStorage on app start
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode === 'true') {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -41,7 +48,7 @@ export default function Layout({ children }: LayoutProps) {
         </main>
 
         {/* Bottom Navigation */}
-        <NavigationBar />
+        <BottomNavigation />
 
         {/* Floating Action Button */}
         <button 
