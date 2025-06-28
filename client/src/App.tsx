@@ -32,48 +32,26 @@ function Router() {
     );
   }
 
+  if (!isAuthenticated) {
+    return <Landing />;
+  }
+  
+  if (user && !(user as any).isProfileComplete) {
+    return <Onboarding />;
+  }
+
   return (
-    <Switch>
-      {!isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : user && !(user as any).isProfileComplete ? (
-        <Route path="/" component={Onboarding} />
-      ) : (
-        <>
-          <Route path="/">
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </Route>
-          <Route path="/add-meal">
-            <Layout>
-              <AddMeal />
-            </Layout>
-          </Route>
-          <Route path="/my-plan">
-            <Layout>
-              <MyPlan />
-            </Layout>
-          </Route>
-          <Route path="/progress">
-            <Layout>
-              <Progress />
-            </Layout>
-          </Route>
-          <Route path="/profile">
-            <Layout>
-              <Profile />
-            </Layout>
-          </Route>
-          <Route path="/ai-chat">
-            <Layout>
-              <AiChat />
-            </Layout>
-          </Route>
-        </>
-      )}
-      <Route component={NotFound} />
-    </Switch>
+    <Layout>
+      <Switch>
+        <Route path="/" component={Dashboard} />
+        <Route path="/add-meal" component={AddMeal} />
+        <Route path="/my-plan" component={MyPlan} />
+        <Route path="/progress" component={Progress} />
+        <Route path="/profile" component={Profile} />
+        <Route path="/ai-chat" component={AiChat} />
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
   );
 }
 
