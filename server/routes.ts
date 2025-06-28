@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupLocalAuth, localAuthMiddleware } from "./localAuth";
 import { insertFoodSchema, insertMealTypeSchema, insertMealSchema, insertMealFoodSchema, insertRecipeSchema, insertRecipeIngredientSchema, meals, mealTypes } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { pdfService } from "./services/pdfService";
@@ -103,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       next();
     } else {
       // Para produção, usar autenticação Replit
-      isAuthenticated(req, res, next);
+      localAuthMiddleware(req, res, next);
     }
   };
 
@@ -229,7 +230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/meal-types', isAuthenticated, async (req: any, res) => {
+  app.post('/api/meal-types', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const mealTypeData = insertMealTypeSchema.parse({ ...req.body, userId });
@@ -242,7 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Meal routes
-  app.get('/api/meals', isAuthenticated, async (req: any, res) => {
+  app.get('/api/meals', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const date = req.query.date as string;
@@ -254,7 +255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/meals', isAuthenticated, async (req: any, res) => {
+  app.post('/api/meals', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const mealData = insertMealSchema.parse({ ...req.body, userId });
@@ -266,7 +267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/meals/:mealId/foods', isAuthenticated, async (req: any, res) => {
+  app.post('/api/meals/:mealId/foods', localAuthMiddleware, async (req: any, res) => {
     try {
       const { mealId } = req.params;
       const userId = req.user.claims.sub;
@@ -313,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/meals/:mealId/foods/:foodId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/meals/:mealId/foods/:foodId', localAuthMiddleware, async (req: any, res) => {
     try {
       const { mealId, foodId } = req.params;
       await storage.removeFoodFromMeal(parseInt(mealId), parseInt(foodId));
@@ -324,7 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/meals/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/meals/:id', localAuthMiddleware, async (req: any, res) => {
     try {
       const { id } = req.params;
       await storage.deleteMeal(parseInt(id));
@@ -336,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Recipe routes
-  app.get('/api/recipes', isAuthenticated, async (req: any, res) => {
+  app.get('/api/recipes', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const recipes = await storage.getRecipes(userId);
@@ -347,7 +348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/recipes', isAuthenticated, async (req: any, res) => {
+  app.post('/api/recipes', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const recipeData = insertRecipeSchema.parse({ ...req.body, userId });
@@ -359,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/recipes/:recipeId/ingredients', isAuthenticated, async (req: any, res) => {
+  app.post('/api/recipes/:recipeId/ingredients', localAuthMiddleware, async (req: any, res) => {
     try {
       const { recipeId } = req.params;
       const ingredientData = insertRecipeIngredientSchema.parse({ ...req.body, recipeId: parseInt(recipeId) });
@@ -371,7 +372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/recipes/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/recipes/:id', localAuthMiddleware, async (req: any, res) => {
     try {
       const { id } = req.params;
       await storage.deleteRecipe(parseInt(id));
@@ -383,7 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Daily Nutrition routes
-  app.get('/api/nutrition/daily', isAuthenticated, async (req: any, res) => {
+  app.get('/api/nutrition/daily', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const requestedDate = (req.query.date as string) || new Date().toISOString().split('T')[0];
@@ -452,7 +453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/nutrition/history', isAuthenticated, async (req: any, res) => {
+  app.get('/api/nutrition/history', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const period = (req.query.period as string) || 'week';
@@ -496,7 +497,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Real-time progress tracking endpoints
-  app.get('/api/progress/hourly', isAuthenticated, async (req: any, res) => {
+  app.get('/api/progress/hourly', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
@@ -564,7 +565,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/progress/weekly', isAuthenticated, async (req: any, res) => {
+  app.get('/api/progress/weekly', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
@@ -618,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/progress/monthly', isAuthenticated, async (req: any, res) => {
+  app.get('/api/progress/monthly', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
@@ -678,7 +679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI routes
-  app.post('/api/ai/analyze-meal', isAuthenticated, async (req: any, res) => {
+  app.post('/api/ai/analyze-meal', localAuthMiddleware, async (req: any, res) => {
     try {
       const { description } = req.body;
       if (!description) {
@@ -693,7 +694,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/ai/suggest-recipes', isAuthenticated, async (req: any, res) => {
+  app.post('/api/ai/suggest-recipes', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { availableIngredients } = req.body;
@@ -707,7 +708,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Personalized recipe recommendations based on nutrition goals
-  app.post('/api/ai/personalized-recommendations', isAuthenticated, async (req: any, res) => {
+  app.post('/api/ai/personalized-recommendations', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { availableIngredients } = req.body;
@@ -750,7 +751,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PDF Export routes
-  app.post('/api/export/pdf', isAuthenticated, async (req: any, res) => {
+  app.post('/api/export/pdf', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { startDate, endDate, type } = req.body;
@@ -776,7 +777,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Notification routes
-  app.post('/api/notifications/schedule-daily', isAuthenticated, async (req: any, res) => {
+  app.post('/api/notifications/schedule-daily', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       await notificationService.scheduleDailyNotification(userId);
@@ -788,7 +789,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PDF Report generation endpoint
-  app.get('/api/reports/nutrition-pdf', isAuthenticated, async (req: any, res) => {
+  app.get('/api/reports/nutrition-pdf', localAuthMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { period = 'daily', date = new Date().toISOString().split('T')[0] } = req.query;
