@@ -31,9 +31,7 @@ export default function AiChat() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: `Olá! Sou seu assistente nutricional com IA. Posso ajudar você com dúvidas sobre alimentação, sugestões de substituições, análise de refeições e muito mais.
-
-Como posso ajudar hoje?`,
+      content: `Olá! Sou seu assistente nutricional com IA. Posso ajudar você com dúvidas sobre alimentação, sugestões de substituições, análise de refeições e muito mais.`,
       role: 'assistant',
       timestamp: new Date(),
     }
@@ -49,25 +47,27 @@ Como posso ajudar hoje?`,
     scrollToBottom();
   }, [messages]);
 
-  // Send helpful tips as separate messages after initial load
+  // Send introduction sequence as separate messages
   useEffect(() => {
     if (isAuthenticated && messages.length === 1) {
-      const tips = [
-        "💡 **Dica 1:** Como melhorar minha alimentação?\nFoque em alimentos naturais, mantenha horários regulares e hidrate-se bem.",
-        "💡 **Dica 2:** Quantas refeições por dia?\nRecomendo 5-6 refeições pequenas: café da manhã, lanche, almoço, lanche da tarde, jantar e ceia.",
-        "💡 **Dica 3:** Como controlar compulsão alimentar?\nMantenha horários regulares, pratique mindfulness e identifique gatilhos emocionais."
+      const introSequence = [
+        "💡 Perguntas comuns:",
+        "• Como posso melhorar minha alimentação?",
+        "• Quantas refeições por dia?",
+        "• Como controlar compulsão alimentar?",
+        "Como posso ajudar hoje?"
       ];
 
-      tips.forEach((tip, index) => {
+      introSequence.forEach((message, index) => {
         setTimeout(() => {
-          const tipMessage: Message = {
-            id: `tip-${index + 1}`,
-            content: tip,
+          const introMessage: Message = {
+            id: `intro-${index + 2}`,
+            content: message,
             role: 'assistant',
             timestamp: new Date(),
           };
-          setMessages(prev => [...prev, tipMessage]);
-        }, (index + 1) * 2000); // 2 seconds between each tip
+          setMessages(prev => [...prev, introMessage]);
+        }, (index + 1) * 1500); // 1.5 seconds between each message
       });
     }
   }, [isAuthenticated, messages.length]);

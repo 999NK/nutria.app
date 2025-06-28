@@ -40,4 +40,5 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - ✓ Corrected chat message duplication issue (single message display)
 - ✓ Implemented chat memory system to maintain conversation context
 - ✓ Added user-specific chat history storage (last 20 messages)
-- ✓ Separated helpful tips from bot introduction (sent as individual messages)
+- ✓ Restructured bot introduction into 6 separate sequential messages
+- ✓ Implemented exact message flow: intro → common questions header → 3 questions → call to action
