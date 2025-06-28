@@ -142,6 +142,35 @@ export const dailyNutrition = pgTable("daily_nutrition", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const userPlans = pgTable("user_plans", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: varchar("name").notNull(),
+  description: text("description").notNull(),
+  type: varchar("type").notNull(), // 'diet', 'workout', 'combined'
+  content: jsonb("content").notNull(), // Diet/workout structure
+  dailyCalories: integer("daily_calories"),
+  macroCarbs: integer("macro_carbs"), // percentage
+  macroProtein: integer("macro_protein"), // percentage
+  macroFat: integer("macro_fat"), // percentage
+  isActive: boolean("is_active").default(false),
+  isCustom: boolean("is_custom").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const dailyProgress = pgTable("daily_progress", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  planId: integer("plan_id").notNull().references(() => userPlans.id),
+  date: varchar("date").notNull(), // YYYY-MM-DD format
+  dietCompleted: boolean("diet_completed").default(false),
+  workoutCompleted: boolean("workout_completed").default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Keep meal_plans for backward compatibility
 export const mealPlans = pgTable("meal_plans", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
@@ -165,6 +194,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   mealTypes: many(mealTypes),
   dailyNutrition: many(dailyNutrition),
   mealPlans: many(mealPlans),
+  userPlans: many(userPlans),
+  dailyProgress: many(dailyProgress),
 }));
 
 export const foodsRelations = relations(foods, ({ one, many }) => ({
@@ -205,6 +236,16 @@ export const dailyNutritionRelations = relations(dailyNutrition, ({ one }) => ({
 
 export const mealPlansRelations = relations(mealPlans, ({ one }) => ({
   user: one(users, { fields: [mealPlans.userId], references: [users.id] }),
+}));
+
+export const userPlansRelations = relations(userPlans, ({ one, many }) => ({
+  user: one(users, { fields: [userPlans.userId], references: [users.id] }),
+  dailyProgress: many(dailyProgress),
+}));
+
+export const dailyProgressRelations = relations(dailyProgress, ({ one }) => ({
+  user: one(users, { fields: [dailyProgress.userId], references: [users.id] }),
+  plan: one(userPlans, { fields: [dailyProgress.planId], references: [userPlans.id] }),
 }));
 
 // Insert Schemas
