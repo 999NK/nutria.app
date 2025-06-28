@@ -45,6 +45,7 @@ function Router() {
           <Route path="/my-foods" component={MyFoods} />
           <Route path="/progress" component={Progress} />
           <Route path="/profile" component={Profile} />
+          <Route path="/ai-chat" component={AiChat} />
         </Layout>
       )}
       <Route component={NotFound} />
