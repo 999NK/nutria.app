@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { setupLocalAuth, authMiddleware } from "./localAuth";
+import { setupLocalAuth } from "./localAuth";
 import { insertFoodSchema, insertMealTypeSchema, insertMealSchema, insertMealFoodSchema, insertRecipeSchema, insertRecipeIngredientSchema, meals, mealTypes } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { pdfService } from "./services/pdfService";
