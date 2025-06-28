@@ -904,26 +904,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Meal Plan endpoints with Gemini AI integration
-  app.get('/api/my-meal-plan', isAuthenticated, async (req: any, res) => {
+  // User Plans endpoints (diet, workout, combined)
+  app.get('/api/user-plans/active', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      // For now, use meal plan until we implement userPlans in storage
       const activePlan = await storage.getActiveMealPlan(userId);
       res.json(activePlan || null);
     } catch (error) {
-      console.error("Error fetching active meal plan:", error);
-      res.status(500).json({ message: "Failed to fetch meal plan" });
+      console.error("Error fetching active plan:", error);
+      res.status(500).json({ message: "Failed to fetch active plan" });
     }
   });
 
-  app.get('/api/my-meal-plans/history', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user-plans/history', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      // For now, use meal plan history until we implement userPlans in storage
       const history = await storage.getMealPlanHistory(userId);
       res.json(history);
     } catch (error) {
-      console.error("Error fetching meal plan history:", error);
-      res.status(500).json({ message: "Failed to fetch meal plan history" });
+      console.error("Error fetching plan history:", error);
+      res.status(500).json({ message: "Failed to fetch plan history" });
     }
   });
 
@@ -959,34 +961,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/meal-plans/:id/update', isAuthenticated, async (req: any, res) => {
+  app.post('/api/generate-workout-plan', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const planId = parseInt(req.params.id);
       const { description } = req.body;
 
       if (!description) {
         return res.status(400).json({ message: "Description is required" });
       }
 
-      // Generate updated meal plan using Gemini AI
-      const aiPlan = await aiService.generateMealPlan(description);
+      // Generate workout plan using Gemini AI
+      const aiPlan = await aiService.generateWorkoutPlan(description);
 
-      // Update meal plan in database
-      const updatedPlan = await storage.updateMealPlan(planId, {
+      // Create workout plan as meal plan for now (until userPlans is implemented)
+      const workoutPlan = await storage.createMealPlan({
+        userId,
         name: aiPlan.name,
         description: aiPlan.description,
-        meals: aiPlan.meals,
-        dailyCalories: aiPlan.dailyCalories,
-        macroCarbs: aiPlan.macroCarbs,
-        macroProtein: aiPlan.macroProtein,
-        macroFat: aiPlan.macroFat,
+        meals: aiPlan.workouts, // Store workouts in meals field temporarily
+        dailyCalories: 0,
+        macroCarbs: 0,
+        macroProtein: 0,
+        macroFat: 0,
+        isActive: true,
       });
 
+      res.json(workoutPlan);
+    } catch (error) {
+      console.error("Error generating workout plan:", error);
+      res.status(500).json({ message: "Failed to generate workout plan" });
+    }
+  });
+
+  app.get('/api/daily-progress/:date', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { date } = req.params;
+      
+      // Mock progress data for now
+      const mockProgress = {
+        id: 1,
+        planId: 1,
+        date,
+        dietCompleted: false,
+        workoutCompleted: false,
+        notes: null
+      };
+      
+      res.json(mockProgress);
+    } catch (error) {
+      console.error("Error fetching daily progress:", error);
+      res.status(500).json({ message: "Failed to fetch daily progress" });
+    }
+  });
+
+  app.post('/api/daily-progress', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { planId, date, type, completed } = req.body;
+      
+      // Mock response for now
+      const mockProgress = {
+        id: 1,
+        planId,
+        date,
+        dietCompleted: type === 'diet' ? completed : false,
+        workoutCompleted: type === 'workout' ? completed : false,
+        notes: null
+      };
+      
+      res.json(mockProgress);
+    } catch (error) {
+      console.error("Error updating daily progress:", error);
+      res.status(500).json({ message: "Failed to update daily progress" });
+    }
+  });
+
+  app.patch('/api/user-plans/:id/activate', isAuthenticated, async (req: any, res) => {
+    try {
+      const planId = parseInt(req.params.id);
+      // For now, use meal plan methods
+      const updatedPlan = await storage.updateMealPlan(planId, { isActive: true });
       res.json(updatedPlan);
     } catch (error) {
-      console.error("Error updating meal plan:", error);
-      res.status(500).json({ message: "Failed to update meal plan" });
+      console.error("Error activating plan:", error);
+      res.status(500).json({ message: "Failed to activate plan" });
+    }
+  });
+
+  app.delete('/api/user-plans/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const planId = parseInt(req.params.id);
+      await storage.deleteMealPlan(planId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting plan:", error);
+      res.status(500).json({ message: "Failed to delete plan" });
+    }
+  });
+
+  // Legacy meal plan endpoints for backward compatibility
+  app.get('/api/my-meal-plan', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const activePlan = await storage.getActiveMealPlan(userId);
+      res.json(activePlan || null);
+    } catch (error) {
+      console.error("Error fetching active meal plan:", error);
+      res.status(500).json({ message: "Failed to fetch meal plan" });
+    }
+  });
+
+  app.get('/api/my-meal-plans/history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const history = await storage.getMealPlanHistory(userId);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching meal plan history:", error);
+      res.status(500).json({ message: "Failed to fetch meal plan history" });
     }
   });
 

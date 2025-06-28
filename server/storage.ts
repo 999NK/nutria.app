@@ -8,6 +8,8 @@ import {
   recipeIngredients,
   dailyNutrition,
   mealPlans,
+  userPlans,
+  dailyProgress,
   type User,
   type UpsertUser,
   type Food,
@@ -26,6 +28,10 @@ import {
   type InsertDailyNutrition,
   type MealPlan,
   type InsertMealPlan,
+  type UserPlan,
+  type InsertUserPlan,
+  type DailyProgress,
+  type InsertDailyProgress,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, gte, lte } from "drizzle-orm";

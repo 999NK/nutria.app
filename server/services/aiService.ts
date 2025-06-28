@@ -266,6 +266,93 @@ class AIService {
     }
   }
 
+  async generateWorkoutPlan(description: string): Promise<any> {
+    try {
+      const prompt = `Você é um personal trainer especializado. Crie um plano de treino semanal COMPLETO em português brasileiro baseado na descrição: "${description}".
+
+FORMATO EXATO DA RESPOSTA (JSON válido):
+{
+  "name": "Nome do Plano de Treino",
+  "description": "Descrição detalhada do plano de treino",
+  "type": "workout",
+  "workouts": {
+    "segunda": {
+      "name": "Treino A - Peito e Tríceps",
+      "exercises": [
+        {"name": "Supino reto", "sets": 4, "reps": "8-12", "rest": "90s"},
+        {"name": "Supino inclinado", "sets": 3, "reps": "10-12", "rest": "60s"},
+        {"name": "Crucifixo", "sets": 3, "reps": "12-15", "rest": "60s"},
+        {"name": "Tríceps pulley", "sets": 3, "reps": "12-15", "rest": "45s"}
+      ],
+      "duration": "60-75 minutos"
+    },
+    "terca": {
+      "name": "Treino B - Costas e Bíceps",
+      "exercises": [
+        {"name": "Puxada frontal", "sets": 4, "reps": "8-12", "rest": "90s"},
+        {"name": "Remada baixa", "sets": 3, "reps": "10-12", "rest": "60s"}
+      ],
+      "duration": "60-75 minutos"
+    },
+    "quarta": {"name": "Descanso", "exercises": [], "duration": "0 minutos"},
+    "quinta": {
+      "name": "Treino C - Pernas",
+      "exercises": [
+        {"name": "Agachamento", "sets": 4, "reps": "8-12", "rest": "90s"}
+      ],
+      "duration": "60-75 minutos"
+    },
+    "sexta": {
+      "name": "Treino D - Ombros",
+      "exercises": [
+        {"name": "Desenvolvimento", "sets": 4, "reps": "8-12", "rest": "90s"}
+      ],
+      "duration": "45-60 minutos"
+    },
+    "sabado": {"name": "Cardio", "exercises": [{"name": "Esteira", "sets": 1, "reps": "30 min", "rest": "0s"}], "duration": "30 minutos"},
+    "domingo": {"name": "Descanso", "exercises": [], "duration": "0 minutos"}
+  }
+}
+
+Use exercícios apropriados para o nível e objetivos mencionados. Retorne APENAS o JSON válido.`;
+
+      const response = await fetch(`${this.baseUrl}/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!content) {
+        throw new Error('No content received from Gemini API');
+      }
+
+      // Parse JSON from the response
+      const jsonStart = content.indexOf('{');
+      const jsonEnd = content.lastIndexOf('}') + 1;
+      const jsonContent = content.substring(jsonStart, jsonEnd);
+      
+      return JSON.parse(jsonContent);
+    } catch (error) {
+      console.error('Error generating workout plan with AI:', error);
+      throw new Error('Failed to generate workout plan');
+    }
+  }
+
   async generateMealPlan(description: string): Promise<MealPlanGeneration> {
     try {
       const prompt = `Você é um nutricionista especializado. Crie um plano alimentar semanal COMPLETO em português brasileiro baseado na descrição: "${description}".

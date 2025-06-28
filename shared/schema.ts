@@ -293,6 +293,17 @@ export const insertMealPlanSchema = createInsertSchema(mealPlans).omit({
   updatedAt: true,
 });
 
+export const insertUserPlanSchema = createInsertSchema(userPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertDailyProgressSchema = createInsertSchema(dailyProgress).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -312,3 +323,7 @@ export type DailyNutrition = typeof dailyNutrition.$inferSelect;
 export type InsertDailyNutrition = z.infer<typeof insertDailyNutritionSchema>;
 export type MealPlan = typeof mealPlans.$inferSelect;
 export type InsertMealPlan = z.infer<typeof insertMealPlanSchema>;
+export type UserPlan = typeof userPlans.$inferSelect;
+export type InsertUserPlan = z.infer<typeof insertUserPlanSchema>;
+export type DailyProgress = typeof dailyProgress.$inferSelect;
+export type InsertDailyProgress = z.infer<typeof insertDailyProgressSchema>;
