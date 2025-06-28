@@ -121,12 +121,19 @@
       }
     </script>
     
-    <!-- Initialize dark mode before React loads -->
+    <!-- Initialize theme before React loads to prevent flashing -->
     <script>
       (function() {
-        const savedDarkMode = localStorage.getItem('darkMode');
-        if (savedDarkMode === 'true' || (!savedDarkMode && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.classList.add('dark');
+        try {
+          const savedTheme = localStorage.getItem('nutria-ui-theme') || 'light';
+          if (savedTheme === 'dark' || (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.add('light');
+          }
+        } catch (e) {
+          // Fallback to light mode if localStorage is not available
+          document.documentElement.classList.add('light');
         }
       })();
     </script>
