@@ -15,8 +15,18 @@ import { FoodDropdownSearch } from "@/components/FoodDropdownSearch";
 import { getNutritionalDay } from "@/lib/nutritionalDay";
 
 interface FoodItem {
-  id: number;
+  id?: number;
+  usdaFdcId?: number;
   name: string;
+  brand?: string;
+  category?: string;
+  caloriesPer100g?: number;
+  proteinPer100g?: number;
+  carbsPer100g?: number;
+  fatPer100g?: number;
+  fiberPer100g?: number;
+  sugarPer100g?: number;
+  sodiumPer100g?: number;
   quantity: number;
   unit: string;
   calories: number;

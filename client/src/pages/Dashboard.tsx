@@ -63,7 +63,7 @@ export default function Dashboard() {
   const todayFormatted = format(new Date(), "d MMM", { locale: ptBR });
 
   // Fetch today's meals
-  const { data: meals = [], isLoading: mealsLoading } = useQuery({
+  const { data: meals = [], isLoading: mealsLoading } = useQuery<any[]>({
     queryKey: ["/api/meals", { date: today }],
     enabled: isAuthenticated,
   });
