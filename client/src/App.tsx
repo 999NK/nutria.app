@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import AddMeal from "@/pages/AddMeal";
-import MyFoods from "@/pages/MyFoods";
+import MyPlan from "@/pages/MyPlan";
 import Progress from "@/pages/Progress";
 import Profile from "@/pages/Profile";
 import Onboarding from "@/pages/Onboarding";
@@ -42,7 +42,7 @@ function Router() {
         <Layout>
           <Route path="/" component={Dashboard} />
           <Route path="/add-meal" component={AddMeal} />
-          <Route path="/my-foods" component={MyFoods} />
+          <Route path="/my-plan" component={MyPlan} />
           <Route path="/progress" component={Progress} />
           <Route path="/profile" component={Profile} />
           <Route path="/ai-chat" component={AiChat} />

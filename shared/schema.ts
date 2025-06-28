@@ -4,6 +4,7 @@ import {
   varchar,
   timestamp,
   jsonb,
+  json,
   index,
   serial,
   integer,
@@ -138,6 +139,21 @@ export const dailyNutrition = pgTable("daily_nutrition", {
   goalProtein: integer("goal_protein"),
   goalCarbs: integer("goal_carbs"),
   goalFat: integer("goal_fat"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const mealPlans = pgTable("meal_plans", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  meals: json("meals"), // JSON structure with daily meal plans
+  dailyCalories: integer("daily_calories").default(0),
+  macroCarbs: integer("macro_carbs").default(0),
+  macroProtein: integer("macro_protein").default(0),
+  macroFat: integer("macro_fat").default(0),
+  isActive: boolean("is_active").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
