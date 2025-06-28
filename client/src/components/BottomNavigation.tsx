@@ -5,7 +5,7 @@ export default function BottomNavigation() {
 
   const navItems = [
     { path: "/", icon: "home", label: "Início" },
-    { path: "/ai-chat", icon: "comment", label: "IA Chat" },
+    { path: "/add-meal", icon: "plus-circle", label: "Adicionar" },
     { path: "/my-foods", icon: "utensils", label: "Alimentos" },
     { path: "/progress", icon: "chart-bar", label: "Progresso" },
     { path: "/profile", icon: "user", label: "Perfil" },

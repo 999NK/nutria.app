@@ -49,6 +49,14 @@ export default function Layout({ children }: LayoutProps) {
 
         {/* Bottom Navigation */}
         <BottomNavigation />
+
+        {/* Floating Action Button */}
+        <button 
+          className="fixed bottom-20 right-4 w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-40"
+          onClick={() => window.location.href = "/add-meal"}
+        >
+          <i className="fas fa-plus text-xl"></i>
+        </button>
       </div>
     </div>
   );

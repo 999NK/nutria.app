@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { setupLocalAuth } from "./localAuth";
 import { insertFoodSchema, insertMealTypeSchema, insertMealSchema, insertMealFoodSchema, insertRecipeSchema, insertRecipeIngredientSchema, meals, mealTypes } from "@shared/schema";
 import { aiService } from "./services/aiService";
 import { pdfService } from "./services/pdfService";
@@ -39,36 +38,8 @@ function getNutritionalDayRange(dateString: string): { start: Date, end: Date } 
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Always use local development mode in this environment
-  const isLocal = true;
-  
-  // Local development mode - create user automatically for all requests
-  app.use(async (req: any, res, next) => {
-    req.user = {
-      claims: {
-        sub: '43962121', // Use the existing user ID
-        email: 'dev@local.com',
-        first_name: 'Dev',
-        last_name: 'User'
-      }
-    };
-    
-    // Ensure user exists in database
-    try {
-      await storage.upsertUser({
-        id: req.user.claims.sub,
-        email: req.user.claims.email,
-        firstName: req.user.claims.first_name,
-        lastName: req.user.claims.last_name,
-        profileImageUrl: null
-      });
-    } catch (error) {
-      console.error('Error creating development user:', error);
-    }
-    
-    req.isAuthenticated = () => true;
-    next();
-  });
+  // Auth middleware
+  await setupAuth(app);
 
   // Initialize default meal types
   const initializeMealTypes = async () => {
@@ -95,20 +66,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   await initializeMealTypes();
 
-  // Middleware simplificado para desenvolvimento local
-  const authMiddleware = (req: any, res: any, next: any) => {
-    if (isLocal) {
-      // Para desenvolvimento local, sempre permitir acesso
-      req.isAuthenticated = () => true;
-      next();
-    } else {
-      // Para produção, usar autenticação Replit
-      isAuthenticated(req, res, next);
-    }
-  };
-
   // Auth routes
-  app.get('/api/auth/user', authMiddleware, async (req: any, res) => {
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -120,7 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User routes
-  app.patch('/api/user/goals', authMiddleware, async (req: any, res) => {
+  app.patch('/api/user/goals', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const updateSchema = z.object({
@@ -176,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add USDA food to user's foods
-  app.post('/api/foods/from-usda', authMiddleware, async (req: any, res) => {
+  app.post('/api/foods/from-usda', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { usdaFood } = req.body;
@@ -205,7 +164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/foods', authMiddleware, async (req: any, res) => {
+  app.post('/api/foods', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const foodData = insertFoodSchema.parse({ ...req.body, userId });
@@ -229,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/meal-types', authMiddleware, async (req: any, res) => {
+  app.post('/api/meal-types', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const mealTypeData = insertMealTypeSchema.parse({ ...req.body, userId });
@@ -242,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Meal routes
-  app.get('/api/meals', authMiddleware, async (req: any, res) => {
+  app.get('/api/meals', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const date = req.query.date as string;
@@ -254,7 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/meals', authMiddleware, async (req: any, res) => {
+  app.post('/api/meals', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const mealData = insertMealSchema.parse({ ...req.body, userId });
@@ -266,7 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/meals/:mealId/foods', authMiddleware, async (req: any, res) => {
+  app.post('/api/meals/:mealId/foods', isAuthenticated, async (req: any, res) => {
     try {
       const { mealId } = req.params;
       const userId = req.user.claims.sub;
@@ -313,7 +272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/meals/:mealId/foods/:foodId', authMiddleware, async (req: any, res) => {
+  app.delete('/api/meals/:mealId/foods/:foodId', isAuthenticated, async (req: any, res) => {
     try {
       const { mealId, foodId } = req.params;
       await storage.removeFoodFromMeal(parseInt(mealId), parseInt(foodId));
@@ -324,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/meals/:id', authMiddleware, async (req: any, res) => {
+  app.delete('/api/meals/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
       await storage.deleteMeal(parseInt(id));
@@ -336,7 +295,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Recipe routes
-  app.get('/api/recipes', authMiddleware, async (req: any, res) => {
+  app.get('/api/recipes', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const recipes = await storage.getRecipes(userId);
@@ -347,7 +306,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/recipes', authMiddleware, async (req: any, res) => {
+  app.post('/api/recipes', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const recipeData = insertRecipeSchema.parse({ ...req.body, userId });
@@ -359,7 +318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/recipes/:recipeId/ingredients', authMiddleware, async (req: any, res) => {
+  app.post('/api/recipes/:recipeId/ingredients', isAuthenticated, async (req: any, res) => {
     try {
       const { recipeId } = req.params;
       const ingredientData = insertRecipeIngredientSchema.parse({ ...req.body, recipeId: parseInt(recipeId) });
@@ -371,7 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/recipes/:id', authMiddleware, async (req: any, res) => {
+  app.delete('/api/recipes/:id', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
       await storage.deleteRecipe(parseInt(id));
@@ -383,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Daily Nutrition routes
-  app.get('/api/nutrition/daily', authMiddleware, async (req: any, res) => {
+  app.get('/api/nutrition/daily', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const requestedDate = (req.query.date as string) || new Date().toISOString().split('T')[0];
@@ -452,7 +411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/nutrition/history', authMiddleware, async (req: any, res) => {
+  app.get('/api/nutrition/history', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const period = (req.query.period as string) || 'week';
@@ -496,7 +455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Real-time progress tracking endpoints
-  app.get('/api/progress/hourly', authMiddleware, async (req: any, res) => {
+  app.get('/api/progress/hourly', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
@@ -564,7 +523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/progress/weekly', authMiddleware, async (req: any, res) => {
+  app.get('/api/progress/weekly', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
@@ -618,7 +577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/progress/monthly', authMiddleware, async (req: any, res) => {
+  app.get('/api/progress/monthly', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
@@ -678,7 +637,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI routes
-  app.post('/api/ai/analyze-meal', authMiddleware, async (req: any, res) => {
+  app.post('/api/ai/analyze-meal', isAuthenticated, async (req: any, res) => {
     try {
       const { description } = req.body;
       if (!description) {
@@ -693,7 +652,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/ai/suggest-recipes', authMiddleware, async (req: any, res) => {
+  app.post('/api/ai/suggest-recipes', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { availableIngredients } = req.body;
@@ -707,7 +666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Personalized recipe recommendations based on nutrition goals
-  app.post('/api/ai/personalized-recommendations', authMiddleware, async (req: any, res) => {
+  app.post('/api/ai/personalized-recommendations', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { availableIngredients } = req.body;
@@ -750,7 +709,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PDF Export routes
-  app.post('/api/export/pdf', authMiddleware, async (req: any, res) => {
+  app.post('/api/export/pdf', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { startDate, endDate, type } = req.body;
@@ -776,7 +735,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Notification routes
-  app.post('/api/notifications/schedule-daily', authMiddleware, async (req: any, res) => {
+  app.post('/api/notifications/schedule-daily', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       await notificationService.scheduleDailyNotification(userId);
@@ -788,7 +747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PDF Report generation endpoint
-  app.get('/api/reports/nutrition-pdf', authMiddleware, async (req: any, res) => {
+  app.get('/api/reports/nutrition-pdf', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { period = 'daily', date = new Date().toISOString().split('T')[0] } = req.query;
@@ -849,145 +808,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating PDF report:", error);
       res.status(500).json({ message: "Failed to generate PDF report" });
-    }
-  });
-
-  // AI Chat endpoint
-  app.post('/api/ai/chat', authMiddleware, async (req: any, res) => {
-    try {
-      const { message } = req.body;
-      
-      if (!message || typeof message !== 'string') {
-        return res.status(400).json({ message: "Message is required" });
-      }
-
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-
-      // Get user's nutrition context for more personalized responses
-      const today = getNutritionalDay(new Date());
-      const dailyNutrition = await storage.getDailyNutrition(userId, today);
-      
-      let contextualInfo = '';
-      if (dailyNutrition && user) {
-        const remainingCalories = (user.dailyCalories || 2000) - (dailyNutrition.totalCalories || 0);
-        const remainingProtein = (user.dailyProtein || 150) - (parseFloat(dailyNutrition.totalProtein || "0"));
-        
-        contextualInfo = `Contexto do usuário: Meta calórica diária ${user.dailyCalories || 2000}kcal, já consumiu ${dailyNutrition.totalCalories || 0}kcal hoje (restam ${Math.max(0, remainingCalories)}kcal). Meta de proteína ${user.dailyProtein || 150}g, já consumiu ${parseFloat(dailyNutrition.totalProtein || "0")}g hoje (restam ${Math.max(0, remainingProtein)}g).`;
-      }
-
-      // Simple AI response based on message content
-      let response = '';
-      
-      const lowerMessage = message.toLowerCase();
-      
-      if (lowerMessage.includes('proteína') || lowerMessage.includes('protein')) {
-        response = `Ótima pergunta sobre proteínas!
-
-As melhores fontes de proteína incluem:
-
-**Animais:** Frango, peixe, ovos, carne vermelha magra, laticínios
-**Vegetais:** Feijões, lentilhas, grão-de-bico, quinoa, tofu
-
-**Dica:** Combine diferentes fontes ao longo do dia. Um adulto precisa de cerca de 0,8-1,2g de proteína por kg de peso corporal.
-
-**Lanches ricos em proteína:**
-• Iogurte grego com nozes
-• Ovo cozido
-• Mix de castanhas
-• Queijo cottage com frutas
-
-Quer sugestões específicas para alguma refeição?`;
-      } else if (lowerMessage.includes('açúcar') || lowerMessage.includes('doce') || lowerMessage.includes('substituir')) {
-        response = `Excelente ideia reduzir o açúcar!
-
-**Substitutos naturais:**
-• Mel (com moderação)
-• Tâmaras amassadas
-• Banana madura
-• Stevia ou xilitol
-• Canela para adoçar naturalmente
-
-**Para receitas:**
-• 1 xícara açúcar = 3/4 xícara mel (reduza líquidos)
-• Use frutas maduras em bolos e sobremesas
-• Experimente especiarias: canela, baunilha, cardamomo
-
-**Dica importante:** Reduza gradualmente para seu paladar se adaptar. Após 2-3 semanas, você sentirá menos necessidade de doce!
-
-Precisa de alguma receita específica sem açúcar?`;
-      } else if (lowerMessage.includes('água') || lowerMessage.includes('hidrat')) {
-        response = `A hidratação é fundamental!
-
-**Quantidade ideal:**
-• 35ml por kg de peso corporal
-• Exemplo: 70kg = 2,4L por dia
-• Aumente em dias quentes ou exercícios
-
-**Sinais de boa hidratação:**
-• Urina clara ou amarelo claro
-• Pele elástica
-• Energia estável
-
-**Dicas para beber mais água:**
-• Garrafa sempre à vista
-• Água com limão, hortelã ou pepino
-• Chás de ervas (sem açúcar)
-• Frutas ricas em água: melancia, laranja
-
-**Evite:** Sucos industrializados, refrigerantes
-
-Quer dicas de águas saborizadas naturais?`;
-      } else if (lowerMessage.includes('lanche') || lowerMessage.includes('snack')) {
-        response = `Lanches saudáveis são essenciais!
-
-**Opções rápidas e nutritivas:**
-
-**Doces:**
-• Frutas com pasta de amendoim
-• Iogurte com granola caseira
-• Mix de frutas secas e castanhas
-• Banana com canela
-
-**Salgados:**
-• Cenoura com homus
-• Ovos cozidos
-• Queijo com tomate cereja
-• Abacate amassado no pão integral
-
-**Para levar:**
-• Mix de nuts (porção: 1 punhado)
-• Barrinhas caseiras de aveia
-• Frutas in natura
-
-**Regra de ouro:** Combine sempre carboidrato + proteína ou gordura boa para saciedade prolongada!
-
-Quer receitas de algum lanche específico?`;
-      } else {
-        response = `Olá! Sou seu assistente nutricional e estou aqui para ajudar!
-
-Posso orientar sobre:
-• **Alimentação equilibrada** e planejamento de refeições
-• **Substituições** de ingredientes
-• **Receitas saudáveis** e dicas de preparo
-• **Macronutrientes** (proteínas, carboidratos, gorduras)
-• **Hidratação** e metabolismo
-• **Lanches nutritivos** para o seu dia a dia
-
-**Dica do dia:** Uma alimentação saudável não precisa ser complicada! Foque em alimentos naturais, cores variadas no prato e horários regulares.
-
-Como posso te ajudar especificamente hoje? Tem alguma dúvida sobre alimentação, receita ou substituição de ingredientes?`;
-      }
-
-      // Add contextual information if available
-      if (contextualInfo) {
-        response += `\n\n**Seu progresso hoje:** ${contextualInfo}`;
-      }
-
-      res.json({ response });
-    } catch (error) {
-      console.error("Error in AI chat:", error);
-      res.status(500).json({ message: "Failed to process chat message" });
     }
   });
 
