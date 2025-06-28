@@ -854,6 +854,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Chat endpoint
+  app.post('/api/ai/chat', authMiddleware, async (req: any, res) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      // Get user's nutrition context for more personalized responses
+      const today = getNutritionalDay(new Date());
+      const dailyNutrition = await storage.getDailyNutrition(userId, today);
+      
+      let contextualInfo = '';
+      if (dailyNutrition && user) {
+        const remainingCalories = (user.dailyCalories || 2000) - (dailyNutrition.calories || 0);
+        const remainingProtein = (user.dailyProtein || 150) - (dailyNutrition.protein || 0);
+        
+        contextualInfo = `Contexto do usuário: Meta calórica diária ${user.dailyCalories || 2000}kcal, já consumiu ${dailyNutrition.calories || 0}kcal hoje (restam ${Math.max(0, remainingCalories)}kcal). Meta de proteína ${user.dailyProtein || 150}g, já consumiu ${dailyNutrition.protein || 0}g hoje (restam ${Math.max(0, remainingProtein)}g).`;
+      }
+
+      // Simple AI response based on message content
+      let response = '';
+      
+      const lowerMessage = message.toLowerCase();
+      
+      if (lowerMessage.includes('proteína') || lowerMessage.includes('protein')) {
+        response = `Ótima pergunta sobre proteínas!
+
+As melhores fontes de proteína incluem:
+
+**Animais:** Frango, peixe, ovos, carne vermelha magra, laticínios
+**Vegetais:** Feijões, lentilhas, grão-de-bico, quinoa, tofu
+
+**Dica:** Combine diferentes fontes ao longo do dia. Um adulto precisa de cerca de 0,8-1,2g de proteína por kg de peso corporal.
+
+**Lanches ricos em proteína:**
+• Iogurte grego com nozes
+• Ovo cozido
+• Mix de castanhas
+• Queijo cottage com frutas
+
+Quer sugestões específicas para alguma refeição?`;
+      } else if (lowerMessage.includes('açúcar') || lowerMessage.includes('doce') || lowerMessage.includes('substituir')) {
+        response = `Excelente ideia reduzir o açúcar!
+
+**Substitutos naturais:**
+• Mel (com moderação)
+• Tâmaras amassadas
+• Banana madura
+• Stevia ou xilitol
+• Canela para adoçar naturalmente
+
+**Para receitas:**
+• 1 xícara açúcar = 3/4 xícara mel (reduza líquidos)
+• Use frutas maduras em bolos e sobremesas
+• Experimente especiarias: canela, baunilha, cardamomo
+
+**Dica importante:** Reduza gradualmente para seu paladar se adaptar. Após 2-3 semanas, você sentirá menos necessidade de doce!
+
+Precisa de alguma receita específica sem açúcar?`;
+      } else if (lowerMessage.includes('água') || lowerMessage.includes('hidrat')) {
+        response = `A hidratação é fundamental!
+
+**Quantidade ideal:**
+• 35ml por kg de peso corporal
+• Exemplo: 70kg = 2,4L por dia
+• Aumente em dias quentes ou exercícios
+
+**Sinais de boa hidratação:**
+• Urina clara ou amarelo claro
+• Pele elástica
+• Energia estável
+
+**Dicas para beber mais água:**
+• Garrafa sempre à vista
+• Água com limão, hortelã ou pepino
+• Chás de ervas (sem açúcar)
+• Frutas ricas em água: melancia, laranja
+
+**Evite:** Sucos industrializados, refrigerantes
+
+Quer dicas de águas saborizadas naturais?`;
+      } else if (lowerMessage.includes('lanche') || lowerMessage.includes('snack')) {
+        response = `Lanches saudáveis são essenciais!
+
+**Opções rápidas e nutritivas:**
+
+**Doces:**
+• Frutas com pasta de amendoim
+• Iogurte com granola caseira
+• Mix de frutas secas e castanhas
+• Banana com canela
+
+**Salgados:**
+• Cenoura com homus
+• Ovos cozidos
+• Queijo com tomate cereja
+• Abacate amassado no pão integral
+
+**Para levar:**
+• Mix de nuts (porção: 1 punhado)
+• Barrinhas caseiras de aveia
+• Frutas in natura
+
+**Regra de ouro:** Combine sempre carboidrato + proteína ou gordura boa para saciedade prolongada!
+
+Quer receitas de algum lanche específico?`;
+      } else {
+        response = `Olá! Sou seu assistente nutricional e estou aqui para ajudar!
+
+Posso orientar sobre:
+• **Alimentação equilibrada** e planejamento de refeições
+• **Substituições** de ingredientes
+• **Receitas saudáveis** e dicas de preparo
+• **Macronutrientes** (proteínas, carboidratos, gorduras)
+• **Hidratação** e metabolismo
+• **Lanches nutritivos** para o seu dia a dia
+
+**Dica do dia:** Uma alimentação saudável não precisa ser complicada! Foque em alimentos naturais, cores variadas no prato e horários regulares.
+
+Como posso te ajudar especificamente hoje? Tem alguma dúvida sobre alimentação, receita ou substituição de ingredientes?`;
+      }
+
+      // Add contextual information if available
+      if (contextualInfo) {
+        response += `\n\n**Seu progresso hoje:** ${contextualInfo}`;
+      }
+
+      res.json({ response });
+    } catch (error) {
+      console.error("Error in AI chat:", error);
+      res.status(500).json({ message: "Failed to process chat message" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
