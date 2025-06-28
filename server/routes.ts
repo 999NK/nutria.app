@@ -904,6 +904,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Meal Plan endpoints with Gemini AI integration
+  app.get('/api/my-meal-plan', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const activePlan = await storage.getActiveMealPlan(userId);
+      res.json(activePlan || null);
+    } catch (error) {
+      console.error("Error fetching active meal plan:", error);
+      res.status(500).json({ message: "Failed to fetch meal plan" });
+    }
+  });
+
+  app.get('/api/my-meal-plans/history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const history = await storage.getMealPlanHistory(userId);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching meal plan history:", error);
+      res.status(500).json({ message: "Failed to fetch meal plan history" });
+    }
+  });
+
+  app.post('/api/generate-meal-plan', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { description } = req.body;
+
+      if (!description) {
+        return res.status(400).json({ message: "Description is required" });
+      }
+
+      // Generate meal plan using Gemini AI
+      const aiPlan = await aiService.generateMealPlan(description);
+
+      // Create meal plan in database
+      const mealPlan = await storage.createMealPlan({
+        userId,
+        name: aiPlan.name,
+        description: aiPlan.description,
+        meals: aiPlan.meals,
+        dailyCalories: aiPlan.dailyCalories,
+        macroCarbs: aiPlan.macroCarbs,
+        macroProtein: aiPlan.macroProtein,
+        macroFat: aiPlan.macroFat,
+        isActive: true,
+      });
+
+      res.json(mealPlan);
+    } catch (error) {
+      console.error("Error generating meal plan:", error);
+      res.status(500).json({ message: "Failed to generate meal plan" });
+    }
+  });
+
+  app.patch('/api/meal-plans/:id/update', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const planId = parseInt(req.params.id);
+      const { description } = req.body;
+
+      if (!description) {
+        return res.status(400).json({ message: "Description is required" });
+      }
+
+      // Generate updated meal plan using Gemini AI
+      const aiPlan = await aiService.generateMealPlan(description);
+
+      // Update meal plan in database
+      const updatedPlan = await storage.updateMealPlan(planId, {
+        name: aiPlan.name,
+        description: aiPlan.description,
+        meals: aiPlan.meals,
+        dailyCalories: aiPlan.dailyCalories,
+        macroCarbs: aiPlan.macroCarbs,
+        macroProtein: aiPlan.macroProtein,
+        macroFat: aiPlan.macroFat,
+      });
+
+      res.json(updatedPlan);
+    } catch (error) {
+      console.error("Error updating meal plan:", error);
+      res.status(500).json({ message: "Failed to update meal plan" });
+    }
+  });
+
+  app.delete('/api/meal-plans/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const planId = parseInt(req.params.id);
+      await storage.deleteMealPlan(planId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting meal plan:", error);
+      res.status(500).json({ message: "Failed to delete meal plan" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
