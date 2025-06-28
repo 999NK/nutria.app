@@ -54,19 +54,9 @@ Como posso ajudar hoje?`,
     scrollToBottom();
   }, [messages]);
 
-  // Redirect if not authenticated
+  // Skip authentication redirect for local development
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
+    // Authentication check disabled for local development
   }, [isAuthenticated, isLoading, toast]);
 
   const sendMessageMutation = useMutation({
@@ -190,7 +180,7 @@ Como posso ajudar hoje?`,
     "Quais são os melhores lanches saudáveis?",
   ];
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

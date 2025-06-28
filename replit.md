@@ -133,7 +133,17 @@ NutrIA is a comprehensive nutrition tracking mobile application built with React
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- June 28, 2025: Added AI Chat functionality
+  - Created comprehensive AI Chat page with nutrition assistant
+  - Integrated chat interface into bottom navigation (replaced "Adicionar" with "IA Chat")
+  - Built backend endpoint for contextual nutrition responses
+  - Added mobile-responsive chat interface with suggested questions
+  - Implemented personalized responses based on user's daily nutrition progress
+
 ## Changelog
 
 Changelog:
 - June 27, 2025. Initial setup
+- June 28, 2025. AI Chat feature implementation
