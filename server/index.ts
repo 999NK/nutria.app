@@ -11,6 +11,17 @@ app.use((req, res, next) => {
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
+  // Force cache busting headers for all responses
+  res.set({
+    'Cache-Control': 'no-cache, no-store, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    'Surrogate-Control': 'no-store',
+    'ETag': `"${Date.now()}"`,
+    'Last-Modified': new Date().toUTCString(),
+    'Vary': 'Accept-Encoding, User-Agent'
+  });
+
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
     capturedJsonResponse = bodyJson;

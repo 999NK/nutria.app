@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nutria-v1.1';
+const CACHE_NAME = 'nutria-v2.0-' + Date.now();
 const urlsToCache = [
   '/',
   '/manifest.json',
@@ -69,30 +69,23 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Handle all other requests with Cache First strategy
+  // Handle all other requests with Network First strategy to force updates
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(function(response) {
-        // Return cached version if available
-        if (response) {
+        // If network request succeeds, cache it and return
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(event.request, responseClone);
+          });
           return response;
         }
-        
-        // Otherwise fetch from network and cache
-        return fetch(event.request).then(function(response) {
-          // Check if valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-
-          // Clone response before caching
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then(function(cache) {
-            cache.put(event.request, responseToCache);
-          });
-
-          return response;
-        });
+        return response;
+      })
+      .catch(function() {
+        // If network fails, try cache as fallback
+        return caches.match(event.request);
       })
   );
 });

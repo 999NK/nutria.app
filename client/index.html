@@ -86,8 +86,8 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <meta name="cache-bust" content="20250628-055700" />
-    <meta name="timestamp" content="1735354620000" />
+    <meta name="cache-bust" content="20250628-061600" />
+    <meta name="timestamp" content="1735355760000" />
   </head>
   <body>
     <script>
@@ -126,21 +126,32 @@
       </div>
     </div>
     
-    <script type="module" src="/src/main.tsx?v=20250628055700"></script>
+    <script type="module" src="/src/main.tsx?v=20250628061600"></script>
 
     
-    <!-- Service Worker Registration for PWA -->
+    <!-- Service Worker Registration for PWA - Temporarily disabled for cache clearing -->
     <script>
+      // First, unregister any existing service workers
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            console.log('Unregistering SW:', registration);
+            registration.unregister();
+          }
+        });
+        
+        // Re-register after clearing cache
+        setTimeout(() => {
+          navigator.serviceWorker.register('/sw.js?v=20250628061600')
             .then((registration) => {
-              console.log('SW registered: ', registration);
+              console.log('SW re-registered: ', registration);
+              // Force update
+              registration.update();
             })
             .catch((registrationError) => {
               console.log('SW registration failed: ', registrationError);
             });
-        });
+        }, 2000);
       }
     </script>
     
