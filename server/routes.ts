@@ -10,6 +10,30 @@ import { db } from "./db";
 import { eq, and, sql, gte, lt } from "drizzle-orm";
 import { z } from "zod";
 
+// Chat history types and storage
+type ChatMessage = {
+  role: 'user' | 'model';
+  content: string;
+};
+
+const chatHistory = new Map<string, ChatMessage[]>();
+
+function getUserChatHistory(userId: string): ChatMessage[] {
+  return chatHistory.get(userId) || [];
+}
+
+function addToChatHistory(userId: string, role: 'user' | 'model', content: string): void {
+  const userHistory = getUserChatHistory(userId);
+  userHistory.push({ role, content });
+  
+  // Keep only last 20 messages to prevent token limit issues
+  if (userHistory.length > 20) {
+    userHistory.splice(0, userHistory.length - 20);
+  }
+  
+  chatHistory.set(userId, userHistory);
+}
+
 // Utility functions for nutritional day calculation (5AM to 5AM)
 function getNutritionalDay(date: Date): string {
   const nutritionalDate = new Date(date);
@@ -758,8 +782,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { message } = req.body;
       
-      // Use Gemini AI for real responses
-      const response = await aiService.getChatResponse(message);
+      // Get user's chat history
+      const userHistory = getUserChatHistory(userId);
+      
+      // Add current user message to history
+      addToChatHistory(userId, 'user', message);
+      
+      // Get AI response with full context
+      const response = await aiService.getChatResponse(message, userHistory);
+      
+      // Add AI response to history
+      addToChatHistory(userId, 'model', response);
       
       res.json({ response });
     } catch (error) {

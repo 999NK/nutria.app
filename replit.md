@@ -38,3 +38,5 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - ✓ Gemini API integration implemented (replaced automatic responses with real AI)
 - ✓ Fixed model endpoint to use gemini-1.5-flash (working model)
 - ✓ Corrected chat message duplication issue (single message display)
+- ✓ Implemented chat memory system to maintain conversation context
+- ✓ Added user-specific chat history storage (last 20 messages)

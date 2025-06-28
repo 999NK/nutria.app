@@ -59,7 +59,7 @@ class AIService {
     }
   }
 
-  async getChatResponse(message: string): Promise<string> {
+  async getChatResponse(message: string, chatHistory: Array<{role: 'user' | 'model', content: string}> = []): Promise<string> {
     try {
       // Test with basic model name first
       const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
@@ -68,13 +68,31 @@ class AIService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Você é um assistente nutricional especializado em alimentação saudável brasileira. Responda sempre em português brasileiro, seja amigável e educativo. Mantenha respostas concisas e focadas em nutrição.
-
-Pergunta: ${message}`
-            }]
-          }],
+          contents: [
+            // System message first
+            {
+              parts: [{
+                text: "Você é um assistente nutricional especializado em alimentação saudável brasileira. Responda sempre em português brasileiro, seja amigável e educativo. Mantenha respostas concisas e focadas em nutrição."
+              }],
+              role: 'user'
+            },
+            {
+              parts: [{
+                text: "Entendido! Sou seu assistente nutricional especializado em alimentação brasileira. Estou aqui para ajudar com dicas de nutrição, receitas saudáveis e orientações alimentares. Como posso te ajudar?"
+              }],
+              role: 'model'
+            },
+            // Add chat history
+            ...chatHistory.map(msg => ({
+              parts: [{ text: msg.content }],
+              role: msg.role
+            })),
+            // Current user message
+            {
+              parts: [{ text: message }],
+              role: 'user' as const
+            }
+          ],
           generationConfig: {
             temperature: 0.7,
             maxOutputTokens: 400,
