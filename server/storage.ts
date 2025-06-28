@@ -143,21 +143,27 @@ export class DatabaseStorage implements IStorage {
 
   // Food operations
   async getFoods(userId?: string, search?: string): Promise<Food[]> {
-    let query = db.select().from(foods);
+    const query = db.select().from(foods);
+    
+    let whereConditions = [];
     
     if (userId) {
-      query = query.where(
+      whereConditions.push(
         sql`${foods.userId} IS NULL OR ${foods.userId} = ${userId}`
       );
     }
     
     if (search) {
-      query = query.where(
+      whereConditions.push(
         sql`LOWER(${foods.name}) LIKE LOWER(${'%' + search + '%'})`
       );
     }
     
-    return query.orderBy(foods.name);
+    if (whereConditions.length > 0) {
+      return await query.where(and(...whereConditions)).orderBy(foods.name);
+    }
+    
+    return await query.orderBy(foods.name);
   }
 
   async createFood(food: InsertFood): Promise<Food> {
@@ -195,7 +201,13 @@ export class DatabaseStorage implements IStorage {
 
   // Meal operations
   async getMeals(userId: string, date?: string): Promise<(Meal & { mealType: MealType; mealFoods: (MealFood & { food: Food })[] })[]> {
-    let query = db
+    let whereConditions = [eq(meals.userId, userId)];
+    
+    if (date) {
+      whereConditions.push(eq(meals.date, date));
+    }
+
+    const results = await db
       .select({
         meal: meals,
         mealType: mealTypes,
@@ -206,13 +218,8 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(mealTypes, eq(meals.mealTypeId, mealTypes.id))
       .leftJoin(mealFoods, eq(meals.id, mealFoods.mealId))
       .leftJoin(foods, eq(mealFoods.foodId, foods.id))
-      .where(eq(meals.userId, userId));
-
-    if (date) {
-      query = query.where(and(eq(meals.userId, userId), eq(meals.date, date)));
-    }
-
-    const results = await query.orderBy(desc(meals.createdAt));
+      .where(and(...whereConditions))
+      .orderBy(desc(meals.createdAt));
 
     // Group results by meal
     const mealMap = new Map();
