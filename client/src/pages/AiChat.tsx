@@ -224,7 +224,7 @@ export default function AiChat() {
           {/* Chat Area */}
           <div className="flex-1 flex flex-col">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 lg:p-6 pb-24">
+            <div className="flex-1 overflow-y-auto p-4 lg:p-6 pb-28 lg:pb-24">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -295,8 +295,8 @@ export default function AiChat() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area - Fixed at bottom for all devices */}
-            <div className="fixed bottom-0 left-0 right-0 lg:left-64 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-40">
+            {/* Input Area - Desktop Only */}
+            <div className="hidden lg:block fixed bottom-0 left-64 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-40">
               <div className="flex space-x-3 items-end max-w-4xl mx-auto">
                 <Textarea
                   value={inputMessage}
@@ -380,15 +380,15 @@ export default function AiChat() {
         </div>
       </main>
 
-      {/* Fixed Input Area - Mobile Only */}
+      {/* Fixed Input Area - Mobile and Tablet */}
       <div className="lg:hidden fixed bottom-16 left-0 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-50">
-        <div className="flex space-x-3 items-center">
+        <div className="flex space-x-3 items-end">
           <Textarea
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Digite sua pergunta sobre nutrição..."
-            className="flex-1 min-h-[44px] max-h-[44px] resize-none border-gray-300 dark:border-gray-600 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="flex-1 min-h-[44px] max-h-32 resize-none border-gray-300 dark:border-gray-600 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
             disabled={sendMessageMutation.isPending}
           />
           <Button
