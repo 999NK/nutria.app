@@ -264,7 +264,7 @@ export default function MyPlan() {
                 </Card>
 
                 {/* Main Content Grid */}
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 xl:h-[calc(100vh-200px)]">
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 xl:flex-1 xl:min-h-0">
                   {/* Plan Details - Takes up 2 columns on XL screens */}
                   <div className="xl:col-span-2 space-y-6 xl:h-full xl:overflow-y-auto">
                     {/* Nutrition/Workout Stats */}

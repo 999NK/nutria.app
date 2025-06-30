@@ -10,19 +10,19 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
-**2025-06-30 05:59**
+**2025-06-30 06:05**
+- ✓ Fixed React child rendering error in workout plans (object with keys {name, reps, rest, sets})
+- ✓ Implemented proper type checking for exercise objects vs strings in workout display
+- ✓ Corrected desktop sidebar to fill full vertical height with proper flex layout structure
+- ✓ Enhanced full-height layout with container flex structure and tab content optimization
+- ✓ Added exercise details display (reps, sets, duration) for comprehensive workout info
 - ✓ Fixed "Meu Plano" page errors with proper authentication handling and error boundaries
-- ✓ Corrected desktop sidebar layout to fill entire vertical space (calc(100vh-350px))
-- ✓ Enhanced sidebar responsiveness with proper flex layouts and overflow handling
-- ✓ Added unauthorized error handling for all API mutations and queries
 - ✓ Replaced half-donut chart with green circular progress ring matching user's reference image
 - ✓ Implemented exact Dashboard macronutrient visualization (7840 kcal display style)
 - ✓ Added dark theme card background with white text for nutrition progress
 - ✓ Enhanced horizontal progress bars for protein, carbohydrates, and fat with proper colors
 - ✓ Completely redesigned "Meu Plano" page with professional UX design for desktop and mobile
 - ✓ Implemented responsive 3-column grid layout (XL screens) with sidebar progress tracking
-- ✓ Enhanced plan details with color-coded macro cards and meal/workout previews
-- ✓ Improved mobile responsiveness across all plan management features
 
 ## Recent Debug Fixes
 **2025-06-28 02:45**
