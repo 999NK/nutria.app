@@ -178,41 +178,41 @@ export default function AiChat() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-      {/* Fixed Header - Mobile and Tablet */}
-      <div className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 px-4 md:px-6 py-4 border-b z-40 md:hidden">
+      {/* Fixed Header - Mobile */}
+      <div className="fixed top-0 left-0 right-0 bg-gray-800 dark:bg-gray-900 px-4 py-4 border-b border-gray-700 z-40 md:hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-green-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm md:text-base">N</span>
+            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+              <Brain className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
-                NutrIA - Chat IA
-              </h1>
-              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
+              <h1 className="text-lg font-bold text-white">
                 Assistente Nutricional
+              </h1>
+              <p className="text-sm text-gray-300">
+                Tire suas dúvidas sobre nutrição e alimentação
               </p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="w-8 h-8 md:w-10 md:h-10">
-            <Bell className="w-4 h-4 md:w-5 md:h-5" />
+          <Button variant="ghost" size="icon" className="w-10 h-10 text-gray-300 hover:text-white">
+            <Bell className="w-5 h-5" />
           </Button>
         </div>
       </div>
 
       <main className="flex-1 overflow-hidden flex flex-col">
         {/* Desktop and Tablet Header */}
-        <header className="hidden md:block bg-card border-b border-border px-6 py-4">
+        <header className="hidden md:block bg-gray-800 dark:bg-gray-900 border-b border-gray-700 px-6 py-4">
           <div className="flex items-center">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
                 <Brain className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">
-                  Assistente IA Nutricional
+                <h2 className="text-2xl font-bold text-white">
+                  Assistente Nutricional
                 </h2>
-                <p className="text-muted-foreground">
+                <p className="text-gray-300">
                   Tire suas dúvidas sobre nutrição e alimentação
                 </p>
               </div>
@@ -294,8 +294,6 @@ export default function AiChat() {
               )}
               <div ref={messagesEndRef} />
             </div>
-
-
           </div>
 
           {/* Sidebar with suggestions - Desktop Only */}
@@ -371,9 +369,7 @@ export default function AiChat() {
           />
           <Button
             onClick={handleSendMessage}
-            disabled={
-              !inputMessage.trim() || sendMessageMutation.isPending
-            }
+            disabled={!inputMessage.trim() || sendMessageMutation.isPending}
             size="icon"
             className="h-11 w-11 rounded-full bg-green-500 hover:bg-green-600 disabled:opacity-50"
           >
