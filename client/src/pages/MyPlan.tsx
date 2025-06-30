@@ -218,10 +218,14 @@ ${(plan as any).workouts ? Object.entries((plan as any).workouts).map(([day, wor
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="current" className="flex items-center gap-2">
               <Target className="w-4 h-4" />
               Plano Atual
+            </TabsTrigger>
+            <TabsTrigger value="manual" className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Criar Manual
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />

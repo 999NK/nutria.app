@@ -287,7 +287,7 @@ export default function Dashboard() {
       <Card>
         <CardContent className="p-4">
           <h3 className="font-semibold mb-3">Refeições de Hoje</h3>
-          {meals.length === 0 ? (
+          {mealsArray.length === 0 ? (
             <div className="text-center py-8">
               <div className="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
                 <i className="fas fa-utensils text-gray-400 text-xl"></i>
@@ -303,7 +303,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="space-y-3">
-              {meals.map((meal: any) => (
+              {mealsArray.map((meal: any) => (
                 <div
                   key={meal.id}
                   className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"

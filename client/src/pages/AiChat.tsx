@@ -224,7 +224,7 @@ export default function AiChat() {
           {/* Chat Area */}
           <div className="flex-1 flex flex-col">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 lg:p-6 pb-20 lg:pb-6">
+            <div className="flex-1 overflow-y-auto p-4 lg:p-6 pb-24">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -295,9 +295,9 @@ export default function AiChat() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area - Desktop Only */}
-            <div className="hidden lg:block border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
-              <div className="flex space-x-3 items-end">
+            {/* Input Area - Fixed at bottom for all devices */}
+            <div className="fixed bottom-0 left-0 right-0 lg:left-64 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-40">
+              <div className="flex space-x-3 items-end max-w-4xl mx-auto">
                 <Textarea
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
@@ -334,10 +334,10 @@ export default function AiChat() {
                   <Button
                     key={index}
                     variant="outline"
-                    className="w-full text-left h-auto p-3 text-sm"
+                    className="w-full text-left h-auto p-3 text-sm whitespace-normal break-words"
                     onClick={() => setInputMessage(question)}
                   >
-                    {question}
+                    <span className="block truncate">{question}</span>
                   </Button>
                 ))}
               </CardContent>
