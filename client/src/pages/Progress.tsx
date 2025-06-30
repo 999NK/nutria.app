@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, TrendingUp, Target, Activity, Clock, BarChart3, Zap, Download, FileText } from "lucide-react";
+import { Calendar, TrendingUp, Target, Activity, Clock, BarChart3, Zap, Download, FileText, Flame } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, RadialBarChart, RadialBar, Legend } from "recharts";
 import { ProgressRing } from "@/components/ProgressRing";
 import { useToast } from "@/hooks/use-toast";
@@ -146,6 +146,115 @@ export default function Progress() {
     { name: 'Gorduras', value: (dailyNutrition as any).fat, color: '#ef4444' }
   ] : [];
 
+  // Macronutrient Chart Component (similar to the reference image)
+  const MacronutrientChart = () => {
+    const totalCalories = (dailyNutrition as any)?.calories || 0;
+    const currentProtein = (dailyNutrition as any)?.protein || 0;
+    const currentCarbs = (dailyNutrition as any)?.carbs || 0;
+    const currentFat = (dailyNutrition as any)?.fat || 0;
+    const targetCalories = (user as any)?.dailyCalories || 2000;
+    const remainingCalories = Math.max(0, targetCalories - totalCalories);
+
+    return (
+      <Card className="bg-gray-900 text-white border-gray-700 shadow-2xl">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-white text-lg">Progresso Diário</CardTitle>
+            <span className="text-gray-400 text-sm">
+              {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Circular Calories Display */}
+          <div className="flex justify-center">
+            <div className="relative">
+              <svg width="180" height="180" className="transform -rotate-90">
+                {/* Background circle */}
+                <circle
+                  cx="90"
+                  cy="90"
+                  r="75"
+                  stroke="rgb(31, 41, 55)"
+                  strokeWidth="8"
+                  fill="none"
+                />
+                {/* Progress circle */}
+                <circle
+                  cx="90"
+                  cy="90"
+                  r="75"
+                  stroke="#22c55e"
+                  strokeWidth="8"
+                  fill="none"
+                  strokeDasharray={`${2 * Math.PI * 75}`}
+                  strokeDashoffset={`${2 * Math.PI * 75 * (1 - Math.min(1, totalCalories / targetCalories))}`}
+                  strokeLinecap="round"
+                  className="transition-all duration-700"
+                />
+              </svg>
+              {/* Center content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="text-3xl font-bold text-green-400">
+                  {totalCalories}
+                </div>
+                <div className="text-sm text-gray-300">kcal</div>
+                <div className="text-xs text-gray-500">
+                  {remainingCalories} restantes
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Macronutrient Bars */}
+          <div className="space-y-4">
+            {/* Protein */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-blue-400 font-medium">Proteína</span>
+                <span className="text-white font-semibold">{currentProtein}g</span>
+              </div>
+              <div className="w-full bg-gray-700 rounded-full h-2">
+                <div 
+                  className="bg-blue-500 h-2 rounded-full transition-all duration-700"
+                  style={{ width: `${Math.min(100, (currentProtein / ((user as any)?.dailyProtein || 120)) * 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Carbohydrates */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-yellow-400 font-medium">Carboidratos</span>
+                <span className="text-white font-semibold">{currentCarbs}g</span>
+              </div>
+              <div className="w-full bg-gray-700 rounded-full h-2">
+                <div 
+                  className="bg-yellow-500 h-2 rounded-full transition-all duration-700"
+                  style={{ width: `${Math.min(100, (currentCarbs / ((user as any)?.dailyCarbs || 250)) * 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Fat */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-orange-400 font-medium">Gordura</span>
+                <span className="text-white font-semibold">{currentFat}g</span>
+              </div>
+              <div className="w-full bg-gray-700 rounded-full h-2">
+                <div 
+                  className="bg-orange-500 h-2 rounded-full transition-all duration-700"
+                  style={{ width: `${Math.min(100, (currentFat / ((user as any)?.dailyFat || 67)) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   const renderHourlyView = () => (
     <div className="space-y-8">
       {/* Header with Export Button */}
@@ -175,6 +284,40 @@ export default function Progress() {
             )}
             Exportar PDF
           </Button>
+        </div>
+      </div>
+
+      {/* Macronutrient Chart - Featured prominently */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <MacronutrientChart />
+        </div>
+        <div className="lg:col-span-2 space-y-6">
+          {/* Additional stats or content can go here */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+                Resumo Nutricional
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {Math.round((((dailyNutrition as any)?.calories || 0) / ((user as any)?.dailyCalories || 2000)) * 100)}%
+                  </div>
+                  <div className="text-sm text-green-700 dark:text-green-400">Meta Calórica</div>
+                </div>
+                <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {Math.round((((dailyNutrition as any)?.protein || 0) / ((user as any)?.dailyProtein || 120)) * 100)}%
+                  </div>
+                  <div className="text-sm text-blue-700 dark:text-blue-400">Meta Proteína</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
