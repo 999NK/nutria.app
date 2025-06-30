@@ -60,15 +60,18 @@ export default function Sidebar() {
               <Link key={item.href} href={item.href}>
                 <a
                   className={`
-                  flex items-center px-4 py-3 rounded-xl transition-all duration-200
+                  relative flex items-center px-4 py-3 rounded-xl transition-all duration-200
                   ${
                     isActive
-                      ? "bg-primary text-white shadow-lg"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      ? "bg-primary text-white shadow-lg transform scale-[1.02]"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:transform hover:scale-[1.01]"
                   }
                 `}
                 >
-                  <i className={`${item.icon} w-5 text-center mr-3`}></i>
+                  {isActive && (
+                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"></div>
+                  )}
+                  <i className={`${item.icon} w-5 text-center mr-3 ${isActive ? 'text-white' : ''}`}></i>
                   <span className="font-medium">{item.label}</span>
                 </a>
               </Link>

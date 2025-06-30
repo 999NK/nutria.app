@@ -62,10 +62,12 @@ export default function AddMeal() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  // Fetch meal types
+  // Fetch meal types with optimized caching
   const { data: mealTypes = [] } = useQuery<any[]>({
     queryKey: ["/api/meal-types"],
     enabled: isAuthenticated,
+    staleTime: 10 * 60 * 1000, // 10 minutes - meal types rarely change
+    refetchOnWindowFocus: false,
   });
 
   // Removed redundant food search query - FoodDropdownSearch handles its own search

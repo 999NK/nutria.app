@@ -10,6 +10,17 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-06-30 21:45**
+- ✓ Fixed notification duplicates with per-day per-user scheduling system
+- ✓ Optimized React Query caching (5min staleTime, no window refocus)
+- ✓ Added loading skeleton states for better UX
+- ✓ Enhanced sidebar navigation with active page indicators and hover effects
+- ✓ Improved floating action button with scale animations
+- ✓ Corrected responsive breakpoints for consistent tablet experience
+- ✓ Optimized Progress page queries (removed excessive refetch intervals)
+- ✓ Enhanced dark mode contrast for better accessibility
+- ✓ Performance improvements across all major components
+
 **2025-06-30 06:40**
 - ✓ Made app fully responsive for tablet screens (640px-1023px)
 - ✓ Tablets now use desktop layout with sidebar instead of mobile layout

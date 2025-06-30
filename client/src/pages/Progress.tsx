@@ -101,22 +101,26 @@ export default function Progress() {
 
   const { data: hourlyData, isLoading: hourlyLoading } = useQuery<HourlyData[]>({
     queryKey: ['/api/progress/hourly', selectedDate],
-    refetchInterval: 10 * 1000, // Refetch every 10 seconds for real-time updates
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
   });
 
   const { data: weeklyData, isLoading: weeklyLoading } = useQuery<WeeklyData[]>({
     queryKey: ['/api/progress/weekly'],
-    refetchInterval: 30 * 1000, // Refetch every 30 seconds
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   const { data: monthlyData, isLoading: monthlyLoading } = useQuery<MonthlyData[]>({
     queryKey: ['/api/progress/monthly'],
-    refetchInterval: 60 * 1000, // Refetch every minute
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   const { data: dailyNutrition, isLoading: dailyLoading } = useQuery({
     queryKey: ['/api/nutrition/daily', selectedDate],
-    refetchInterval: 10 * 1000, // Refetch every 10 seconds for real-time updates
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Progress calculations with type safety
