@@ -96,6 +96,7 @@ export default function Dashboard() {
 
   const caloriesRemaining = Math.max(0, caloriesGoal - caloriesConsumed);
   const caloriesProgress = Math.min(100, (caloriesConsumed / caloriesGoal) * 100);
+  const caloriesExceeded = caloriesConsumed > caloriesGoal;
 
   // Prepare chart data
   const macroData = [
@@ -125,7 +126,10 @@ export default function Dashboard() {
     }
   ];
 
-  const caloriesChartData = [
+  const caloriesChartData = caloriesExceeded ? [
+    { name: 'Meta', value: caloriesGoal, color: '#E5E7EB' },
+    { name: 'Excesso', value: caloriesConsumed - caloriesGoal, color: '#EF4444' }
+  ] : [
     { name: 'Consumido', value: caloriesConsumed, color: '#10B981' },
     { name: 'Restante', value: caloriesRemaining, color: '#E5E7EB' }
   ];
@@ -185,7 +189,15 @@ export default function Dashboard() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Calorias de Hoje</h3>
+              <div className="flex items-center">
+                <h3 className="text-lg font-semibold">Calorias de Hoje</h3>
+                {caloriesExceeded && (
+                  <span className="ml-2 text-xs bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 px-2 py-1 rounded flex items-center">
+                    <i className="fas fa-exclamation-triangle mr-1"></i>
+                    Meta excedida
+                  </span>
+                )}
+              </div>
               <span className="text-sm text-gray-500 dark:text-gray-400">{todayFormatted}</span>
             </div>
             
@@ -211,29 +223,55 @@ export default function Dashboard() {
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {caloriesConsumed}
+                    {caloriesConsumed.toLocaleString('pt-BR')}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">de {caloriesGoal}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">de {caloriesGoal.toLocaleString('pt-BR')}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-500">kcal</p>
                   <div className="mt-2 text-center">
-                    <p className="text-xs text-gray-500 dark:text-gray-500">Restante</p>
-                    <p className="text-sm font-semibold text-green-600 dark:text-green-400">
-                      {caloriesRemaining} kcal
-                    </p>
+                    {caloriesExceeded ? (
+                      <>
+                        <p className="text-xs text-gray-500 dark:text-gray-500">Excesso</p>
+                        <p className="text-sm font-semibold text-red-600 dark:text-red-400">
+                          +{(caloriesConsumed - caloriesGoal).toLocaleString('pt-BR')} kcal
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-xs text-gray-500 dark:text-gray-500">Restante</p>
+                        <p className="text-sm font-semibold text-green-600 dark:text-green-400">
+                          {caloriesRemaining.toLocaleString('pt-BR')} kcal
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="flex justify-center space-x-6 text-sm">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                <span className="text-gray-600 dark:text-gray-400">Consumido</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-gray-300 rounded-full mr-2"></div>
-                <span className="text-gray-600 dark:text-gray-400">Restante</span>
-              </div>
+              {caloriesExceeded ? (
+                <>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-gray-300 rounded-full mr-2"></div>
+                    <span className="text-gray-600 dark:text-gray-400">Meta</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                    <span className="text-gray-600 dark:text-gray-400">Excesso</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                    <span className="text-gray-600 dark:text-gray-400">Consumido</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-gray-300 rounded-full mr-2"></div>
+                    <span className="text-gray-600 dark:text-gray-400">Restante</span>
+                  </div>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -257,17 +295,22 @@ export default function Dashboard() {
                     content={({ active, payload, label }) => {
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
+                        const isExceeded = data.consumido > data.meta;
                         return (
                           <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
                             <p className="font-semibold">{label}</p>
                             <p className="text-sm text-blue-600 dark:text-blue-400">
-                              Consumido: {data.consumido.toFixed(1)}{data.unit}
+                              Consumido: {data.consumido.toLocaleString('pt-BR', {maximumFractionDigits: 1})}{data.unit}
                             </p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                              Meta: {data.meta}{data.unit}
+                              Meta: {data.meta.toLocaleString('pt-BR')}{data.unit}
                             </p>
-                            <p className="text-sm text-green-600 dark:text-green-400">
-                              Progresso: {data.percentage.toFixed(1)}%
+                            <p className={`text-sm ${isExceeded ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                              {isExceeded ? 'Excesso: ' : 'Progresso: '}
+                              {isExceeded ? 
+                                `+${(data.consumido - data.meta).toLocaleString('pt-BR', {maximumFractionDigits: 1})}${data.unit}` :
+                                `${data.percentage.toFixed(1)}%`
+                              }
                             </p>
                           </div>
                         );
@@ -283,25 +326,33 @@ export default function Dashboard() {
 
             {/* Progress Summary */}
             <div className="mt-4 space-y-2">
-              {macroData.map((macro, index) => (
-                <div key={index} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center">
-                    <div 
-                      className="w-3 h-3 rounded-full mr-2" 
-                      style={{ backgroundColor: macro.color }}
-                    ></div>
-                    <span className="text-gray-600 dark:text-gray-400">{macro.name}</span>
+              {macroData.map((macro, index) => {
+                const isExceeded = macro.consumido > macro.meta;
+                return (
+                  <div key={index} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center">
+                      <div 
+                        className="w-3 h-3 rounded-full mr-2" 
+                        style={{ backgroundColor: macro.color }}
+                      ></div>
+                      <span className="text-gray-600 dark:text-gray-400">{macro.name}</span>
+                      {isExceeded && (
+                        <span className="ml-2 text-xs bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 px-2 py-1 rounded">
+                          Excesso
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <span className={`font-semibold ${isExceeded ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
+                        {macro.consumido.toLocaleString('pt-BR', {maximumFractionDigits: 1})}{macro.unit}
+                      </span>
+                      <span className="text-gray-500 dark:text-gray-500 ml-1">
+                        / {macro.meta.toLocaleString('pt-BR')}{macro.unit}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {macro.consumido.toFixed(1)}{macro.unit}
-                    </span>
-                    <span className="text-gray-500 dark:text-gray-500 ml-1">
-                      / {macro.meta}{macro.unit}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
