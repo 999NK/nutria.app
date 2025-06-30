@@ -295,29 +295,7 @@ export default function AiChat() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area - Desktop Only */}
-            <div className="hidden lg:block fixed bottom-0 left-64 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-40">
-              <div className="flex space-x-3 items-end max-w-4xl mx-auto">
-                <Textarea
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Digite sua pergunta sobre nutrição..."
-                  className="flex-1 min-h-[44px] max-h-32 resize-none border-gray-300 dark:border-gray-600 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  disabled={sendMessageMutation.isPending}
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={
-                    !inputMessage.trim() || sendMessageMutation.isPending
-                  }
-                  size="icon"
-                  className="h-11 w-11 rounded-full bg-green-500 hover:bg-green-600 disabled:opacity-50"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+
           </div>
 
           {/* Sidebar with suggestions - Desktop Only */}
@@ -379,6 +357,30 @@ export default function AiChat() {
           </div>
         </div>
       </main>
+
+      {/* Fixed Input Area - Desktop (after sidebar) */}
+      <div className="hidden lg:block fixed bottom-0 left-64 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-40">
+        <div className="flex space-x-3 items-end max-w-4xl mx-auto">
+          <Textarea
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Digite sua pergunta sobre nutrição..."
+            className="flex-1 min-h-[44px] max-h-32 resize-none border-gray-300 dark:border-gray-600 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            disabled={sendMessageMutation.isPending}
+          />
+          <Button
+            onClick={handleSendMessage}
+            disabled={
+              !inputMessage.trim() || sendMessageMutation.isPending
+            }
+            size="icon"
+            className="h-11 w-11 rounded-full bg-green-500 hover:bg-green-600 disabled:opacity-50"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
 
       {/* Fixed Input Area - Mobile and Tablet */}
       <div className="lg:hidden fixed bottom-16 left-0 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-50">
