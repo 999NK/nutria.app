@@ -59,12 +59,14 @@ export default function MyPlan() {
   const { data: activePlan } = useQuery<MealPlan | null>({
     queryKey: ['/api/user-plans/active'],
     retry: false,
+    enabled: isAuthenticated,
   });
 
   // Fetch plan history
   const { data: planHistory = [] } = useQuery<MealPlan[]>({
     queryKey: ['/api/user-plans/history'],
     retry: false,
+    enabled: isAuthenticated,
   });
 
   // Generate plan mutation
@@ -83,6 +85,17 @@ export default function MyPlan() {
       setUserDescription("");
     },
     onError: (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Não autorizado",
+          description: "Você precisa fazer login novamente...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
       toast({
         title: "Erro ao gerar plano",
         description: error.message || "Tente novamente em alguns instantes.",
@@ -251,9 +264,9 @@ export default function MyPlan() {
                 </Card>
 
                 {/* Main Content Grid */}
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 min-h-[600px]">
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 xl:min-h-[calc(100vh-300px)]">
                   {/* Plan Details - Takes up 2 columns on XL screens */}
-                  <div className="xl:col-span-2 space-y-6">
+                  <div className="xl:col-span-2 space-y-6 xl:h-full xl:overflow-y-auto">
                     {/* Nutrition/Workout Stats */}
                     <Card className="shadow-md">
                       <CardHeader>
@@ -407,10 +420,10 @@ export default function MyPlan() {
                   </div>
 
                   {/* Progress Sidebar */}
-                  <div className="space-y-6 xl:h-full xl:flex xl:flex-col">
+                  <div className="space-y-6 xl:h-full xl:flex xl:flex-col xl:min-h-[calc(100vh-350px)]">
                     {/* Daily Progress */}
-                    <Card className="shadow-md xl:flex-1">
-                      <CardHeader>
+                    <Card className="shadow-md xl:flex-1 xl:min-h-0">
+                      <CardHeader className="xl:flex-shrink-0">
                         <CardTitle className="flex items-center gap-2 text-xl">
                           <TrendingUp className="w-6 h-6 text-purple-600" />
                           Progresso Diário
@@ -419,7 +432,7 @@ export default function MyPlan() {
                           Acompanhe suas conquistas de hoje
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-4 xl:h-full xl:flex xl:flex-col xl:justify-between">
+                      <CardContent className="space-y-4 xl:flex-1 xl:flex xl:flex-col xl:justify-between xl:overflow-y-auto">
                         {/* Diet Progress */}
                         <div className="p-4 border-2 rounded-xl transition-all hover:shadow-md">
                           <div className="flex items-center justify-between mb-3">
