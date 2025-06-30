@@ -201,28 +201,28 @@ export default function AiChat() {
       </div>
 
       <main className="flex-1 overflow-hidden flex flex-col">
-        {/* Desktop and Tablet Header */}
-        <header className="hidden md:block bg-card border-b border-border px-6 py-4">
-          <div className="flex items-center">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <Brain className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-foreground">
-                  Assistente IA Nutricional
-                </h2>
-                <p className="text-muted-foreground">
-                  Tire suas dúvidas sobre nutrição e alimentação
-                </p>
-              </div>
-            </div>
-          </div>
-        </header>
+
 
         <div className="flex-1 flex overflow-hidden md:pt-0 pt-16">
           {/* Chat Area */}
           <div className="flex-1 flex flex-col">
+            {/* Fixed Chat Header - Assistente IA Nutricional */}
+            <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-5 sticky top-0 z-30">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-md">
+                  <Brain className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                    Assistente IA Nutricional
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Tire suas dúvidas sobre nutrição e alimentação
+                  </p>
+                </div>
+              </div>
+            </div>
+            
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-6 pb-32 md:pb-28 lg:pb-24">
               {messages.map((message) => (
