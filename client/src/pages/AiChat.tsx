@@ -178,31 +178,31 @@ export default function AiChat() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-      {/* Fixed Header - Mobile */}
-      <div className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 px-4 py-4 border-b z-40 lg:hidden">
+      {/* Fixed Header - Mobile and Tablet */}
+      <div className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 px-4 md:px-6 py-4 border-b z-40 md:hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">N</span>
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-green-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm md:text-base">N</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900 dark:text-white">
-                NutrIA
+              <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
+                NutrIA - Chat IA
               </h1>
-              <p className="text-xs text-gray-600 dark:text-gray-400">
-                ter., 24 de junho
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
+                Assistente Nutricional
               </p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="w-8 h-8">
-            <Bell className="w-4 h-4" />
+          <Button variant="ghost" size="icon" className="w-8 h-8 md:w-10 md:h-10">
+            <Bell className="w-4 h-4 md:w-5 md:h-5" />
           </Button>
         </div>
       </div>
 
       <main className="flex-1 overflow-hidden flex flex-col">
-        {/* Desktop Header */}
-        <header className="hidden lg:block bg-card border-b border-border px-6 py-4">
+        {/* Desktop and Tablet Header */}
+        <header className="hidden md:block bg-card border-b border-border px-6 py-4">
           <div className="flex items-center">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
@@ -220,18 +220,18 @@ export default function AiChat() {
           </div>
         </header>
 
-        <div className="flex-1 flex overflow-hidden lg:pt-0 pt-16">
+        <div className="flex-1 flex overflow-hidden md:pt-0 pt-16">
           {/* Chat Area */}
           <div className="flex-1 flex flex-col">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 lg:p-6 pb-28 lg:pb-24">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-6 pb-32 md:pb-28 lg:pb-24">
               {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} mb-4`}
                 >
                   <div
-                    className={`flex space-x-3 max-w-[85%] lg:max-w-2xl ${message.role === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
+                    className={`flex space-x-3 max-w-[85%] md:max-w-[75%] lg:max-w-2xl ${message.role === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
                   >
                     <Avatar className="w-8 h-8 flex-shrink-0">
                       <AvatarFallback
@@ -360,7 +360,7 @@ export default function AiChat() {
 
       {/* Fixed Input Area - Desktop (after sidebar) */}
       <div className="hidden lg:block fixed bottom-0 left-64 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-50">
-        <div className="flex space-x-3 items-end">
+        <div className="flex space-x-3 items-end max-w-4xl">
           <Textarea
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
@@ -382,8 +382,30 @@ export default function AiChat() {
         </div>
       </div>
 
-      {/* Fixed Input Area - Mobile and Tablet */}
-      <div className="lg:hidden fixed bottom-16 left-0 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-50">
+      {/* Fixed Input Area - Tablet (after sidebar on larger tablets) */}
+      <div className="hidden md:block lg:hidden fixed bottom-0 left-64 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-50">
+        <div className="flex space-x-3 items-end max-w-3xl">
+          <Textarea
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Digite sua pergunta sobre nutrição..."
+            className="flex-1 min-h-[44px] max-h-32 resize-none border-gray-300 dark:border-gray-600 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            disabled={sendMessageMutation.isPending}
+          />
+          <Button
+            onClick={handleSendMessage}
+            disabled={!inputMessage.trim() || sendMessageMutation.isPending}
+            size="icon"
+            className="h-11 w-11 rounded-full bg-green-500 hover:bg-green-600 disabled:opacity-50 flex-shrink-0"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Fixed Input Area - Mobile */}
+      <div className="md:hidden fixed bottom-16 left-0 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-50">
         <div className="flex space-x-3 items-end">
           <Textarea
             value={inputMessage}

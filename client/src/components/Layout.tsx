@@ -16,9 +16,9 @@ export default function Layout({ children }: LayoutProps) {
       document.documentElement.classList.add('dark');
     }
 
-    // Check if mobile
+    // Check if mobile (phones only, not tablets)
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 640);
     };
 
     checkMobile();
