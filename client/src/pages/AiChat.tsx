@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { Link, useLocation } from "wouter";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,12 @@ import {
   Lightbulb,
   Sparkles,
   Bell,
+  Home,
+  Plus,
+  Calendar,
+  TrendingUp,
+  User,
+  Bot,
 } from "lucide-react";
 
 interface Message {
@@ -177,7 +184,75 @@ export default function AiChat() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+      {/* Sidebar - Desktop */}
+      <div className="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col z-30">
+        {/* Logo */}
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold">N</span>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">NutrIA</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Assistente Nutricional</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2">
+          <Link href="/">
+            <Button variant="ghost" className="w-full justify-start text-left">
+              <Home className="w-5 h-5 mr-3" />
+              Dashboard
+            </Button>
+          </Link>
+          <Link href="/add-meal">
+            <Button variant="ghost" className="w-full justify-start text-left">
+              <Plus className="w-5 h-5 mr-3" />
+              Adicionar Refeição
+            </Button>
+          </Link>
+          <Link href="/my-plan">
+            <Button variant="ghost" className="w-full justify-start text-left">
+              <Calendar className="w-5 h-5 mr-3" />
+              Meu Plano
+            </Button>
+          </Link>
+          <Link href="/progress">
+            <Button variant="ghost" className="w-full justify-start text-left">
+              <TrendingUp className="w-5 h-5 mr-3" />
+              Progresso
+            </Button>
+          </Link>
+          <Link href="/ai-chat">
+            <Button variant="default" className="w-full justify-start text-left bg-primary text-white">
+              <Bot className="w-5 h-5 mr-3" />
+              Chat IA
+            </Button>
+          </Link>
+          <Link href="/profile">
+            <Button variant="ghost" className="w-full justify-start text-left">
+              <User className="w-5 h-5 mr-3" />
+              Perfil
+            </Button>
+          </Link>
+        </nav>
+
+        {/* Logout */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-left text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+            onClick={() => window.location.href = "/api/logout"}
+          >
+            <span className="w-5 h-5 mr-3">⏻</span>
+            Sair
+          </Button>
+        </div>
+      </div>
+
       {/* Fixed Header - Mobile */}
       <div className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 px-4 py-4 border-b z-40 lg:hidden">
         <div className="flex items-center justify-between">
@@ -200,19 +275,20 @@ export default function AiChat() {
         </div>
       </div>
 
-      <main className="flex-1 overflow-hidden flex flex-col">
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col lg:ml-64">
         {/* Desktop Header */}
-        <header className="hidden lg:block bg-card border-b border-border px-6 py-4">
+        <header className="hidden lg:block bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
           <div className="flex items-center">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                 <Brain className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   Assistente IA Nutricional
                 </h2>
-                <p className="text-muted-foreground">
+                <p className="text-gray-600 dark:text-gray-400">
                   Tire suas dúvidas sobre nutrição e alimentação
                 </p>
               </div>
@@ -359,14 +435,14 @@ export default function AiChat() {
       </main>
 
       {/* Fixed Input Area - Desktop (after sidebar) */}
-      <div className="hidden lg:block fixed bottom-0 left-64 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-40">
-        <div className="flex space-x-3 items-end max-w-4xl mx-auto">
+      <div className="hidden lg:block fixed bottom-0 left-64 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-50 shadow-lg">
+        <div className="flex space-x-3 items-end max-w-4xl">
           <Textarea
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Digite sua pergunta sobre nutrição..."
-            className="flex-1 min-h-[44px] max-h-32 resize-none border-gray-300 dark:border-gray-600 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="flex-1 min-h-[44px] max-h-32 resize-none border-gray-300 dark:border-gray-600 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700"
             disabled={sendMessageMutation.isPending}
           />
           <Button
@@ -375,7 +451,7 @@ export default function AiChat() {
               !inputMessage.trim() || sendMessageMutation.isPending
             }
             size="icon"
-            className="h-11 w-11 rounded-full bg-green-500 hover:bg-green-600 disabled:opacity-50"
+            className="h-11 w-11 rounded-full bg-green-500 hover:bg-green-600 disabled:opacity-50 flex-shrink-0"
           >
             <Send className="h-4 w-4" />
           </Button>

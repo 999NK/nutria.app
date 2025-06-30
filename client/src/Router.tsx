@@ -36,16 +36,20 @@ export default function Router() {
   }
 
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/add-meal" component={AddMeal} />
-        <Route path="/my-plan" component={MyPlan} />
-        <Route path="/progress" component={Progress} />
-        <Route path="/profile" component={Profile} />
-        <Route path="/ai-chat" component={AiChat} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      <Route path="/ai-chat" component={AiChat} />
+      <Route path="/*">
+        <Layout>
+          <Switch>
+            <Route path="/" component={Dashboard} />
+            <Route path="/add-meal" component={AddMeal} />
+            <Route path="/my-plan" component={MyPlan} />
+            <Route path="/progress" component={Progress} />
+            <Route path="/profile" component={Profile} />
+            <Route component={NotFound} />
+          </Switch>
+        </Layout>
+      </Route>
+    </Switch>
   );
 }
