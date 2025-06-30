@@ -77,9 +77,9 @@ export default function Layout({ children }: LayoutProps) {
 
   // Desktop Layout
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white flex">
-      {/* Fixed Sidebar */}
-      <div className="fixed left-0 top-0 h-full z-30">
+    <div className="h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white flex overflow-hidden">
+      {/* Fixed Sidebar - Full Height */}
+      <div className="fixed left-0 top-0 h-screen w-64 z-30">
         <Sidebar />
       </div>
       

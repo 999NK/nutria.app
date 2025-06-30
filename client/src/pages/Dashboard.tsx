@@ -12,7 +12,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { useToast } from "@/hooks/use-toast";
 import { getNutritionalDay } from "@/lib/nutritionalDay";
 import { PersonalizedRecommendations } from "@/components/PersonalizedRecommendations";
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 export default function Dashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -97,6 +97,39 @@ export default function Dashboard() {
   const caloriesRemaining = Math.max(0, caloriesGoal - caloriesConsumed);
   const caloriesProgress = Math.min(100, (caloriesConsumed / caloriesGoal) * 100);
 
+  // Prepare chart data
+  const macroData = [
+    {
+      name: 'Proteína',
+      consumido: proteinConsumed,
+      meta: proteinGoal,
+      percentage: Math.min(100, (proteinConsumed / proteinGoal) * 100),
+      color: '#3B82F6',
+      unit: 'g'
+    },
+    {
+      name: 'Carboidratos',
+      consumido: carbsConsumed,
+      meta: carbsGoal,
+      percentage: Math.min(100, (carbsConsumed / carbsGoal) * 100),
+      color: '#EAB308',
+      unit: 'g'
+    },
+    {
+      name: 'Gordura',
+      consumido: fatConsumed,
+      meta: fatGoal,
+      percentage: Math.min(100, (fatConsumed / fatGoal) * 100),
+      color: '#F97316',
+      unit: 'g'
+    }
+  ];
+
+  const caloriesChartData = [
+    { name: 'Consumido', value: caloriesConsumed, color: '#10B981' },
+    { name: 'Restante', value: caloriesRemaining, color: '#E5E7EB' }
+  ];
+
   // Schedule daily notification mutation
   const scheduleNotificationMutation = useMutation({
     mutationFn: async () => {
@@ -154,31 +187,159 @@ export default function Dashboard() {
             <span className="text-sm text-gray-500 dark:text-gray-400">{todayFormatted}</span>
           </div>
           
-          {/* Nutrition Progress - Half Donut Chart */}
-          <div className="flex flex-col lg:flex-row items-center gap-6">
-            {/* Half Donut Chart */}
-            <div className="relative w-48 h-24 lg:w-56 lg:h-28">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Consumido', value: caloriesConsumed },
-                      { name: 'Restante', value: caloriesRemaining }
-                    ]}
-                    cx="50%"
-                    cy="100%"
-                    startAngle={180}
-                    endAngle={0}
-                    innerRadius={40}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    dataKey="value"
+          {/* Enhanced Nutrition Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Calories Donut Chart */}
+            <div className="flex flex-col items-center">
+              <h3 className="text-lg font-medium mb-4">Calorias</h3>
+              <div className="relative w-48 h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={caloriesChartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={90}
+                      startAngle={90}
+                      endAngle={450}
+                      dataKey="value"
+                    >
+                      {caloriesChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {caloriesConsumed}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">de {caloriesGoal}</p>
+                  <p className="text-xs text-gray-500">kcal</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 mt-4 text-sm">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                  <span>Consumido</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-gray-300 rounded-full mr-2"></div>
+                  <span>Restante</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Macronutrients Bar Chart */}
+            <div className="flex flex-col">
+              <h3 className="text-lg font-medium mb-4">Macronutrientes</h3>
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={macroData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis 
+                      dataKey="name" 
+                      className="text-xs"
+                      tick={{ fontSize: 11 }}
+                    />
+                    <YAxis className="text-xs" tick={{ fontSize: 11 }} />
+                    <Tooltip 
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                              <p className="font-semibold">{label}</p>
+                              <p className="text-sm text-blue-600 dark:text-blue-400">
+                                Consumido: {data.consumido.toFixed(1)}{data.unit}
+                              </p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Meta: {data.meta}{data.unit}
+                              </p>
+                              <p className="text-sm text-green-600 dark:text-green-400">
+                                {data.percentage.toFixed(1)}% da meta
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar 
+                      dataKey="consumido" 
+                      fill="#3B82F6"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar 
+                      dataKey="meta" 
+                      fill="#E5E7EB" 
+                      opacity={0.3}
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress Summary Cards */}
+          <div className="grid grid-cols-3 gap-4 mt-6">
+            {macroData.map((macro, index) => (
+              <div 
+                key={index} 
+                className="text-center p-4 rounded-lg border"
+                style={{ 
+                  backgroundColor: `${macro.color}10`, 
+                  borderColor: `${macro.color}30` 
+                }}
+              >
+                <div className="flex justify-center mb-2">
+                  <div 
+                    className="w-full h-2 bg-gray-200 rounded-full overflow-hidden"
                   >
-                    <Cell fill="#22c55e" />
-                    <Cell fill="#e5e7eb" />
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
+                    <div 
+                      className="h-full transition-all duration-500 rounded-full"
+                      style={{ 
+                        width: `${macro.percentage}%`,
+                        backgroundColor: macro.color
+                      }}
+                    />
+                  </div>
+                </div>
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  {macro.name}
+                </p>
+                <p className="text-sm font-bold" style={{ color: macro.color }}>
+                  {macro.consumido.toFixed(0)}{macro.unit}
+                </p>
+                <p className="text-xs text-gray-500">
+                  de {macro.meta}{macro.unit}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Daily Summary */}
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <p className="text-gray-600 dark:text-gray-400 mb-1">Calorias Restantes</p>
+                <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                  {caloriesRemaining}
+                </p>
+                <p className="text-xs text-gray-500">kcal</p>
+              </div>
+              <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-gray-600 dark:text-gray-400 mb-1">Progresso Diário</p>
+                <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                  {caloriesProgress.toFixed(0)}%
+                </p>
+                <p className="text-xs text-gray-500">da meta</p>
+              </div>
+            </div>
+        </CardContent>
+      </Card>
               
               {/* Center Text */}
               <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
