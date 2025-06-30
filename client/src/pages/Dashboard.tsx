@@ -12,6 +12,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { useToast } from "@/hooks/use-toast";
 import { getNutritionalDay } from "@/lib/nutritionalDay";
 import { PersonalizedRecommendations } from "@/components/PersonalizedRecommendations";
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 export default function Dashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -164,26 +165,48 @@ export default function Dashboard() {
             <span className="text-sm text-gray-500 dark:text-gray-400">{todayFormatted}</span>
           </div>
           
-          {/* Nutrition Metrics - 2x2 Grid Layout */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            {/* Calories Card */}
-            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-3 sm:p-4 rounded-lg border border-green-200 dark:border-green-700">
-              <div className="text-center">
-                <div className="w-full bg-green-200 dark:bg-green-700 rounded-full h-2 mb-2">
-                  <div 
-                    className="bg-green-500 h-2 rounded-full transition-all duration-300" 
-                    style={{ width: `${Math.min(100, caloriesProgress)}%` }}
-                  />
+          {/* Nutrition Progress - Half Donut Chart */}
+          <div className="flex flex-col lg:flex-row items-center gap-6">
+            {/* Half Donut Chart */}
+            <div className="relative w-48 h-24 lg:w-56 lg:h-28">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Consumido', value: caloriesConsumed, color: '#22c55e' },
+                      { name: 'Restante', value: caloriesRemaining, color: '#e5e7eb' }
+                    ]}
+                    cx="50%"
+                    cy="100%"
+                    startAngle={180}
+                    endAngle={0}
+                    innerRadius={40}
+                    outerRadius={80}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    <Cell fill="#22c55e" />
+                    <Cell fill="#e5e7eb" />
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              
+              {/* Center Text */}
+              <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{caloriesConsumed}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">de {caloriesGoal} kcal</p>
+                  <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                    {Math.round(caloriesProgress)}% do objetivo
+                  </p>
                 </div>
-                <p className="text-xs text-green-600 dark:text-green-400 font-medium">Calorias</p>
-                <p className="text-sm font-bold text-green-700 dark:text-green-300">{caloriesConsumed}</p>
-                <p className="text-xs text-green-600 dark:text-green-400">de {caloriesGoal} kcal</p>
               </div>
             </div>
 
-            {/* Protein Card */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-3 sm:p-4 rounded-lg border border-blue-200 dark:border-blue-700">
-              <div className="text-center">
+            {/* Macros Summary */}
+            <div className="flex-1 grid grid-cols-3 gap-4 w-full">
+              {/* Protein */}
+              <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
                 <div className="w-full bg-blue-200 dark:bg-blue-700 rounded-full h-2 mb-2">
                   <div 
                     className="bg-blue-500 h-2 rounded-full transition-all duration-300" 
@@ -194,11 +217,9 @@ export default function Dashboard() {
                 <p className="text-sm font-bold text-blue-700 dark:text-blue-300">{proteinConsumed.toFixed(0)}g</p>
                 <p className="text-xs text-blue-600 dark:text-blue-400">de {proteinGoal}g</p>
               </div>
-            </div>
 
-            {/* Carbs Card */}
-            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 p-3 sm:p-4 rounded-lg border border-yellow-200 dark:border-yellow-700">
-              <div className="text-center">
+              {/* Carbs */}
+              <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
                 <div className="w-full bg-yellow-200 dark:bg-yellow-700 rounded-full h-2 mb-2">
                   <div 
                     className="bg-yellow-500 h-2 rounded-full transition-all duration-300" 
@@ -209,11 +230,9 @@ export default function Dashboard() {
                 <p className="text-sm font-bold text-yellow-700 dark:text-yellow-300">{carbsConsumed.toFixed(0)}g</p>
                 <p className="text-xs text-yellow-600 dark:text-yellow-400">de {carbsGoal}g</p>
               </div>
-            </div>
 
-            {/* Fat Card */}
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 p-3 sm:p-4 rounded-lg border border-orange-200 dark:border-orange-700">
-              <div className="text-center">
+              {/* Fat */}
+              <div className="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
                 <div className="w-full bg-orange-200 dark:bg-orange-700 rounded-full h-2 mb-2">
                   <div 
                     className="bg-orange-500 h-2 rounded-full transition-all duration-300" 
@@ -223,6 +242,21 @@ export default function Dashboard() {
                 <p className="text-xs text-orange-600 dark:text-orange-400 font-medium">Gordura</p>
                 <p className="text-sm font-bold text-orange-700 dark:text-orange-300">{fatConsumed.toFixed(0)}g</p>
                 <p className="text-xs text-orange-600 dark:text-orange-400">de {fatGoal}g</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Daily Summary */}
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Resumo do Dia</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-gray-600 dark:text-gray-400">Calorias restantes:</p>
+                <p className="font-semibold text-green-600 dark:text-green-400">{caloriesRemaining} kcal</p>
+              </div>
+              <div>
+                <p className="text-gray-600 dark:text-gray-400">Meta diária:</p>
+                <p className="font-semibold text-gray-900 dark:text-white">{caloriesGoal} kcal</p>
               </div>
             </div>
           </div>

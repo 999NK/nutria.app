@@ -177,7 +177,7 @@ export default function AiChat() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col pb-32 lg:pb-0">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       {/* Fixed Header - Mobile */}
       <div className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 px-4 py-4 border-b z-40 lg:hidden">
         <div className="flex items-center justify-between">
