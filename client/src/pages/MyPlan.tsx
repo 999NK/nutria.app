@@ -16,6 +16,7 @@ interface MealPlan {
   name: string;
   description: string;
   meals?: any;
+  workouts?: any;
   dailyCalories: number;
   macroCarbs: number;
   macroProtein: number;
@@ -145,6 +146,19 @@ export default function MyPlan() {
     return plan.dailyCalories && plan.dailyCalories > 0;
   };
 
+  const getMealTypeName = (mealType: string) => {
+    const mealTypeNames: Record<string, string> = {
+      breakfast: "Café da Manhã",
+      lunch: "Almoço",
+      dinner: "Jantar",
+      snack1: "Lanche da Manhã",
+      snack2: "Lanche da Tarde",
+      snack: "Lanche",
+      ceia: "Ceia"
+    };
+    return mealTypeNames[mealType] || mealType;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
@@ -186,6 +200,93 @@ export default function MyPlan() {
                         </div>
                         <Progress value={getWeekProgress()} className="w-full" />
                       </div>
+
+                      <Separator />
+
+                      {/* Plan Details */}
+                      {activePlan.meals && isPlanDiet(activePlan) && (
+                        <div className="space-y-4">
+                          <h4 className="font-medium">Plano Alimentar Detalhado</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                              <p className="text-sm font-medium text-green-700 dark:text-green-300">Calorias Diárias</p>
+                              <p className="text-lg font-bold text-green-800 dark:text-green-200">{activePlan.dailyCalories} kcal</p>
+                            </div>
+                            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                              <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Proteínas</p>
+                              <p className="text-lg font-bold text-blue-800 dark:text-blue-200">{activePlan.macroProtein}%</p>
+                            </div>
+                            <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg">
+                              <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Carboidratos</p>
+                              <p className="text-lg font-bold text-orange-800 dark:text-orange-200">{activePlan.macroCarbs}%</p>
+                            </div>
+                          </div>
+
+                          {/* Weekly Meal Plan */}
+                          <div className="space-y-3">
+                            <h5 className="font-medium">Refeições da Semana</h5>
+                            <div className="space-y-2">
+                              {Object.entries(activePlan.meals).map(([day, dayMeals]: [string, any]) => (
+                                <div key={day} className="border rounded-lg p-3">
+                                  <h6 className="font-medium capitalize mb-2">{day}</h6>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                    {Object.entries(dayMeals).map(([mealType, meal]: [string, any]) => (
+                                      <div key={mealType} className="bg-gray-50 dark:bg-gray-800 p-2 rounded">
+                                        <p className="font-medium">{getMealTypeName(mealType)}</p>
+                                        <p className="text-gray-600 dark:text-gray-400">{meal.name}</p>
+                                        <p className="text-xs text-gray-500">{meal.calories} kcal</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Workout Plan Details */}
+                      {(activePlan as any).workouts && !isPlanDiet(activePlan) && (
+                        <div className="space-y-4">
+                          <h4 className="font-medium">Plano de Treino Detalhado</h4>
+                          <div className="space-y-3">
+                            {Object.entries((activePlan as any).workouts).map(([day, workout]: [string, any]) => (
+                              <div key={day} className="border rounded-lg p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                  <h6 className="font-medium capitalize">{day}</h6>
+                                  {workout.duration && (
+                                    <Badge variant="secondary">{workout.duration}</Badge>
+                                  )}
+                                </div>
+                                <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                  {workout.name}
+                                </h6>
+                                {workout.exercises && workout.exercises.length > 0 ? (
+                                  <div className="space-y-2">
+                                    {workout.exercises.map((exercise: any, index: number) => (
+                                      <div key={index} className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                                        <div className="flex items-center justify-between">
+                                          <span className="font-medium">{exercise.name}</span>
+                                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                                            {exercise.sets && exercise.reps && (
+                                              <span>{exercise.sets} x {exercise.reps}</span>
+                                            )}
+                                            {exercise.rest && (
+                                              <span className="ml-2">• {exercise.rest}</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-gray-500 dark:text-gray-400 text-sm">Dia de descanso</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       <Separator />
 
