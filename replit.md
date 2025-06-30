@@ -10,14 +10,16 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
-**2025-06-28 05:30**
-- ✓ Completed "Meu Plano" page redesign following user's image example
-- ✓ Implemented dual AI functionality (nutritionist + personal trainer)
-- ✓ Added plan history management with activate/deactivate and deletion
-- ✓ Created daily progress tracking system for diet and exercise plans
-- ✓ Fixed TypeScript errors in storage.ts that were affecting hot reload
-- ✓ Confirmed hot reload functionality working (Vite HMR operational)
-- ✓ Gemini AI integration complete for custom plan generation
+**2025-06-30 01:30**
+- ✓ Added manual plan creation tab in "Meu Plano" page with 3-tab layout
+- ✓ Implemented user characteristics display (weight, height, age, goal)
+- ✓ Enhanced AI plan generation to use user profile data automatically
+- ✓ Added personalized placeholders based on user characteristics
+- ✓ Implemented comprehensive meal plan and workout plan generation using user data
+- ✓ Fixed TypeScript errors for user data access with proper type checking
+- ✓ Enhanced AI prompts with detailed user characteristics for both diet and workout plans
+- ✓ Completed export functionality and plan management system
+- ✓ Finalized all requested improvements for comprehensive nutrition tracking
 
 ## Recent Debug Fixes
 **2025-06-28 02:45**

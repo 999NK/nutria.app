@@ -1031,9 +1031,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Description is required" });
       }
 
-      // Generate workout plan using Gemini AI
-      console.log("Calling AI service to generate workout plan...");
-      const aiPlan = await aiService.generateWorkoutPlan(description);
+      // Get user characteristics for personalized workout plan generation
+      const user = await storage.getUser(userId);
+      
+      // Enhance description with user characteristics
+      const enhancedDescription = `
+        CARACTERÍSTICAS DO USUÁRIO:
+        - Peso: ${user?.weight || 'não informado'} kg
+        - Altura: ${user?.height || 'não informado'} cm
+        - Idade: ${user?.age || 'não informado'} anos
+        - Objetivo: ${user?.goal || 'não informado'}
+        - Nível de atividade: ${user?.activityLevel || 'não informado'}
+        
+        DESCRIÇÃO PERSONALIZADA: ${description}
+        
+        Por favor, crie um plano de treino detalhado considerando essas informações, adequado para o biotipo e objetivos do usuário.
+      `;
+
+      // Generate workout plan using Gemini AI with enhanced description
+      console.log("Calling AI service to generate workout plan with user characteristics...");
+      const aiPlan = await aiService.generateWorkoutPlan(enhancedDescription);
       console.log("AI workout plan generated successfully:", aiPlan.name);
 
       // Create workout plan as meal plan for now (until userPlans is implemented)

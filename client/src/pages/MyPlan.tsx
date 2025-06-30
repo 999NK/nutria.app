@@ -36,6 +36,7 @@ export default function MyPlan() {
   });
 
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   // Fetch active plan
@@ -541,19 +542,19 @@ ${(plan as any).workouts ? Object.entries((plan as any).workouts).map(([day, wor
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <p className="text-gray-600 dark:text-gray-400">Peso</p>
-                      <p className="font-semibold">{(user as any)?.weight || 'N/A'} kg</p>
+                      <p className="font-semibold">{user && 'weight' in user ? (user as any).weight : 'N/A'} kg</p>
                     </div>
                     <div>
                       <p className="text-gray-600 dark:text-gray-400">Altura</p>
-                      <p className="font-semibold">{(user as any)?.height || 'N/A'} cm</p>
+                      <p className="font-semibold">{user && 'height' in user ? (user as any).height : 'N/A'} cm</p>
                     </div>
                     <div>
                       <p className="text-gray-600 dark:text-gray-400">Idade</p>
-                      <p className="font-semibold">{(user as any)?.age || 'N/A'} anos</p>
+                      <p className="font-semibold">{user && 'age' in user ? (user as any).age : 'N/A'} anos</p>
                     </div>
                     <div>
                       <p className="text-gray-600 dark:text-gray-400">Objetivo</p>
-                      <p className="font-semibold">{(user as any)?.goal || 'N/A'}</p>
+                      <p className="font-semibold">{user && 'goal' in user ? (user as any).goal : 'N/A'}</p>
                     </div>
                   </div>
                 </div>
@@ -566,8 +567,8 @@ ${(plan as any).workouts ? Object.entries((plan as any).workouts).map(([day, wor
                   <Textarea
                     placeholder={
                       selectedPlanType === 'diet'
-                        ? `Baseado no seu perfil (${(user as any)?.weight}kg, ${(user as any)?.height}cm, ${(user as any)?.age} anos), descreva suas preferências alimentares, restrições e objetivos específicos...`
-                        : `Considerando seu perfil (${(user as any)?.weight}kg, ${(user as any)?.height}cm, ${(user as any)?.age} anos), descreva sua experiência com exercícios, disponibilidade e preferências de treino...`
+                        ? `Baseado no seu perfil (${user && 'weight' in user ? (user as any).weight : 'N/A'}kg, ${user && 'height' in user ? (user as any).height : 'N/A'}cm, ${user && 'age' in user ? (user as any).age : 'N/A'} anos), descreva suas preferências alimentares, restrições e objetivos específicos...`
+                        : `Considerando seu perfil (${user && 'weight' in user ? (user as any).weight : 'N/A'}kg, ${user && 'height' in user ? (user as any).height : 'N/A'}cm, ${user && 'age' in user ? (user as any).age : 'N/A'} anos), descreva sua experiência com exercícios, disponibilidade e preferências de treino...`
                     }
                     value={userDescription}
                     onChange={(e) => setUserDescription(e.target.value)}
