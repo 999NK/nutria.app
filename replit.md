@@ -10,11 +10,11 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
-**2025-06-30 06:28**
-- ✓ Fixed duplicate input issue in AI Chat for tablet screens
-- ✓ Separated desktop and mobile/tablet input components with proper Tailwind classes
-- ✓ Optimized input positioning to prevent overlap and duplication
-- ✓ Enhanced responsive design for chat interface across all device sizes
+**2025-06-30 06:37**
+- ✓ Fixed AI Chat input positioning using original Layout structure
+- ✓ Desktop input now correctly positioned after sidebar (left-64) 
+- ✓ Mobile input maintains proper spacing above bottom navigation
+- ✓ Removed unnecessary custom sidebar to keep original design consistency
 
 **2025-06-30 06:19**
 - ✓ Resolved Babel parser syntax error causing app startup failure
