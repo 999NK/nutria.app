@@ -12,7 +12,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { useToast } from "@/hooks/use-toast";
 import { getNutritionalDay } from "@/lib/nutritionalDay";
 import { PersonalizedRecommendations } from "@/components/PersonalizedRecommendations";
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+
 
 export default function Dashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -147,90 +147,98 @@ export default function Dashboard() {
   return (
     <div className="p-4 space-y-6 pb-20">
       {/* Daily Progress Summary with Half Donut Chart */}
-      <Card>
+      <Card className="bg-gray-900 dark:bg-gray-900 border-gray-700">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Progresso Diário</h2>
-            <span className="text-sm text-gray-500 dark:text-gray-400">{todayFormatted}</span>
+            <h2 className="text-lg font-semibold text-white">Progresso Diário</h2>
+            <span className="text-sm text-gray-400">{todayFormatted}</span>
           </div>
           
-          {/* Nutrition Progress - Half Donut Chart */}
+          {/* Nutrition Progress - Green Circle */}
           <div className="flex flex-col lg:flex-row items-center gap-6">
-            {/* Half Donut Chart */}
-            <div className="relative w-48 h-24 lg:w-56 lg:h-28">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Consumido', value: caloriesConsumed },
-                      { name: 'Restante', value: caloriesRemaining }
-                    ]}
-                    cx="50%"
-                    cy="100%"
-                    startAngle={180}
-                    endAngle={0}
-                    innerRadius={40}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    <Cell fill="#22c55e" />
-                    <Cell fill="#e5e7eb" />
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              
-              {/* Center Text */}
-              <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{caloriesConsumed}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">de {caloriesGoal} kcal</p>
-                  <p className="text-xs text-green-600 dark:text-green-400 font-medium">
-                    {Math.round(caloriesProgress)}% do objetivo
-                  </p>
+            {/* Green Circle Chart */}
+            <div className="relative flex justify-center items-center">
+              <div className="relative">
+                <svg width="140" height="140" className="transform -rotate-90">
+                  {/* Background circle */}
+                  <circle
+                    cx="70"
+                    cy="70"
+                    r="60"
+                    stroke="rgb(55, 65, 81)"
+                    strokeWidth="6"
+                    fill="none"
+                    className="opacity-20"
+                  />
+                  {/* Progress circle */}
+                  <circle
+                    cx="70"
+                    cy="70"
+                    r="60"
+                    stroke="#22c55e"
+                    strokeWidth="6"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 60}`}
+                    strokeDashoffset={`${2 * Math.PI * 60 * (1 - Math.min(1, caloriesConsumed / caloriesGoal))}`}
+                    strokeLinecap="round"
+                    className="transition-all duration-700"
+                  />
+                </svg>
+                {/* Center content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-3xl font-bold text-white">
+                    {caloriesConsumed}
+                  </div>
+                  <div className="text-sm text-gray-300">kcal</div>
+                  <div className="text-xs text-gray-400">
+                    {caloriesRemaining} restantes
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Macros Summary */}
-            <div className="flex-1 grid grid-cols-3 gap-4 w-full">
+            {/* Macros Summary - Horizontal Bars like the reference image */}
+            <div className="flex-1 space-y-4 w-full">
               {/* Protein */}
-              <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-                <div className="w-full bg-blue-200 dark:bg-blue-700 rounded-full h-2 mb-2">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-blue-400 font-medium">Proteína</span>
+                  <span className="text-white font-semibold">{proteinConsumed.toFixed(0)}g</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
                   <div 
-                    className="bg-blue-500 h-2 rounded-full transition-all duration-300" 
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-700"
                     style={{ width: `${Math.min(100, (proteinConsumed / proteinGoal) * 100)}%` }}
                   />
                 </div>
-                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Proteína</p>
-                <p className="text-sm font-bold text-blue-700 dark:text-blue-300">{proteinConsumed.toFixed(0)}g</p>
-                <p className="text-xs text-blue-600 dark:text-blue-400">de {proteinGoal}g</p>
               </div>
 
-              {/* Carbs */}
-              <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
-                <div className="w-full bg-yellow-200 dark:bg-yellow-700 rounded-full h-2 mb-2">
+              {/* Carbohydrates */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-yellow-400 font-medium">Carboidratos</span>
+                  <span className="text-white font-semibold">{carbsConsumed.toFixed(0)}g</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
                   <div 
-                    className="bg-yellow-500 h-2 rounded-full transition-all duration-300" 
+                    className="bg-yellow-500 h-2 rounded-full transition-all duration-700"
                     style={{ width: `${Math.min(100, (carbsConsumed / carbsGoal) * 100)}%` }}
                   />
                 </div>
-                <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">Carboidratos</p>
-                <p className="text-sm font-bold text-yellow-700 dark:text-yellow-300">{carbsConsumed.toFixed(0)}g</p>
-                <p className="text-xs text-yellow-600 dark:text-yellow-400">de {carbsGoal}g</p>
               </div>
 
               {/* Fat */}
-              <div className="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
-                <div className="w-full bg-orange-200 dark:bg-orange-700 rounded-full h-2 mb-2">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-orange-400 font-medium">Gordura</span>
+                  <span className="text-white font-semibold">{fatConsumed.toFixed(0)}g</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
                   <div 
-                    className="bg-orange-500 h-2 rounded-full transition-all duration-300" 
+                    className="bg-orange-500 h-2 rounded-full transition-all duration-700"
                     style={{ width: `${Math.min(100, (fatConsumed / fatGoal) * 100)}%` }}
                   />
                 </div>
-                <p className="text-xs text-orange-600 dark:text-orange-400 font-medium">Gordura</p>
-                <p className="text-sm font-bold text-orange-700 dark:text-orange-300">{fatConsumed.toFixed(0)}g</p>
-                <p className="text-xs text-orange-600 dark:text-orange-400">de {fatGoal}g</p>
               </div>
             </div>
           </div>
