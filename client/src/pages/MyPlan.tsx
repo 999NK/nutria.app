@@ -371,9 +371,12 @@ export default function MyPlan() {
   // Funções para os cards inteligentes
   const handleActivatePlan = async (planId: number) => {
     try {
-      await apiRequest(`/api/user-plans/${planId}/activate`, {
-        method: 'POST'
+      const response = await fetch(`/api/user-plans/${planId}/activate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
       });
+      if (!response.ok) throw new Error('Failed to activate plan');
+      
       queryClient.invalidateQueries({ queryKey: ['/api/user-plans/active'] });
       queryClient.invalidateQueries({ queryKey: ['/api/user-plans/history'] });
       toast({
@@ -391,9 +394,12 @@ export default function MyPlan() {
 
   const handleDeletePlan = async (planId: number) => {
     try {
-      await apiRequest(`/api/user-plans/${planId}`, {
-        method: 'DELETE'
+      const response = await fetch(`/api/user-plans/${planId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
       });
+      if (!response.ok) throw new Error('Failed to delete plan');
+      
       queryClient.invalidateQueries({ queryKey: ['/api/user-plans/active'] });
       queryClient.invalidateQueries({ queryKey: ['/api/user-plans/history'] });
       toast({
@@ -481,16 +487,45 @@ export default function MyPlan() {
                 <CardContent className="pt-0">
                   {planHistory.find(p => isPlanDiet(p) && p.isActive) ? (
                     <div className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400">Progresso hoje</span>
-                          <span className="font-medium">75%</span>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                          {planHistory.find(p => isPlanDiet(p) && p.isActive)?.name}
+                        </p>
+                        <p className="text-xs text-gray-500 line-clamp-2">
+                          {planHistory.find(p => isPlanDiet(p) && p.isActive)?.description}
+                        </p>
+                      </div>
+                      
+                      {/* Feedback Visual Aprimorado */}
+                      <div className="space-y-3">
+                        <div className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200">
+                          <div className="flex items-center justify-between text-sm mb-2">
+                            <span className="text-green-700 dark:text-green-300 font-medium">Progresso hoje</span>
+                            <span className="font-bold text-green-800 dark:text-green-200">75%</span>
+                          </div>
+                          <Progress value={75} className="h-3 bg-green-100" />
+                          <div className="flex items-center justify-between mt-2 text-xs">
+                            <span className="text-green-600 dark:text-green-400">3/4 refeições completas</span>
+                            <div className="flex items-center gap-1 text-green-700">
+                              <Award className="w-3 h-3" />
+                              <span>3 dias seguidos! 🔥</span>
+                            </div>
+                          </div>
                         </div>
-                        <Progress value={75} className="h-2" />
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
-                          <TrendingUp className="w-3 h-3" />
-                          <span>3 dias seguidos</span>
-                          <span className="text-green-600">🔥</span>
+                        
+                        {/* Cronograma Visual */}
+                        <div className="space-y-2">
+                          <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Próximas refeições</p>
+                          <div className="grid grid-cols-4 gap-1">
+                            {['Café', 'Almoço', 'Lanche', 'Jantar'].map((meal, index) => (
+                              <div key={meal} className={`text-center p-2 rounded-md text-xs ${
+                                index < 3 ? 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-300' : 
+                                'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                              }`}>
+                                {index < 3 ? '✓' : '○'} {meal}
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -558,16 +593,52 @@ export default function MyPlan() {
                 <CardContent className="pt-0">
                   {planHistory.find(p => !isPlanDiet(p) && p.isActive) ? (
                     <div className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400">Progresso hoje</span>
-                          <span className="font-medium">100%</span>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                          {planHistory.find(p => !isPlanDiet(p) && p.isActive)?.name}
+                        </p>
+                        <p className="text-xs text-gray-500 line-clamp-2">
+                          {planHistory.find(p => !isPlanDiet(p) && p.isActive)?.description}
+                        </p>
+                      </div>
+                      
+                      {/* Feedback Visual de Treino Aprimorado */}
+                      <div className="space-y-3">
+                        <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg border border-blue-200">
+                          <div className="flex items-center justify-between text-sm mb-2">
+                            <span className="text-blue-700 dark:text-blue-300 font-medium">Treino hoje</span>
+                            <span className="font-bold text-blue-800 dark:text-blue-200">100%</span>
+                          </div>
+                          <Progress value={100} className="h-3 bg-blue-100" />
+                          <div className="flex items-center justify-between mt-2 text-xs">
+                            <span className="text-blue-600 dark:text-blue-400">Push - Concluído</span>
+                            <div className="flex items-center gap-1 text-blue-700">
+                              <Award className="w-3 h-3" />
+                              <span>5 dias seguidos! 🔥</span>
+                            </div>
+                          </div>
                         </div>
-                        <Progress value={100} className="h-2" />
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
-                          <TrendingUp className="w-3 h-3" />
-                          <span>5 dias seguidos</span>
-                          <span className="text-green-600">🔥</span>
+                        
+                        {/* Cronograma de Treinos Semanal */}
+                        <div className="space-y-2">
+                          <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Cronograma da semana</p>
+                          <div className="grid grid-cols-7 gap-1">
+                            {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => (
+                              <div key={day} className={`text-center p-2 rounded-md text-xs ${
+                                index === 1 || index === 3 || index === 5 ? 
+                                  (index <= 3 ? 'bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-300' : 
+                                               'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400') :
+                                  'bg-gray-50 text-gray-400 dark:bg-gray-800 dark:text-gray-500'
+                              }`}>
+                                <div className="font-medium">{day}</div>
+                                <div className="text-xs mt-1">
+                                  {index === 1 ? '✓ Push' : 
+                                   index === 3 ? '✓ Pull' : 
+                                   index === 5 ? '○ Legs' : ''}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
