@@ -57,16 +57,20 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [currentNutritionalDay, queryClient, toast]);
 
-  // Fetch today's meals
-  const { data: meals = [] } = useQuery({
+  // Fetch today's meals with optimized caching
+  const { data: meals = [], isLoading: mealsLoading } = useQuery({
     queryKey: ["/api/meals"],
     retry: false,
-  }) as { data: any[] };
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+  }) as { data: any[], isLoading: boolean };
 
-  // Fetch daily nutrition
-  const { data: dailyNutrition } = useQuery({
+  // Fetch daily nutrition with optimized caching
+  const { data: dailyNutrition, isLoading: nutritionLoading } = useQuery({
     queryKey: ["/api/nutrition/daily"],
     retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   const todayFormatted = format(new Date(), "EEEE, dd 'de' MMMM", { locale: ptBR });
@@ -122,14 +126,19 @@ export default function Dashboard() {
     },
   });
 
-  // Schedule notification only once per session
+  // Schedule notification only once per day per user
   useEffect(() => {
-    const hasScheduled = sessionStorage.getItem('notification-scheduled');
-    if (isAuthenticated && (user as any)?.notificationsEnabled && !hasScheduled) {
+    const today = new Date().toDateString();
+    const lastScheduled = localStorage.getItem('notification-scheduled-date');
+    const scheduledUser = localStorage.getItem('notification-scheduled-user');
+    
+    if (isAuthenticated && user?.id && 
+        (lastScheduled !== today || scheduledUser !== user.id)) {
       scheduleNotificationMutation.mutate();
-      sessionStorage.setItem('notification-scheduled', 'true');
+      localStorage.setItem('notification-scheduled-date', today);
+      localStorage.setItem('notification-scheduled-user', user.id);
     }
-  }, [isAuthenticated, (user as any)?.notificationsEnabled]);
+  }, [isAuthenticated, user?.id]);
 
   const getMealIcon = (mealName: string) => {
     const name = mealName.toLowerCase();
@@ -142,6 +151,44 @@ export default function Dashboard() {
 
   if (isLoading || !isAuthenticated) {
     return null;
+  }
+
+  // Loading skeleton for better UX
+  if (mealsLoading || nutritionLoading) {
+    return (
+      <div className="p-4 space-y-6 pb-20">
+        {/* Progress Summary Skeleton */}
+        <Card className="bg-gray-900 dark:bg-gray-900 border-gray-700">
+          <CardContent className="p-6">
+            <div className="animate-pulse">
+              <div className="h-6 bg-gray-700 rounded w-1/3 mb-4"></div>
+              <div className="flex items-center justify-center mb-6">
+                <div className="w-32 h-32 bg-gray-700 rounded-full"></div>
+              </div>
+              <div className="space-y-4">
+                <div className="h-4 bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-700 rounded w-full"></div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Meals Skeleton */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/4"></div>
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-16 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

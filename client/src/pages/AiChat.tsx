@@ -378,9 +378,9 @@ export default function AiChat() {
         </div>
       </div>
 
-      {/* Fixed Input Area - Tablet (after sidebar on larger tablets) */}
+      {/* Fixed Input Area - Tablet (768px to 1023px) */}
       <div className="hidden md:block lg:hidden fixed bottom-0 left-64 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 z-50">
-        <div className="flex space-x-3 items-end max-w-3xl">
+        <div className="flex space-x-3 items-end max-w-2xl mx-auto">
           <Textarea
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
