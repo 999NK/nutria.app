@@ -189,9 +189,9 @@ export default function MyPlan() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 h-12">
+      <div className="container mx-auto px-4 py-6 max-w-7xl xl:h-screen xl:flex xl:flex-col">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full xl:flex-1 xl:flex xl:flex-col">
+          <TabsList className="grid w-full grid-cols-3 mb-8 h-12 xl:flex-shrink-0">
             <TabsTrigger value="current" className="flex items-center gap-2 text-base">
               <Target className="w-5 h-5" />
               Plano Atual
@@ -206,11 +206,11 @@ export default function MyPlan() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="current" className="space-y-6">
+          <TabsContent value="current" className="space-y-6 xl:flex-1 xl:flex xl:flex-col">
             {activePlan ? (
-              <div className="space-y-6">
+              <div className="space-y-6 xl:flex-1 xl:flex xl:flex-col">
                 {/* Plan Header Card */}
-                <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 shadow-lg">
+                <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 shadow-lg xl:flex-shrink-0">
                   <CardHeader className="pb-4">
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
@@ -264,7 +264,7 @@ export default function MyPlan() {
                 </Card>
 
                 {/* Main Content Grid */}
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 xl:min-h-[calc(100vh-300px)]">
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 xl:h-[calc(100vh-200px)]">
                   {/* Plan Details - Takes up 2 columns on XL screens */}
                   <div className="xl:col-span-2 space-y-6 xl:h-full xl:overflow-y-auto">
                     {/* Nutrition/Workout Stats */}
@@ -396,12 +396,24 @@ export default function MyPlan() {
                                                 {exerciseType}
                                               </div>
                                               <div className="text-sm font-semibold mt-1">
-                                                {exercise.name || exercise}
+                                                {typeof exercise === 'object' && exercise.name ? exercise.name : 
+                                                 typeof exercise === 'string' ? exercise : 
+                                                 'Exercício'}
                                               </div>
-                                              {exercise.duration && (
+                                              {typeof exercise === 'object' && exercise.duration && (
                                                 <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
                                                   <Clock className="w-3 h-3" />
                                                   {exercise.duration}
+                                                </div>
+                                              )}
+                                              {typeof exercise === 'object' && exercise.reps && (
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                  {exercise.reps} repetições
+                                                </div>
+                                              )}
+                                              {typeof exercise === 'object' && exercise.sets && (
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                  {exercise.sets} séries
                                                 </div>
                                               )}
                                             </div>
@@ -420,9 +432,9 @@ export default function MyPlan() {
                   </div>
 
                   {/* Progress Sidebar */}
-                  <div className="space-y-6 xl:h-full xl:flex xl:flex-col xl:min-h-[calc(100vh-350px)]">
+                  <div className="xl:h-full xl:flex xl:flex-col space-y-6">
                     {/* Daily Progress */}
-                    <Card className="shadow-md xl:flex-1 xl:min-h-0">
+                    <Card className="shadow-md xl:flex-1 xl:flex xl:flex-col xl:overflow-hidden">
                       <CardHeader className="xl:flex-shrink-0">
                         <CardTitle className="flex items-center gap-2 text-xl">
                           <TrendingUp className="w-6 h-6 text-purple-600" />
@@ -432,7 +444,7 @@ export default function MyPlan() {
                           Acompanhe suas conquistas de hoje
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-4 xl:flex-1 xl:flex xl:flex-col xl:justify-between xl:overflow-y-auto">
+                      <CardContent className="space-y-4 xl:flex-1 xl:overflow-y-auto">
                         {/* Diet Progress */}
                         <div className="p-4 border-2 rounded-xl transition-all hover:shadow-md">
                           <div className="flex items-center justify-between mb-3">
@@ -525,7 +537,7 @@ export default function MyPlan() {
                     </Card>
 
                     {/* Quick Stats */}
-                    <Card className="shadow-md xl:flex-shrink-0">
+                    <Card className="shadow-md xl:flex-shrink-0 xl:h-auto">
                       <CardHeader>
                         <CardTitle className="text-lg">Estatísticas Rápidas</CardTitle>
                       </CardHeader>
