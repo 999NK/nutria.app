@@ -956,9 +956,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Description is required" });
       }
 
-      // Generate meal plan using Gemini AI
-      console.log("Calling AI service to generate meal plan...");
-      const aiPlan = await aiService.generateMealPlan(description);
+      // Get user characteristics for personalized plan generation
+      const user = await storage.getUser(userId);
+      
+      // Enhance description with user characteristics
+      const enhancedDescription = `
+        CARACTERÍSTICAS DO USUÁRIO:
+        - Peso: ${user?.weight || 'não informado'} kg
+        - Altura: ${user?.height || 'não informado'} cm
+        - Idade: ${user?.age || 'não informado'} anos
+        - Objetivo: ${user?.goal || 'não informado'}
+        - Nível de atividade: ${user?.activityLevel || 'não informado'}
+        - Meta calórica diária: ${user?.dailyCalories || 2000} kcal
+        - Meta de proteína: ${user?.dailyProtein || 120}g
+        - Meta de carboidratos: ${user?.dailyCarbs || 250}g
+        - Meta de gordura: ${user?.dailyFat || 67}g
+        
+        DESCRIÇÃO PERSONALIZADA: ${description}
+        
+        Por favor, crie um plano alimentar detalhado considerando essas informações e use refeições típicas brasileiras.
+      `;
+
+      // Generate meal plan using Gemini AI with enhanced description
+      console.log("Calling AI service to generate meal plan with user characteristics...");
+      const aiPlan = await aiService.generateMealPlan(enhancedDescription);
       console.log("AI plan generated successfully:", aiPlan?.name || 'No name');
 
       // Create a simplified meal plan for testing

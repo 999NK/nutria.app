@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, Target, Trash2, Plus, Check, X, Dumbbell, Utensils, Download, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 
 interface MealPlan {
@@ -502,19 +503,95 @@ ${(plan as any).workouts ? Object.entries((plan as any).workouts).map(([day, wor
               </CardContent>
             </Card>
 
-            {/* Custom Plan Button */}
+          </TabsContent>
+
+          <TabsContent value="manual" className="space-y-6">
+            {/* Manual Plan Creation */}
             <Card>
-              <CardContent className="pt-6">
+              <CardHeader>
+                <CardTitle>Criar Plano Personalizado Manual</CardTitle>
+                <CardDescription>
+                  Crie seu plano baseado nas suas características pessoais e objetivos
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Plan Type Selection */}
+                <div className="flex gap-3">
+                  <Button
+                    variant={selectedPlanType === 'diet' ? 'default' : 'outline'}
+                    onClick={() => setSelectedPlanType('diet')}
+                    className="flex-1 flex items-center gap-2"
+                  >
+                    <Utensils className="w-4 h-4" />
+                    Plano Nutricional
+                  </Button>
+                  <Button
+                    variant={selectedPlanType === 'workout' ? 'default' : 'outline'}
+                    onClick={() => setSelectedPlanType('workout')}
+                    className="flex-1 flex items-center gap-2"
+                  >
+                    <Dumbbell className="w-4 h-4" />
+                    Plano de Treino
+                  </Button>
+                </div>
+
+                {/* User Characteristics Summary */}
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                  <h4 className="font-medium mb-3">Suas Características</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-600 dark:text-gray-400">Peso</p>
+                      <p className="font-semibold">{(user as any)?.weight || 'N/A'} kg</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600 dark:text-gray-400">Altura</p>
+                      <p className="font-semibold">{(user as any)?.height || 'N/A'} cm</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600 dark:text-gray-400">Idade</p>
+                      <p className="font-semibold">{(user as any)?.age || 'N/A'} anos</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600 dark:text-gray-400">Objetivo</p>
+                      <p className="font-semibold">{(user as any)?.goal || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Custom Description */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Descrição Personalizada
+                  </label>
+                  <Textarea
+                    placeholder={
+                      selectedPlanType === 'diet'
+                        ? `Baseado no seu perfil (${(user as any)?.weight}kg, ${(user as any)?.height}cm, ${(user as any)?.age} anos), descreva suas preferências alimentares, restrições e objetivos específicos...`
+                        : `Considerando seu perfil (${(user as any)?.weight}kg, ${(user as any)?.height}cm, ${(user as any)?.age} anos), descreva sua experiência com exercícios, disponibilidade e preferências de treino...`
+                    }
+                    value={userDescription}
+                    onChange={(e) => setUserDescription(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+
+                {/* Generate Button */}
                 <Button
-                  variant="outline"
-                  onClick={() => toast({
-                    title: "Em desenvolvimento",
-                    description: "Criação de planos personalizados manuais será implementada em breve.",
-                  })}
-                  className="w-full flex items-center gap-2"
+                  onClick={handleGeneratePlan}
+                  disabled={generatePlanMutation.isPending}
+                  className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
                 >
-                  <Plus className="w-4 h-4" />
-                  Criar Plano Personalizado Manualmente
+                  {generatePlanMutation.isPending ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                      Criando plano personalizado...
+                    </div>
+                  ) : (
+                    <>
+                      <Target className="w-4 h-4 mr-2" />
+                      Criar Plano Personalizado
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
