@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { Calendar, Target, Trash2, Plus, Check, X, Dumbbell, Utensils, Download,
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
+import { isUnauthorizedError } from "@/lib/authUtils";
 
 interface MealPlan {
   id: number;
@@ -36,8 +37,23 @@ export default function MyPlan() {
   });
 
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast({
+        title: "Não autorizado",
+        description: "Você precisa fazer login novamente...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+  }, [isAuthenticated, isLoading, toast]);
 
   // Fetch active plan
   const { data: activePlan } = useQuery<MealPlan | null>({
@@ -159,7 +175,7 @@ export default function MyPlan() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8 h-12">
@@ -235,7 +251,7 @@ export default function MyPlan() {
                 </Card>
 
                 {/* Main Content Grid */}
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 min-h-[600px]">
                   {/* Plan Details - Takes up 2 columns on XL screens */}
                   <div className="xl:col-span-2 space-y-6">
                     {/* Nutrition/Workout Stats */}
@@ -391,9 +407,9 @@ export default function MyPlan() {
                   </div>
 
                   {/* Progress Sidebar */}
-                  <div className="space-y-6">
+                  <div className="space-y-6 xl:h-full xl:flex xl:flex-col">
                     {/* Daily Progress */}
-                    <Card className="shadow-md">
+                    <Card className="shadow-md xl:flex-1">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-xl">
                           <TrendingUp className="w-6 h-6 text-purple-600" />
@@ -403,7 +419,7 @@ export default function MyPlan() {
                           Acompanhe suas conquistas de hoje
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-4 xl:h-full xl:flex xl:flex-col xl:justify-between">
                         {/* Diet Progress */}
                         <div className="p-4 border-2 rounded-xl transition-all hover:shadow-md">
                           <div className="flex items-center justify-between mb-3">
@@ -496,7 +512,7 @@ export default function MyPlan() {
                     </Card>
 
                     {/* Quick Stats */}
-                    <Card className="shadow-md">
+                    <Card className="shadow-md xl:flex-shrink-0">
                       <CardHeader>
                         <CardTitle className="text-lg">Estatísticas Rápidas</CardTitle>
                       </CardHeader>
