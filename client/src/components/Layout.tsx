@@ -78,13 +78,15 @@ export default function Layout({ children }: LayoutProps) {
   // Desktop Layout
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white flex">
-      {/* Sidebar */}
-      <Sidebar />
+      {/* Fixed Sidebar */}
+      <div className="fixed left-0 top-0 h-full z-30">
+        <Sidebar />
+      </div>
       
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Desktop Header */}
-        <header className="bg-white dark:bg-gray-800 shadow-sm px-8 py-4 border-b border-gray-200 dark:border-gray-700">
+      {/* Main Content with sidebar offset */}
+      <div className="flex-1 flex flex-col ml-64">
+        {/* Fixed Desktop Header */}
+        <header className="fixed top-0 right-0 left-64 bg-white dark:bg-gray-800 shadow-sm px-8 py-4 border-b border-gray-200 dark:border-gray-700 z-20">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -114,8 +116,8 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="flex-1 p-8 overflow-y-auto">
+        {/* Main Content with header offset */}
+        <main className="flex-1 p-8 pt-24 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

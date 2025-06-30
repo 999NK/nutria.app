@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Target, Trash2, Plus, Check, X, Dumbbell, Utensils } from "lucide-react";
+import { Calendar, Target, Trash2, Plus, Check, X, Dumbbell, Utensils, Download, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -159,6 +159,61 @@ export default function MyPlan() {
     return mealTypeNames[mealType] || mealType;
   };
 
+  const handleExportPlan = (plan: MealPlan) => {
+    const planText = `
+=== ${plan.name} ===
+Descrição: ${plan.description}
+Criado em: ${new Date(plan.createdAt).toLocaleDateString('pt-BR')}
+
+${isPlanDiet(plan) ? `
+INFORMAÇÕES NUTRICIONAIS:
+- Calorias diárias: ${plan.dailyCalories} kcal
+- Proteínas: ${plan.macroProtein}%
+- Carboidratos: ${plan.macroCarbs}%
+- Gorduras: ${plan.macroFat}%
+
+PLANO ALIMENTAR SEMANAL:
+${plan.meals ? Object.entries(plan.meals).map(([day, dayMeals]: [string, any]) => 
+  `\n${day.toUpperCase()}:\n${Object.entries(dayMeals).map(([mealType, meal]: [string, any]) => 
+    `  ${getMealTypeName(mealType)}: ${meal.name} (${meal.calories} kcal)`
+  ).join('\n')}`
+).join('\n') : 'Plano detalhado não disponível'}
+` : `
+PLANO DE TREINO SEMANAL:
+${(plan as any).workouts ? Object.entries((plan as any).workouts).map(([day, workout]: [string, any]) => 
+  `\n${day.toUpperCase()}:\n  ${workout.name}\n${workout.exercises ? workout.exercises.map((ex: any) => 
+    `    - ${ex.name} ${ex.sets ? `(${ex.sets}x${ex.reps})` : ''}`
+  ).join('\n') : '  Descanso'}`
+).join('\n') : 'Plano detalhado não disponível'}
+`}
+    `.trim();
+
+    const blob = new Blob([planText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${plan.name.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Plano exportado!",
+      description: "O arquivo foi baixado com sucesso.",
+    });
+  };
+
+  const handleSwitchPlanType = async (plan: MealPlan) => {
+    const newType = isPlanDiet(plan) ? 'workout' : 'diet';
+    const description = `Baseado no plano anterior "${plan.name}", adapte para ${newType === 'diet' ? 'nutrição' : 'treino'}`;
+    
+    generatePlanMutation.mutate({
+      description,
+      type: newType
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
@@ -178,17 +233,49 @@ export default function MyPlan() {
             {activePlan ? (
               <div className="space-y-6">
                 {/* Active Plan Card */}
-                <Card>
-                  <CardHeader>
+                <Card className="overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 border-b">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          {isPlanDiet(activePlan) ? <Utensils className="w-5 h-5" /> : <Dumbbell className="w-5 h-5" />}
-                          {activePlan.name}
+                      <div className="flex-1">
+                        <CardTitle className="flex items-center gap-3 text-xl">
+                          <div className={`p-2 rounded-lg ${isPlanDiet(activePlan) ? 'bg-green-100 dark:bg-green-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
+                            {isPlanDiet(activePlan) ? 
+                              <Utensils className="w-6 h-6 text-green-600 dark:text-green-400" /> : 
+                              <Dumbbell className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                            }
+                          </div>
+                          <div>
+                            <h3 className="font-bold">{activePlan.name}</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 font-normal mt-1">
+                              {activePlan.description}
+                            </p>
+                          </div>
                         </CardTitle>
-                        <CardDescription>{activePlan.description}</CardDescription>
                       </div>
-                      <Badge variant="default">Ativo</Badge>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+                          <Check className="w-3 h-3 mr-1" />
+                          Ativo
+                        </Badge>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleExportPlan(activePlan)}
+                          className="flex items-center gap-2"
+                        >
+                          <Download className="w-4 h-4" />
+                          Exportar
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleSwitchPlanType(activePlan)}
+                          className="flex items-center gap-2"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                          Alterar Tipo
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
