@@ -44,6 +44,7 @@ export default function Dashboard() {
       const newNutritionalDay = getNutritionalDay();
       if (newNutritionalDay !== currentNutritionalDay) {
         setCurrentNutritionalDay(newNutritionalDay);
+        // Invalidate all queries to refresh data for the new day
         queryClient.invalidateQueries({ queryKey: ["/api/meals"] });
         queryClient.invalidateQueries({ queryKey: ["/api/nutrition/daily"] });
         toast({
@@ -53,7 +54,7 @@ export default function Dashboard() {
       }
     };
 
-    const interval = setInterval(checkNutritionalDay, 60000);
+    const interval = setInterval(checkNutritionalDay, 60000); // Check every minute
     return () => clearInterval(interval);
   }, [currentNutritionalDay, queryClient, toast]);
 
@@ -61,7 +62,7 @@ export default function Dashboard() {
   const { data: meals = [] } = useQuery({
     queryKey: ["/api/meals"],
     retry: false,
-  }) as { data: any[] };
+  });
 
   // Fetch daily nutrition
   const { data: dailyNutrition } = useQuery({
@@ -72,20 +73,19 @@ export default function Dashboard() {
   const todayFormatted = format(new Date(), "EEEE, dd 'de' MMMM", { locale: ptBR });
 
   // Calculate nutrition totals
-  const mealsArray = Array.isArray(meals) ? meals : [];
-  const caloriesConsumed = mealsArray.reduce((total: number, meal: any) => {
+  const caloriesConsumed = meals.reduce((total: number, meal: any) => {
     return total + (meal.totalCalories || 0);
   }, 0);
 
-  const proteinConsumed = mealsArray.reduce((total: number, meal: any) => {
+  const proteinConsumed = meals.reduce((total: number, meal: any) => {
     return total + parseFloat(meal.totalProtein || '0');
   }, 0);
 
-  const carbsConsumed = mealsArray.reduce((total: number, meal: any) => {
+  const carbsConsumed = meals.reduce((total: number, meal: any) => {
     return total + parseFloat(meal.totalCarbs || '0');
   }, 0);
 
-  const fatConsumed = mealsArray.reduce((total: number, meal: any) => {
+  const fatConsumed = meals.reduce((total: number, meal: any) => {
     return total + parseFloat(meal.totalFat || '0');
   }, 0);
 
@@ -162,8 +162,8 @@ export default function Dashboard() {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: 'Consumido', value: caloriesConsumed },
-                      { name: 'Restante', value: caloriesRemaining }
+                      { name: 'Consumido', value: caloriesConsumed, color: '#22c55e' },
+                      { name: 'Restante', value: caloriesRemaining, color: '#e5e7eb' }
                     ]}
                     cx="50%"
                     cy="100%"
