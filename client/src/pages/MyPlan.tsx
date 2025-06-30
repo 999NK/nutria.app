@@ -67,10 +67,13 @@ export default function MyPlan() {
   const generatePlanMutation = useMutation({
     mutationFn: async (data: { type: string; description: string }) => {
       const endpoint = data.type === 'diet' ? '/api/generate-meal-plan' : '/api/generate-workout-plan';
-      return apiRequest(endpoint, {
+      const response = await fetch(endpoint, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ description: data.description }),
       });
+      if (!response.ok) throw new Error('Failed to generate plan');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/user-plans/active'] });

@@ -193,6 +193,75 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 space-y-6 pb-20">
+      {/* Progresso Diário - Plano de Academia e Próxima Refeição */}
+      <Card className="border border-gray-200 dark:border-gray-700">
+        <CardContent className="p-6">
+          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Hoje no seu Plano</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Treino do Dia */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-800">
+                  <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Treino de Hoje</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Push - Peito, Ombro e Tríceps</p>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Exercícios do dia</span>
+                  <Button variant="ghost" size="sm" className="h-auto p-1 text-xs">
+                    Ver detalhes
+                  </Button>
+                </div>
+                <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                  <div>• Supino reto - 4x8-12</div>
+                  <div>• Desenvolvimento - 3x10-15</div>
+                  <div>• Tríceps pulley - 3x12-15</div>
+                  <div className="text-xs text-gray-500 mt-2">+3 exercícios</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Próxima Refeição */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-800">
+                  <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Próxima Refeição</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Almoço - 12:30</p>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Frango grelhado com batata doce</span>
+                  <Button variant="ghost" size="sm" className="h-auto p-1 text-xs">
+                    Ver receita
+                  </Button>
+                </div>
+                <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                  <div>🍗 150g peito de frango</div>
+                  <div>🥔 200g batata doce assada</div>
+                  <div>🥗 Salada verde mista</div>
+                  <div className="text-xs text-gray-500 mt-2 font-medium">~520 kcal</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Daily Progress Summary with Half Donut Chart */}
       <Card className="bg-gray-900 dark:bg-gray-900 border-gray-700">
         <CardContent className="p-6">
