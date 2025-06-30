@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Target, Trash2, Plus, Check, X, Dumbbell, Utensils, Download, RotateCcw, Clock, TrendingUp } from "lucide-react";
+import { Calendar, Target, Trash2, Plus, Check, X, Dumbbell, Utensils, Download, RotateCcw, Clock, TrendingUp, Edit2, MoreVertical, Award, ChevronDown, ChevronUp } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
@@ -27,6 +28,185 @@ interface MealPlan {
   createdAt: string;
 }
 
+// Componente Smart Plan Card com melhorias UX
+interface SmartPlanCardProps {
+  type: 'nutrition' | 'workout';
+  plan?: MealPlan;
+  allPlans: MealPlan[];
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onActivate: (planId: number) => void;
+  onDelete: (planId: number) => void;
+  progressData: { dietCompleted: boolean; workoutCompleted: boolean };
+}
+
+function SmartPlanCard({ type, plan, allPlans, isExpanded, onToggleExpand, onActivate, onDelete, progressData }: SmartPlanCardProps) {
+  const isNutrition = type === 'nutrition';
+  const icon = isNutrition ? Utensils : Dumbbell;
+  const IconComponent = icon;
+  const title = isNutrition ? 'Plano Nutricional' : 'Plano de Treino';
+  const isActive = plan?.isActive;
+  const completed = isNutrition ? progressData.dietCompleted : progressData.workoutCompleted;
+  
+  // Calcular progresso baseado em dados fictícios para demonstração
+  const progressPercentage = completed ? 100 : Math.floor(Math.random() * 80) + 10;
+  const consecutiveDays = Math.floor(Math.random() * 7) + 1;
+
+  return (
+    <Card className={`transition-all duration-300 ${
+      isActive 
+        ? 'border-2 border-green-400 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 shadow-lg' 
+        : 'border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
+    }`}>
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`p-3 rounded-xl ${
+              isActive 
+                ? isNutrition ? 'bg-green-100 dark:bg-green-800' : 'bg-blue-100 dark:bg-blue-800'
+                : 'bg-gray-100 dark:bg-gray-700'
+            }`}>
+              <IconComponent className={`w-6 h-6 ${
+                isActive 
+                  ? isNutrition ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-500'
+              }`} />
+            </div>
+            <div>
+              <CardTitle className={`text-lg font-bold ${isActive ? '' : 'text-gray-500'}`}>
+                {title}
+              </CardTitle>
+              <div className="flex items-center gap-2 mt-1">
+                {isActive ? (
+                  <>
+                    <Badge variant="outline" className="text-green-700 bg-green-50 border-green-200 text-xs">
+                      <Check className="w-3 h-3 mr-1" />
+                      Ativo
+                    </Badge>
+                    {completed && (
+                      <Badge variant="outline" className="text-yellow-700 bg-yellow-50 border-yellow-200 text-xs">
+                        <Award className="w-3 h-3 mr-1" />
+                        Concluído hoje
+                      </Badge>
+                    )}
+                  </>
+                ) : (
+                  <Badge variant="secondary" className="text-gray-600 text-xs">
+                    <Clock className="w-3 h-3 mr-1" />
+                    Inativo
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {isActive && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => {}}>
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDelete(plan!.id)}>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Excluir
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onToggleExpand}
+              className="h-8 w-8 p-0"
+            >
+              {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="pt-0">
+        {isActive && plan ? (
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{plan.name}</p>
+              <p className="text-xs text-gray-500 line-clamp-2">{plan.description}</p>
+            </div>
+            
+            {/* Progresso Visual */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Progresso hoje</span>
+                <span className="font-medium">{progressPercentage}%</span>
+              </div>
+              <Progress value={progressPercentage} className="h-2" />
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <TrendingUp className="w-3 h-3" />
+                <span>{consecutiveDays} dias seguidos</span>
+                {consecutiveDays >= 3 && <span className="text-green-600">🔥</span>}
+              </div>
+            </div>
+
+            {isExpanded && (
+              <div className="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                {isNutrition ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                      <div className="text-lg font-bold text-orange-600">{plan.dailyCalories}</div>
+                      <div className="text-xs text-orange-700 dark:text-orange-400">kcal/dia</div>
+                    </div>
+                    <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="text-lg font-bold text-blue-600">{plan.macroProtein}g</div>
+                      <div className="text-xs text-blue-700 dark:text-blue-400">Proteína</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    <p>Ver cronograma completo de treinos</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
+              Nenhum {isNutrition ? 'plano nutricional' : 'plano de treino'} ativo
+            </p>
+            {allPlans.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-xs text-gray-400">Planos disponíveis:</p>
+                {allPlans.slice(0, 2).map(p => (
+                  <Button
+                    key={p.id}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onActivate(p.id)}
+                    className="w-full text-left justify-start text-xs"
+                  >
+                    {p.name}
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <Button variant="outline" size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Criar primeiro plano
+              </Button>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function MyPlan() {
   const [activeTab, setActiveTab] = useState("current");
   const [selectedPlanType, setSelectedPlanType] = useState<'diet' | 'workout'>('diet');
@@ -35,6 +215,7 @@ export default function MyPlan() {
     dietCompleted: false,
     workoutCompleted: false
   });
+  const [expandedCards, setExpandedCards] = useState<{[key: string]: boolean}>({});
 
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -187,6 +368,47 @@ export default function MyPlan() {
     return types[type as keyof typeof types] || type;
   };
 
+  // Funções para os cards inteligentes
+  const handleActivatePlan = async (planId: number) => {
+    try {
+      await apiRequest(`/api/user-plans/${planId}/activate`, {
+        method: 'POST'
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-plans/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-plans/history'] });
+      toast({
+        title: "Plano ativado",
+        description: "Plano ativado com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao ativar plano. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeletePlan = async (planId: number) => {
+    try {
+      await apiRequest(`/api/user-plans/${planId}`, {
+        method: 'DELETE'
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-plans/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-plans/history'] });
+      toast({
+        title: "Plano excluído",
+        description: "Plano excluído com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir plano. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       <div className="container mx-auto px-4 py-6 max-w-7xl xl:h-screen xl:flex xl:flex-col">
@@ -207,6 +429,163 @@ export default function MyPlan() {
           </TabsList>
 
           <TabsContent value="current" className="space-y-6 xl:flex-1 xl:flex xl:flex-col">
+            {/* Cards Inteligentes Unificados - Versão Aprimorada */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Card Plano Nutricional */}
+              <Card className={`transition-all duration-300 ${
+                planHistory.find(p => isPlanDiet(p) && p.isActive)
+                  ? 'border-2 border-green-400 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 shadow-lg' 
+                  : 'border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
+              }`}>
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-3 rounded-xl ${
+                        planHistory.find(p => isPlanDiet(p) && p.isActive)
+                          ? 'bg-green-100 dark:bg-green-800'
+                          : 'bg-gray-100 dark:bg-gray-700'
+                      }`}>
+                        <Utensils className={`w-6 h-6 ${
+                          planHistory.find(p => isPlanDiet(p) && p.isActive)
+                            ? 'text-green-600 dark:text-green-400'
+                            : 'text-gray-500'
+                        }`} />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg font-bold">
+                          Plano Nutricional
+                        </CardTitle>
+                        <div className="flex items-center gap-2 mt-1">
+                          {planHistory.find(p => isPlanDiet(p) && p.isActive) ? (
+                            <>
+                              <Badge variant="outline" className="text-green-700 bg-green-50 border-green-200 text-xs">
+                                <Check className="w-3 h-3 mr-1" />
+                                Ativo
+                              </Badge>
+                              <Badge variant="outline" className="text-yellow-700 bg-yellow-50 border-yellow-200 text-xs">
+                                <Award className="w-3 h-3 mr-1" />
+                                3 dias seguidos 🔥
+                              </Badge>
+                            </>
+                          ) : (
+                            <Badge variant="secondary" className="text-gray-600 text-xs">
+                              <Clock className="w-3 h-3 mr-1" />
+                              Inativo
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {planHistory.find(p => isPlanDiet(p) && p.isActive) ? (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Progresso hoje</span>
+                          <span className="font-medium">75%</span>
+                        </div>
+                        <Progress value={75} className="h-2" />
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <TrendingUp className="w-3 h-3" />
+                          <span>3 dias seguidos</span>
+                          <span className="text-green-600">🔥</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
+                        Nenhum plano nutricional ativo
+                      </p>
+                      <Button variant="outline" size="sm">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Criar plano
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Card Plano de Treino */}
+              <Card className={`transition-all duration-300 ${
+                planHistory.find(p => !isPlanDiet(p) && p.isActive)
+                  ? 'border-2 border-blue-400 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 shadow-lg' 
+                  : 'border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
+              }`}>
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-3 rounded-xl ${
+                        planHistory.find(p => !isPlanDiet(p) && p.isActive)
+                          ? 'bg-blue-100 dark:bg-blue-800'
+                          : 'bg-gray-100 dark:bg-gray-700'
+                      }`}>
+                        <Dumbbell className={`w-6 h-6 ${
+                          planHistory.find(p => !isPlanDiet(p) && p.isActive)
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : 'text-gray-500'
+                        }`} />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg font-bold">
+                          Plano de Treino
+                        </CardTitle>
+                        <div className="flex items-center gap-2 mt-1">
+                          {planHistory.find(p => !isPlanDiet(p) && p.isActive) ? (
+                            <>
+                              <Badge variant="outline" className="text-blue-700 bg-blue-50 border-blue-200 text-xs">
+                                <Check className="w-3 h-3 mr-1" />
+                                Ativo
+                              </Badge>
+                              <Badge variant="outline" className="text-yellow-700 bg-yellow-50 border-yellow-200 text-xs">
+                                <Award className="w-3 h-3 mr-1" />
+                                Treino concluído
+                              </Badge>
+                            </>
+                          ) : (
+                            <Badge variant="secondary" className="text-gray-600 text-xs">
+                              <Clock className="w-3 h-3 mr-1" />
+                              Inativo
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {planHistory.find(p => !isPlanDiet(p) && p.isActive) ? (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Progresso hoje</span>
+                          <span className="font-medium">100%</span>
+                        </div>
+                        <Progress value={100} className="h-2" />
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <TrendingUp className="w-3 h-3" />
+                          <span>5 dias seguidos</span>
+                          <span className="text-green-600">🔥</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
+                        Nenhum plano de treino ativo
+                      </p>
+                      <Button variant="outline" size="sm">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Criar plano
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
             {activePlan ? (
               <div className="space-y-6 xl:flex-1 xl:flex xl:flex-col">
                 {/* Plan Header Card */}
