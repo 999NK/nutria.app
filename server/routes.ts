@@ -788,8 +788,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Add current user message to history
       addToChatHistory(userId, 'user', message);
       
-      // Get AI response with full context
-      const response = await aiService.getChatResponse(message, userHistory);
+      // Detect plan creation intent
+      const lowerMessage = message.toLowerCase();
+      const isWorkoutPlan = /\b(treino|exerc[ií]cio|muscula[çc][ãa]o|push\s*pull\s*legs|ppl|academia|malha[çc][ãa]o|hipertrofia|for[çc]a|supino|agachamento|leg\s*press|barra|halter)\b/i.test(lowerMessage);
+      const isDietPlan = /\b(dieta|alimenta[çc][ãa]o|nutri[çc][ãa]o|cardápio|menu|refei[çc][ãa]o|comida|prote[íi]na|carboidrato|gordura|caloria|massa\s*magra|emagre[çc]er|emagrecer|perder\s*peso|ganhar\s*peso)\b/i.test(lowerMessage) && !isWorkoutPlan;
+      const isPlanCreation = /\b(criar|gerar|montar|fazer|desenvolver|elaborar|sugerir|preciso\s*de|quero|gostaria)\b/i.test(lowerMessage) && /\b(plano|programa|rotina|cronograma)\b/i.test(lowerMessage);
+      
+      let response: string;
+      
+      if (isPlanCreation && isWorkoutPlan) {
+        // Auto-generate workout plan
+        try {
+          console.log("=== AUTO WORKOUT PLAN GENERATION ===");
+          console.log("User message:", message);
+          
+          const user = await storage.getUser(userId);
+          const enhancedDescription = `
+            CARACTERÍSTICAS DO USUÁRIO:
+            - Peso: ${user?.weight || 'não informado'} kg
+            - Altura: ${user?.height || 'não informado'} cm
+            - Idade: ${user?.age || 'não informado'} anos
+            - Objetivo: ${user?.goal || 'não informado'}
+            - Nível de atividade: ${user?.activityLevel || 'não informado'}
+            
+            DESCRIÇÃO: ${message}
+            
+            Crie um plano de treino detalhado baseado nessas informações.
+          `;
+          
+          const aiPlan = await aiService.generateWorkoutPlan(enhancedDescription);
+          
+          const workoutPlan = await storage.createMealPlan({
+            userId,
+            name: aiPlan.name,
+            description: aiPlan.description,
+            meals: aiPlan.workouts,
+            dailyCalories: 0,
+            macroCarbs: 0,
+            macroProtein: 0,
+            macroFat: 0,
+            isActive: true,
+          });
+          
+          response = `✅ **Plano de Treino Criado com Sucesso!**\n\n🏋️ **${aiPlan.name}**\n\n${aiPlan.description}\n\nSeu plano de treino personalizado foi criado e ativado automaticamente! Você pode visualizá-lo na seção "Meu Plano" para ver todos os exercícios detalhados, séries e repetições.\n\n💡 **Dica:** Consulte sempre um profissional de educação física antes de iniciar qualquer rotina de exercícios.`;
+          
+          console.log("Auto workout plan created successfully:", workoutPlan.id);
+        } catch (error) {
+          console.error("Error creating auto workout plan:", error);
+          response = await aiService.getChatResponse(message, userHistory);
+        }
+      } else if (isPlanCreation && isDietPlan) {
+        // Auto-generate meal plan
+        try {
+          console.log("=== AUTO MEAL PLAN GENERATION ===");
+          console.log("User message:", message);
+          
+          const user = await storage.getUser(userId);
+          const enhancedDescription = `
+            CARACTERÍSTICAS DO USUÁRIO:
+            - Peso: ${user?.weight || 'não informado'} kg
+            - Altura: ${user?.height || 'não informado'} cm
+            - Idade: ${user?.age || 'não informado'} anos
+            - Objetivo: ${user?.goal || 'não informado'}
+            - Nível de atividade: ${user?.activityLevel || 'não informado'}
+            - Meta calórica diária: ${user?.dailyCalories || 2000} kcal
+            - Meta de proteína: ${user?.dailyProtein || 120}g
+            - Meta de carboidratos: ${user?.dailyCarbs || 250}g
+            - Meta de gordura: ${user?.dailyFat || 67}g
+            
+            DESCRIÇÃO: ${message}
+            
+            Crie um plano alimentar detalhado baseado nessas informações.
+          `;
+          
+          const aiPlan = await aiService.generateMealPlan(enhancedDescription);
+          
+          const mealPlan = await storage.createMealPlan({
+            userId,
+            name: aiPlan.name,
+            description: aiPlan.description,
+            meals: aiPlan.meals,
+            dailyCalories: aiPlan.dailyCalories,
+            macroCarbs: aiPlan.macroCarbs,
+            macroProtein: aiPlan.macroProtein,
+            macroFat: aiPlan.macroFat,
+            isActive: true,
+          });
+          
+          response = `✅ **Plano Alimentar Criado com Sucesso!**\n\n🍽️ **${aiPlan.name}**\n\n${aiPlan.description}\n\n📊 **Metas Diárias:**\n- Calorias: ${aiPlan.dailyCalories} kcal\n- Proteínas: ${aiPlan.macroProtein}g\n- Carboidratos: ${aiPlan.macroCarbs}g\n- Gorduras: ${aiPlan.macroFat}g\n\nSeu plano alimentar personalizado foi criado e ativado! Visite "Meu Plano" para ver todas as refeições detalhadas.\n\n💡 **Dica:** Sempre consulte um nutricionista para orientações personalizadas.`;
+          
+          console.log("Auto meal plan created successfully:", mealPlan.id);
+        } catch (error) {
+          console.error("Error creating auto meal plan:", error);
+          response = await aiService.getChatResponse(message, userHistory);
+        }
+      } else {
+        // Normal chat response
+        response = await aiService.getChatResponse(message, userHistory);
+      }
       
       // Add AI response to history
       addToChatHistory(userId, 'model', response);

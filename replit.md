@@ -10,6 +10,14 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-01 20:10**
+- ✓ Fixed AI chat plan creation logic - now correctly distinguishes workout vs nutrition plans
+- ✓ Implemented intelligent keyword detection for automatic plan generation via chat
+- ✓ Added auto-generation of workout plans when user mentions exercise/training keywords
+- ✓ Fixed issue where workout requests were creating meal plans instead of workout plans
+- ✓ Enhanced chat AI with contextual plan creation and user feedback messages
+- ✓ Improved regex patterns for detecting plan creation intent in natural conversation
+
 **2025-07-01 19:45**
 - ✓ Fixed AI meal plan generation JSON parsing errors with robust error handling
 - ✓ Implemented fallback meal plan structure when AI response is malformed
