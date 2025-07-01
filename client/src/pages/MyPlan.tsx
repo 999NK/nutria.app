@@ -495,147 +495,110 @@ export default function MyPlan() {
           <TabsContent value="history" className="space-y-6">
             {planHistory.length > 0 ? (
               <div className="space-y-8">
-                {/* Planos Nutricionais */}
-                {planHistory.filter(plan => isPlanDiet(plan)).length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <Utensils className="w-5 h-5 text-green-600" />
-                      Planos Nutricionais
+                {/* Navegação Horizontal Simples */}
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <Calendar className="w-5 h-5 text-gray-600" />
+                      Histórico de Planos
                     </h3>
-                    <div className="overflow-x-auto">
-                      <div className="flex gap-4 pb-4" style={{ width: 'fit-content' }}>
-                        {planHistory
-                          .filter(plan => isPlanDiet(plan))
-                          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                          .map((plan) => (
-                            <Card key={plan.id} className="border border-gray-200 dark:border-gray-700 min-w-[280px] max-w-[280px]">
-                              <CardHeader className="pb-3">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-lg bg-green-100 dark:bg-green-800">
-                                      <Utensils className="w-4 h-4 text-green-600 dark:text-green-400" />
-                                    </div>
-                                    <div>
-                                      <CardTitle className="text-sm font-medium line-clamp-1">{plan.name}</CardTitle>
-                                      <Badge variant={plan.isActive ? "default" : "secondary"} className="text-xs mt-1">
-                                        {plan.isActive ? "Ativo" : "Inativo"}
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                        <span className="sr-only">Abrir menu</span>
-                                        <div className="h-1 w-1 bg-gray-400 rounded-full"></div>
-                                        <div className="h-1 w-1 bg-gray-400 rounded-full mt-1"></div>
-                                        <div className="h-1 w-1 bg-gray-400 rounded-full mt-1"></div>
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      {!plan.isActive && (
-                                        <DropdownMenuItem onClick={() => activatePlanMutation.mutate(plan.id)}>
-                                          <RotateCcw className="mr-2 h-4 w-4" />
-                                          Ativar Plano
-                                        </DropdownMenuItem>
-                                      )}
-                                      <DropdownMenuItem onClick={() => handleExportPlan(plan)}>
-                                        <Download className="mr-2 h-4 w-4" />
-                                        Exportar PDF
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
-                              </CardHeader>
-                              <CardContent className="pt-0">
-                                <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                                  {plan.description}
-                                </p>
-                                <div className="grid grid-cols-2 gap-2 mb-3">
-                                  <div className="text-center p-2 bg-orange-50 dark:bg-orange-900/20 rounded text-xs">
-                                    <div className="font-bold text-orange-600">{plan.dailyCalories}</div>
-                                    <div className="text-orange-700 dark:text-orange-400">kcal</div>
-                                  </div>
-                                  <div className="text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-xs">
-                                    <div className="font-bold text-blue-600">{plan.macroProtein}g</div>
-                                    <div className="text-blue-700 dark:text-blue-400">Proteína</div>
-                                  </div>
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                  {new Date(plan.createdAt).toLocaleDateString('pt-BR')}
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-10 h-10 p-0"
+                        disabled={currentHistoryIndex <= 0}
+                        onClick={() => setCurrentHistoryIndex(prev => Math.max(0, prev - 1))}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <span className="text-sm text-gray-500 px-2">
+                        {currentHistoryIndex + 1} de {planHistory.length}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-10 h-10 p-0"
+                        disabled={currentHistoryIndex >= planHistory.length - 1}
+                        onClick={() => setCurrentHistoryIndex(prev => Math.min(planHistory.length - 1, prev + 1))}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                )}
 
-                {/* Planos de Treino */}
-                {planHistory.filter(plan => !isPlanDiet(plan)).length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <Dumbbell className="w-5 h-5 text-blue-600" />
-                      Planos de Treino
-                    </h3>
-                    <div className="overflow-x-auto">
-                      <div className="flex gap-4 pb-4" style={{ width: 'fit-content' }}>
-                        {planHistory
-                          .filter(plan => !isPlanDiet(plan))
-                          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                          .map((plan) => (
-                            <Card key={plan.id} className="border border-gray-200 dark:border-gray-700 min-w-[280px] max-w-[280px]">
-                              <CardHeader className="pb-3">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-800">
-                                      <Dumbbell className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                                    </div>
-                                    <div>
-                                      <CardTitle className="text-sm font-medium line-clamp-1">{plan.name}</CardTitle>
-                                      <Badge variant={plan.isActive ? "default" : "secondary"} className="text-xs mt-1">
-                                        {plan.isActive ? "Ativo" : "Inativo"}
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                        <span className="sr-only">Abrir menu</span>
-                                        <div className="h-1 w-1 bg-gray-400 rounded-full"></div>
-                                        <div className="h-1 w-1 bg-gray-400 rounded-full mt-1"></div>
-                                        <div className="h-1 w-1 bg-gray-400 rounded-full mt-1"></div>
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      {!plan.isActive && (
-                                        <DropdownMenuItem onClick={() => activatePlanMutation.mutate(plan.id)}>
-                                          <RotateCcw className="mr-2 h-4 w-4" />
-                                          Ativar Plano
-                                        </DropdownMenuItem>
-                                      )}
-                                      <DropdownMenuItem onClick={() => handleExportPlan(plan)}>
-                                        <Download className="mr-2 h-4 w-4" />
-                                        Exportar PDF
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
-                              </CardHeader>
-                              <CardContent className="pt-0">
-                                <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                                  {plan.description}
-                                </p>
-                                <div className="text-xs text-gray-500">
-                                  {new Date(plan.createdAt).toLocaleDateString('pt-BR')}
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  {/* Card do Plano Atual */}
+                  {planHistory[currentHistoryIndex] && (
+                    <Card className="border border-gray-200 dark:border-gray-700 max-w-md mx-auto">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${isPlanDiet(planHistory[currentHistoryIndex]) ? 'bg-green-100 dark:bg-green-800' : 'bg-blue-100 dark:bg-blue-800'}`}>
+                              {isPlanDiet(planHistory[currentHistoryIndex]) ? (
+                                <Utensils className="w-5 h-5 text-green-600 dark:text-green-400" />
+                              ) : (
+                                <Dumbbell className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                              )}
+                            </div>
+                            <div>
+                              <CardTitle className="text-base">{planHistory[currentHistoryIndex].name}</CardTitle>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant={planHistory[currentHistoryIndex].isActive ? "default" : "secondary"} className="text-xs">
+                                  {planHistory[currentHistoryIndex].isActive ? "Ativo" : "Inativo"}
+                                </Badge>
+                                <span className="text-xs text-gray-500">
+                                  {isPlanDiet(planHistory[currentHistoryIndex]) ? "Plano Nutricional" : "Plano de Treino"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <span className="sr-only">Abrir menu</span>
+                                <div className="h-1 w-1 bg-gray-400 rounded-full"></div>
+                                <div className="h-1 w-1 bg-gray-400 rounded-full mt-1"></div>
+                                <div className="h-1 w-1 bg-gray-400 rounded-full mt-1"></div>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {!planHistory[currentHistoryIndex].isActive && (
+                                <DropdownMenuItem onClick={() => activatePlanMutation.mutate(planHistory[currentHistoryIndex].id)}>
+                                  <RotateCcw className="mr-2 h-4 w-4" />
+                                  Ativar Plano
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem onClick={() => handleExportPlan(planHistory[currentHistoryIndex])}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Exportar PDF
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+                          {planHistory[currentHistoryIndex].description}
+                        </p>
+                        {isPlanDiet(planHistory[currentHistoryIndex]) && (
+                          <div className="grid grid-cols-2 gap-3 mb-4">
+                            <div className="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded text-sm">
+                              <div className="font-bold text-orange-600">{planHistory[currentHistoryIndex].dailyCalories}</div>
+                              <div className="text-orange-700 dark:text-orange-400 text-xs">kcal/dia</div>
+                            </div>
+                            <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded text-sm">
+                              <div className="font-bold text-blue-600">{planHistory[currentHistoryIndex].macroProtein}g</div>
+                              <div className="text-blue-700 dark:text-blue-400 text-xs">Proteína</div>
+                            </div>
+                          </div>
+                        )}
+                        <div className="text-xs text-gray-500 text-center">
+                          Criado em {new Date(planHistory[currentHistoryIndex].createdAt).toLocaleDateString('pt-BR')}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </div>
             ) : (
               <Card className="text-center py-16">

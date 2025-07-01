@@ -1160,9 +1160,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Get plan data from history
-      const planHistory = await storage.getMealPlanHistory(userId);
-      const plan = planHistory.find(p => p.id === planId);
+      // Get plan data from history or active
+      let plan;
+      try {
+        const planHistory = await storage.getMealPlanHistory(userId);
+        plan = planHistory.find(p => p.id === planId);
+        
+        // If not found in history, check active plan
+        if (!plan) {
+          const activePlan = await storage.getActiveMealPlan(userId);
+          if (activePlan && activePlan.id === planId) {
+            plan = activePlan;
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching plan:", error);
+      }
       
       if (!plan) {
         return res.status(404).json({ message: "Plan not found" });

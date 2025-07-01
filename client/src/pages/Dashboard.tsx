@@ -193,10 +193,119 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 space-y-6 pb-20">
-      {/* Progresso Diário - Plano de Academia e Próxima Refeição */}
+      {/* Daily Progress Summary with Half Donut Chart */}
+      <Card className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Progresso Diário</h2>
+            <span className="text-sm text-gray-600 dark:text-gray-400">{todayFormatted}</span>
+          </div>
+          
+          {/* Nutrition Progress - Green Circle */}
+          <div className="flex flex-col lg:flex-row items-center gap-6">
+            {/* Green Circle Chart */}
+            <div className="relative flex justify-center items-center">
+              <div className="relative">
+                <svg width="140" height="140" className="transform -rotate-90">
+                  {/* Background circle */}
+                  <circle
+                    cx="70"
+                    cy="70"
+                    r="60"
+                    stroke="rgb(55, 65, 81)"
+                    strokeWidth="6"
+                    fill="none"
+                    className="opacity-20"
+                  />
+                  {/* Progress circle */}
+                  <circle
+                    cx="70"
+                    cy="70"
+                    r="60"
+                    stroke="#22c55e"
+                    strokeWidth="6"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 60}`}
+                    strokeDashoffset={`${2 * Math.PI * 60 * (1 - Math.min(1, caloriesConsumed / caloriesGoal))}`}
+                    strokeLinecap="round"
+                    className="transition-all duration-700"
+                  />
+                </svg>
+                {/* Center content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-3xl font-bold text-gray-900 dark:text-white">
+                    {caloriesConsumed}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">kcal</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {caloriesRemaining} restantes
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Macros Summary - Horizontal Bars like the reference image */}
+            <div className="flex-1 space-y-4 w-full">
+              {/* Protein */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">Proteína</span>
+                  <span className="text-gray-900 dark:text-white font-semibold">{proteinConsumed.toFixed(0)}g</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-700"
+                    style={{ width: `${Math.min(100, (proteinConsumed / proteinGoal) * 100)}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Carbohydrates */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-yellow-600 dark:text-yellow-400 font-medium">Carboidratos</span>
+                  <span className="text-gray-900 dark:text-white font-semibold">{carbsConsumed.toFixed(0)}g</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-yellow-500 h-2 rounded-full transition-all duration-700"
+                    style={{ width: `${Math.min(100, (carbsConsumed / carbsGoal) * 100)}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Fat */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-orange-600 dark:text-orange-400 font-medium">Gordura</span>
+                  <span className="text-gray-900 dark:text-white font-semibold">{fatConsumed.toFixed(0)}g</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-orange-500 h-2 rounded-full transition-all duration-700"
+                    style={{ width: `${Math.min(100, (fatConsumed / fatGoal) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Hoje no seu Plano Card */}
       <Card className="border border-gray-200 dark:border-gray-700">
         <CardContent className="p-6">
-          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Hoje no seu Plano</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Hoje no seu Plano</h2>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setLocation('/my-plan')}
+              className="text-xs"
+            >
+              Ver plano completo
+            </Button>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Treino do Dia */}
