@@ -10,6 +10,16 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-01 18:50**
+- ✓ Completely restructured "Meu Plano" page with separate cards for nutrition and workout plans
+- ✓ Fixed active plan detection logic (was using wrong data source)
+- ✓ Added proper activate/reactivate functionality for inactive plans in history
+- ✓ Improved plan history layout with better positioning on desktop
+- ✓ Added dropdown menus with "Ativar Plano" and "Exportar PDF" options
+- ✓ Created expandable sections for plan details (nutrition schedules and workout routines)
+- ✓ Added daily progress section to Dashboard showing today's workout and next meal
+- ✓ Enhanced plan cards with macro summaries and visual status indicators
+
 **2025-06-30 22:30**
 - ✓ Implemented smart plan cards with unified nutrition and workout views
 - ✓ Added visual progress indicators with streak tracking and achievement badges
