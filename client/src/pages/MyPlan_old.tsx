@@ -5,10 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Target, Plus, Check, Dumbbell, Utensils, Download, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
+import { Calendar, Target, Trash2, Plus, Check, X, Dumbbell, Utensils, Download, RotateCcw, Clock, TrendingUp, Edit2, MoreVertical, Award, ChevronDown, ChevronUp } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 
 interface MealPlan {
@@ -34,11 +35,6 @@ export default function MyPlan() {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
-
-  // Helper function to determine if plan is diet-related
-  const isPlanDiet = (plan: MealPlan) => {
-    return plan.dailyCalories > 0;
-  };
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -67,6 +63,11 @@ export default function MyPlan() {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
+
+  // Helper function to determine if plan is diet-related
+  const isPlanDiet = (plan: MealPlan) => {
+    return plan.dailyCalories > 0;
+  };
 
   // Find active nutrition and workout plans
   const activeNutritionPlan = activePlan && isPlanDiet(activePlan) ? activePlan : 
@@ -107,31 +108,6 @@ export default function MyPlan() {
       toast({
         title: "Erro ao criar plano",
         description: "Tente novamente em alguns minutos.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const activatePlanMutation = useMutation({
-    mutationFn: async (planId: number) => {
-      const response = await fetch(`/api/user-plans/${planId}/activate`, {
-        method: 'POST',
-      });
-      if (!response.ok) throw new Error('Failed to activate plan');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user-plans/active'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/user-plans/history'] });
-      toast({
-        title: "Plano ativado",
-        description: "O plano foi ativado com sucesso!",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Erro ao ativar plano. Tente novamente.",
         variant: "destructive",
       });
     },
@@ -278,8 +254,8 @@ export default function MyPlan() {
                         <div className="border-t pt-4">
                           <h4 className="font-medium mb-3">Cronograma de Alimentação</h4>
                           <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {activeNutritionPlan.meals && 
-                             Object.entries(activeNutritionPlan.meals).map(([day, dayMeals]: [string, any]) => (
+                            {planHistory.find(p => isPlanDiet(p) && p.isActive)?.meals && 
+                             Object.entries(planHistory.find(p => isPlanDiet(p) && p.isActive)?.meals || {}).map(([day, dayMeals]: [string, any]) => (
                               <div key={day} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                 <div className="font-medium text-sm capitalize mb-2">{day}</div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -320,7 +296,7 @@ export default function MyPlan() {
                       </div>
                       <div>
                         <CardTitle className="text-lg font-bold">Plano de Treino Atual</CardTitle>
-                        {activeWorkoutPlan && (
+                        {planHistory.find(p => !isPlanDiet(p) && p.isActive) && (
                           <Badge variant="outline" className="text-blue-700 bg-blue-50 border-blue-200 text-xs mt-1">
                             <Check className="w-3 h-3 mr-1" />
                             Ativo
@@ -328,8 +304,8 @@ export default function MyPlan() {
                         )}
                       </div>
                     </div>
-                    {activeWorkoutPlan && (
-                      <Button variant="outline" size="sm" onClick={() => handleExportPlan(activeWorkoutPlan)}>
+                    {planHistory.find(p => !isPlanDiet(p) && p.isActive) && (
+                      <Button variant="outline" size="sm" onClick={() => handleExportPlan(planHistory.find(p => !isPlanDiet(p) && p.isActive)!)}>
                         <Download className="w-4 h-4 mr-2" />
                         Exportar PDF
                       </Button>
@@ -337,14 +313,14 @@ export default function MyPlan() {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  {activeWorkoutPlan ? (
+                  {planHistory.find(p => !isPlanDiet(p) && p.isActive) ? (
                     <div className="space-y-4">
                       <div>
                         <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                          {activeWorkoutPlan.name}
+                          {planHistory.find(p => !isPlanDiet(p) && p.isActive)?.name}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                          {activeWorkoutPlan.description}
+                          Treino focado em ganho de massa muscular
                         </p>
                         <Button 
                           variant="ghost" 
@@ -370,8 +346,8 @@ export default function MyPlan() {
                         <div className="border-t pt-4">
                           <h4 className="font-medium mb-3">Cronograma de Treinos</h4>
                           <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {activeWorkoutPlan.meals && 
-                             Object.entries(activeWorkoutPlan.meals).map(([day, workout]: [string, any]) => (
+                            {planHistory.find(p => !isPlanDiet(p) && p.isActive)?.meals && 
+                             Object.entries(planHistory.find(p => !isPlanDiet(p) && p.isActive)?.meals || {}).map(([day, workout]: [string, any]) => (
                               <div key={day} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                 <div className="font-medium text-sm capitalize mb-2">{day}</div>
                                 <div className="space-y-2">
@@ -497,7 +473,7 @@ export default function MyPlan() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {planHistory.map((plan) => (
                   <Card key={plan.id} className="border border-gray-200 dark:border-gray-700">
-                    <CardHeader className="pb-3">
+                    <CardHeader>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className={`p-2 rounded-lg ${isPlanDiet(plan) ? 'bg-green-100 dark:bg-green-800' : 'bg-blue-100 dark:bg-blue-800'}`}>
@@ -509,53 +485,17 @@ export default function MyPlan() {
                           </div>
                           <div>
                             <CardTitle className="text-base">{plan.name}</CardTitle>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant={plan.isActive ? "default" : "secondary"} className="text-xs">
-                                {plan.isActive ? "Ativo" : "Inativo"}
-                              </Badge>
-                            </div>
+                            <Badge variant={plan.isActive ? "default" : "secondary"} className="text-xs">
+                              {plan.isActive ? "Ativo" : "Inativo"}
+                            </Badge>
                           </div>
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <span className="sr-only">Abrir menu</span>
-                              <div className="h-1 w-1 bg-gray-400 rounded-full"></div>
-                              <div className="h-1 w-1 bg-gray-400 rounded-full mt-1"></div>
-                              <div className="h-1 w-1 bg-gray-400 rounded-full mt-1"></div>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {!plan.isActive && (
-                              <DropdownMenuItem onClick={() => activatePlanMutation.mutate(plan.id)}>
-                                <RotateCcw className="mr-2 h-4 w-4" />
-                                Ativar Plano
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem onClick={() => handleExportPlan(plan)}>
-                              <Download className="mr-2 h-4 w-4" />
-                              Exportar PDF
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </div>
                     </CardHeader>
-                    <CardContent className="pt-0">
+                    <CardContent>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
                         {plan.description}
                       </p>
-                      {isPlanDiet(plan) && (
-                        <div className="grid grid-cols-2 gap-2 mb-3">
-                          <div className="text-center p-2 bg-orange-50 dark:bg-orange-900/20 rounded text-xs">
-                            <div className="font-bold text-orange-600">{plan.dailyCalories}</div>
-                            <div className="text-orange-700 dark:text-orange-400">kcal</div>
-                          </div>
-                          <div className="text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-xs">
-                            <div className="font-bold text-blue-600">{plan.macroProtein}g</div>
-                            <div className="text-blue-700 dark:text-blue-400">Proteína</div>
-                          </div>
-                        </div>
-                      )}
                       <div className="text-xs text-gray-500">
                         Criado em {new Date(plan.createdAt).toLocaleDateString('pt-BR')}
                       </div>
