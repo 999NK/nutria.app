@@ -1006,12 +1006,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user-plans/active', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      // For now, use meal plan until we implement userPlans in storage
-      const activePlan = await storage.getActiveMealPlan(userId);
-      res.json(activePlan || null);
+      // Return all active plans (both nutrition and workout)
+      const activePlans = await storage.getActiveMealPlans(userId);
+      res.json(activePlans || []);
     } catch (error) {
-      console.error("Error fetching active plan:", error);
-      res.status(500).json({ message: "Failed to fetch active plan" });
+      console.error("Error fetching active plans:", error);
+      res.status(500).json({ message: "Failed to fetch active plans" });
     }
   });
 

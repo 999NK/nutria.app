@@ -84,6 +84,7 @@ export interface IStorage {
   
   // Meal Plan operations
   getActiveMealPlan(userId: string): Promise<MealPlan | undefined>;
+  getActiveMealPlans(userId: string): Promise<MealPlan[]>;
   getMealPlanHistory(userId: string): Promise<MealPlan[]>;
   createMealPlan(mealPlan: InsertMealPlan): Promise<MealPlan>;
   updateMealPlan(id: number, mealPlan: Partial<InsertMealPlan>): Promise<MealPlan>;
@@ -463,6 +464,14 @@ export class DatabaseStorage implements IStorage {
     return plan;
   }
 
+  async getActiveMealPlans(userId: string): Promise<MealPlan[]> {
+    return db
+      .select()
+      .from(mealPlans)
+      .where(and(eq(mealPlans.userId, userId), eq(mealPlans.isActive, true)))
+      .orderBy(desc(mealPlans.createdAt));
+  }
+
   async getMealPlanHistory(userId: string): Promise<MealPlan[]> {
     return db
       .select()
@@ -500,6 +509,39 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(mealPlans.id, id))
       .returning();
+    return result;
+  }
+
+  async activateMealPlan(id: number, userId: string): Promise<MealPlan> {
+    // First get the plan to activate to know its type
+    const [planToActivate] = await db
+      .select()
+      .from(mealPlans)
+      .where(eq(mealPlans.id, id));
+    
+    if (!planToActivate) {
+      throw new Error('Plan not found');
+    }
+
+    const planType = planToActivate.type || 'nutrition';
+
+    // Deactivate all other plans of the same type for this user
+    await db
+      .update(mealPlans)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(and(
+        eq(mealPlans.userId, userId),
+        eq(mealPlans.type, planType),
+        ne(mealPlans.id, id)
+      ));
+
+    // Activate the target plan
+    const [result] = await db
+      .update(mealPlans)
+      .set({ isActive: true, updatedAt: new Date() })
+      .where(eq(mealPlans.id, id))
+      .returning();
+    
     return result;
   }
 
