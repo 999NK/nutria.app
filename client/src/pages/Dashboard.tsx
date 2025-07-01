@@ -73,6 +73,14 @@ export default function Dashboard() {
     refetchOnWindowFocus: false,
   });
 
+  // Fetch active plan for "Hoje no seu Plano" section
+  const { data: activePlan } = useQuery({
+    queryKey: ["/api/user-plans/active"],
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
   const todayFormatted = format(new Date(), "EEEE, dd 'de' MMMM", { locale: ptBR });
 
   // Calculate nutrition totals
@@ -307,67 +315,94 @@ export default function Dashboard() {
             </Button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Treino do Dia */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-800">
-                  <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
-                  </svg>
+          {activePlan ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Treino do Dia */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-800">
+                    <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-gray-100">Treino de Hoje</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{activePlan.name}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Treino de Hoje</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Push - Peito, Ombro e Tríceps</p>
+                
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plano ativo</span>
+                    <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
+                      Ver detalhes
+                    </Button>
+                  </div>
+                  <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                    {activePlan.dailyCalories && (
+                      <div>🎯 Meta: {activePlan.dailyCalories} kcal/dia</div>
+                    )}
+                    {activePlan.macroProtein && (
+                      <div>💪 Proteína: {activePlan.macroProtein}g</div>
+                    )}
+                    {activePlan.macroCarbs && (
+                      <div>🍞 Carboidratos: {activePlan.macroCarbs}g</div>
+                    )}
+                    {activePlan.macroFat && (
+                      <div>🥑 Gorduras: {activePlan.macroFat}g</div>
+                    )}
+                  </div>
                 </div>
               </div>
-              
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Exercícios do dia</span>
-                  <Button variant="ghost" size="sm" className="h-auto p-1 text-xs">
-                    Ver detalhes
-                  </Button>
-                </div>
-                <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                  <div>• Supino reto - 4x8-12</div>
-                  <div>• Desenvolvimento - 3x10-15</div>
-                  <div>• Tríceps pulley - 3x12-15</div>
-                  <div className="text-xs text-gray-500 mt-2">+3 exercícios</div>
-                </div>
-              </div>
-            </div>
 
-            {/* Próxima Refeição */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-800">
-                  <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                  </svg>
+              {/* Informações do Plano */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-green-100 dark:bg-green-800">
+                    <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-gray-100">Seu Plano Atual</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Plano ativo desde {new Date(activePlan.createdAt).toLocaleDateString('pt-BR')}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Próxima Refeição</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Almoço - 12:30</p>
-                </div>
-              </div>
-              
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Frango grelhado com batata doce</span>
-                  <Button variant="ghost" size="sm" className="h-auto p-1 text-xs">
-                    Ver receita
-                  </Button>
-                </div>
-                <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                  <div>🍗 150g peito de frango</div>
-                  <div>🥔 200g batata doce assada</div>
-                  <div>🥗 Salada verde mista</div>
-                  <div className="text-xs text-gray-500 mt-2 font-medium">~520 kcal</div>
+                
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Resumo do plano</span>
+                    <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
+                      Ver completo
+                    </Button>
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    {activePlan.description ? (
+                      <p className="line-clamp-3">{activePlan.description}</p>
+                    ) : (
+                      <p>Plano personalizado baseado nos seus objetivos nutricionais</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="text-center py-8">
+              <div className="text-gray-500 dark:text-gray-400 mb-4">
+                <svg className="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                </svg>
+                <p className="text-sm font-medium">Nenhum plano ativo</p>
+                <p className="text-xs">Crie um plano personalizado para começar sua jornada</p>
+              </div>
+              <Button 
+                onClick={() => setLocation('/my-plan')}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Criar Meu Plano
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

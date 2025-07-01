@@ -10,6 +10,16 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-01 19:35**
+- ✓ Implemented proper PDF generation with PDFKit (replaced corrupted PDF issue)
+- ✓ Added detailed workout schedules with sets, reps, and exercise descriptions in PDF export
+- ✓ Fixed Dashboard "Hoje no seu Plano" to show active plan data dynamically
+- ✓ Improved history cards UX with larger size (max-w-2xl instead of max-w-md)
+- ✓ Integrated active plan data into Dashboard with nutrition goals display
+- ✓ Added fallback state for users without active plans with "Criar Meu Plano" button
+- ✓ Enhanced plan information display with creation date and description preview
+- ✓ Fixed plan activation queries and navigation between sections
+
 **2025-07-01 19:20**
 - ✓ Fixed PDF export endpoint (was failing with "Plan not found" errors)
 - ✓ Reordered Dashboard cards: Progresso Diário now appears first, Hoje no seu Plano second
