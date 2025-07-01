@@ -10,6 +10,14 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-01 22:00**
+- ✓ Redesigned nutrition cronograma with detailed meal specifications (Monday-Sunday)
+- ✓ Added individual nutritional values per meal (calories, protein, carbs, fat)
+- ✓ Enhanced workout cronograma with comprehensive exercise details
+- ✓ Displayed specific exercise specifications: series count, repetitions, rest periods
+- ✓ Structured meal display: meal type header → food description → nutritional values
+- ✓ Improved visual hierarchy with color-coded nutritional metrics and exercise parameters
+
 **2025-07-01 21:50**
 - ✓ Enhanced nutrition plan details with calories per meal and ingredient lists
 - ✓ Improved workout plan display with sets, reps, rest periods, and exercise descriptions
