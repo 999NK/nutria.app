@@ -1125,7 +1125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/user-plans/:id/activate', isAuthenticated, async (req: any, res) => {
+  app.post('/api/user-plans/:id/activate', isAuthenticated, async (req: any, res) => {
     try {
       const planId = parseInt(req.params.id);
       // For now, use meal plan methods
