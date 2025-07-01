@@ -1,7 +1,5 @@
 import { User, DailyNutrition } from "@shared/schema";
-
-// PDF Service for generating nutrition reports
-// Using jsPDF for client-side PDF generation or similar library
+import PDFDocument from 'pdfkit';
 
 export interface ReportData {
   user: User;
@@ -14,135 +12,145 @@ export interface ReportData {
 
 class PDFService {
   async generateNutritionReport(data: ReportData): Promise<Buffer> {
-    try {
-      // TODO: Implement actual PDF generation
-      // This would use a library like puppeteer, jsPDF, or PDFKit
-      
-      /*
-      Example with PDFKit:
-      
-      const PDFDocument = require('pdfkit');
-      const doc = new PDFDocument();
-      
-      // Add content to PDF
-      doc.fontSize(20).text('Relatório Nutricional - NutrIA', 100, 100);
-      doc.fontSize(14).text(`Usuário: ${data.user.firstName} ${data.user.lastName}`, 100, 150);
-      doc.text(`Período: ${data.startDate} a ${data.endDate}`, 100, 170);
-      
-      // Add nutrition data
-      let yPosition = 220;
-      data.nutritionHistory.forEach((day, index) => {
-        doc.text(`${day.date}: ${day.totalCalories} kcal`, 100, yPosition + (index * 20));
-      });
-      
-      // Convert to buffer
-      const chunks: Buffer[] = [];
-      doc.on('data', chunk => chunks.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.end();
-      */
+    return new Promise((resolve, reject) => {
+      try {
+        const doc = new PDFDocument();
+        const chunks: Buffer[] = [];
 
-      // Placeholder implementation - return mock PDF content
-      const pdfContent = this.generatePDFContent(data);
-      return Buffer.from(pdfContent, 'utf-8');
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      throw new Error('Failed to generate PDF report');
-    }
-  }
+        doc.on('data', (chunk) => chunks.push(chunk));
+        doc.on('end', () => resolve(Buffer.concat(chunks)));
+        doc.on('error', reject);
 
-  private generatePDFContent(data: ReportData): string {
-    // Generate HTML content that would be converted to PDF
-    const { user, nutritionHistory, startDate, endDate, type } = data;
-    
-    const totalDays = nutritionHistory.length;
-    const avgCalories = nutritionHistory.reduce((sum, day) => sum + (day.totalCalories || 0), 0) / totalDays;
-    const avgProtein = nutritionHistory.reduce((sum, day) => sum + parseFloat(day.totalProtein || "0"), 0) / totalDays;
-    const avgCarbs = nutritionHistory.reduce((sum, day) => sum + parseFloat(day.totalCarbs || "0"), 0) / totalDays;
-    const avgFat = nutritionHistory.reduce((sum, day) => sum + parseFloat(day.totalFat || "0"), 0) / totalDays;
+        // Header
+        doc.fontSize(20).fillColor('#22C55E').text('Relatório Nutricional - NutrIA', 50, 50);
+        doc.fontSize(12).fillColor('#000000').text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 50, 80);
 
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Relatório Nutricional - NutrIA</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
-        .header { text-align: center; margin-bottom: 40px; }
-        .logo { color: #4CAF50; font-size: 24px; font-weight: bold; }
-        .user-info { background: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
-        .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
-        .metric { background: white; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #ddd; }
-        .metric-value { font-size: 24px; font-weight: bold; color: #4CAF50; }
-        .daily-data { margin-top: 30px; }
-        .day-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; }
-        .day-row:first-child { font-weight: bold; background: #f9f9f9; }
-        @media print { body { margin: 20px; } }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="logo">🥗 NutrIA</div>
-        <h1>Relatório Nutricional</h1>
-        <p>Período: ${startDate} a ${endDate}</p>
-    </div>
+        // User Info
+        doc.fontSize(16).text('Informações do Usuário', 50, 120);
+        doc.fontSize(12)
+           .text(`Nome: ${data.user.firstName || 'N/A'} ${data.user.lastName || ''}`, 50, 140)
+           .text(`Email: ${data.user.email}`, 50, 160)
+           .text(`Período: ${data.startDate} a ${data.endDate}`, 50, 180);
 
-    <div class="user-info">
-        <h2>Informações do Usuário</h2>
-        <p><strong>Nome:</strong> ${user.firstName || 'N/A'} ${user.lastName || ''}</p>
-        <p><strong>Email:</strong> ${user.email || 'N/A'}</p>
-        <p><strong>Peso:</strong> ${user.weight || 'N/A'} kg</p>
-        <p><strong>Altura:</strong> ${user.height || 'N/A'} cm</p>
-        <p><strong>Meta de Calorias:</strong> ${user.dailyCalories} kcal/dia</p>
-    </div>
+        let yPos = 220;
 
-    <div class="summary">
-        <div class="metric">
-            <div class="metric-value">${Math.round(avgCalories)}</div>
-            <div>Calorias Médias</div>
-        </div>
-        <div class="metric">
-            <div class="metric-value">${avgProtein.toFixed(1)}g</div>
-            <div>Proteína Média</div>
-        </div>
-        <div class="metric">
-            <div class="metric-value">${avgCarbs.toFixed(1)}g</div>
-            <div>Carboidratos Médios</div>
-        </div>
-        <div class="metric">
-            <div class="metric-value">${avgFat.toFixed(1)}g</div>
-            <div>Gordura Média</div>
-        </div>
-    </div>
+        // Plan Details
+        if (data.plan) {
+          doc.fontSize(16).text('Detalhes do Plano', 50, yPos);
+          yPos += 30;
+          
+          doc.fontSize(14).text(`Plano: ${data.plan.name}`, 50, yPos);
+          yPos += 20;
+          
+          if (data.plan.description) {
+            doc.fontSize(12).text(`Descrição: ${data.plan.description}`, 50, yPos);
+            yPos += 20;
+          }
 
-    <div class="daily-data">
-        <h2>Dados Diários</h2>
-        <div class="day-row">
-            <div>Data</div>
-            <div>Calorias</div>
-            <div>Proteína</div>
-            <div>Carboidratos</div>
-            <div>Gordura</div>
-        </div>
-        ${nutritionHistory.map(day => `
-        <div class="day-row">
-            <div>${day.date}</div>
-            <div>${day.totalCalories || 0} kcal</div>
-            <div>${day.totalProtein || 0}g</div>
-            <div>${day.totalCarbs || 0}g</div>
-            <div>${day.totalFat || 0}g</div>
-        </div>
-        `).join('')}
-    </div>
+          // Nutrition Goals
+          if (data.plan.dailyCalories) {
+            doc.fontSize(14).text('Metas Nutricionais:', 50, yPos);
+            yPos += 20;
+            doc.fontSize(12)
+               .text(`• Calorias: ${data.plan.dailyCalories} kcal`, 70, yPos)
+               .text(`• Proteínas: ${data.plan.dailyProtein}g`, 70, yPos + 15)
+               .text(`• Carboidratos: ${data.plan.dailyCarbs}g`, 70, yPos + 30)
+               .text(`• Gorduras: ${data.plan.dailyFat}g`, 70, yPos + 45);
+            yPos += 80;
+          }
 
-    <div style="margin-top: 40px; text-align: center; color: #666; font-size: 12px;">
-        <p>Relatório gerado em ${new Date().toLocaleString('pt-BR')}</p>
-        <p>NutrIA - Seu assistente nutricional inteligente</p>
-    </div>
-</body>
-</html>
-    `;
+          // Workout Schedule
+          if (data.plan.meals && typeof data.plan.meals === 'string') {
+            try {
+              doc.fontSize(14).text('Cronograma de Treinos:', 50, yPos);
+              yPos += 20;
+
+              const meals = JSON.parse(data.plan.meals);
+              const days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+              
+              days.forEach((day, index) => {
+                const dayKey = `day${index + 1}`;
+                if (meals[dayKey] && meals[dayKey].workout) {
+                  if (yPos > 700) {
+                    doc.addPage();
+                    yPos = 50;
+                  }
+                  
+                  doc.fontSize(12).text(`${day}:`, 70, yPos);
+                  yPos += 15;
+                  
+                  const workout = meals[dayKey].workout;
+                  if (typeof workout === 'string') {
+                    const exercises = workout.split('\n').filter(ex => ex.trim());
+                    exercises.forEach(exercise => {
+                      // Parse exercise details
+                      const match = exercise.match(/^(.*?)(?:\s*-\s*(\d+)\s*séries?\s*(?:de\s*)?(\d+)\s*(?:reps?|repetições))?/i);
+                      if (match) {
+                        const [, name, sets, reps] = match;
+                        let exerciseText = `  • ${name.trim()}`;
+                        if (sets && reps) {
+                          exerciseText += ` - ${sets} séries de ${reps} repetições`;
+                        }
+                        doc.fontSize(10).text(exerciseText, 90, yPos);
+                        yPos += 12;
+                      } else {
+                        doc.fontSize(10).text(`  • ${exercise.trim()}`, 90, yPos);
+                        yPos += 12;
+                      }
+                    });
+                  } else if (Array.isArray(workout)) {
+                    workout.forEach((exercise: any) => {
+                      let exerciseText = `  • ${exercise.name || exercise}`;
+                      if (exercise.sets && exercise.reps) {
+                        exerciseText += ` - ${exercise.sets} séries de ${exercise.reps} repetições`;
+                      }
+                      if (exercise.rest) {
+                        exerciseText += ` (${exercise.rest}s descanso)`;
+                      }
+                      doc.fontSize(10).text(exerciseText, 90, yPos);
+                      yPos += 12;
+                    });
+                  }
+                  yPos += 10;
+                }
+              });
+            } catch (parseError) {
+              console.error('Error parsing workout schedule:', parseError);
+            }
+          }
+        }
+
+        // Nutrition History
+        if (data.nutritionHistory && data.nutritionHistory.length > 0) {
+          if (yPos > 700) {
+            doc.addPage();
+            yPos = 50;
+          }
+          
+          doc.fontSize(16).text('Histórico Nutricional', 50, yPos);
+          yPos += 30;
+
+          data.nutritionHistory.forEach((day) => {
+            if (yPos > 750) {
+              doc.addPage();
+              yPos = 50;
+            }
+            
+            doc.fontSize(12)
+               .text(`${day.date}: ${day.totalCalories || 0} kcal`, 50, yPos)
+               .text(`Proteína: ${day.totalProtein || 0}g`, 200, yPos)
+               .text(`Carb: ${day.totalCarbs || 0}g`, 300, yPos)
+               .text(`Gordura: ${day.totalFat || 0}g`, 400, yPos);
+            yPos += 20;
+          });
+        }
+
+        doc.end();
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        reject(new Error('Failed to generate PDF report'));
+      }
+    });
   }
 }
 
