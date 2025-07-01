@@ -184,13 +184,35 @@ export default function MyPlan() {
 
   const getMealTypeName = (type: string) => {
     const types = {
-      'breakfast': 'Café da manhã',
+      'breakfast': 'Café da Manhã',
       'lunch': 'Almoço',
       'snack': 'Lanche',
+      'lanche': 'Lanche',
       'dinner': 'Jantar',
       'supper': 'Ceia'
     };
     return types[type as keyof typeof types] || type;
+  }
+
+  const getMealTime = (type: string) => {
+    const times = {
+      'breakfast': '07:00',
+      'lunch': '12:00',
+      'snack': '15:00',
+      'lanche': '15:00',
+      'dinner': '19:00',
+      'supper': '21:00'
+    };
+    return times[type as keyof typeof times] || '';
+  }
+
+  const sortMealsByTime = (meals: any) => {
+    const mealOrder = ['breakfast', 'lunch', 'lanche', 'snack', 'dinner', 'supper'];
+    return Object.entries(meals).sort(([a], [b]) => {
+      const indexA = mealOrder.indexOf(a);
+      const indexB = mealOrder.indexOf(b);
+      return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+    });
   };
 
   return (
@@ -290,13 +312,18 @@ export default function MyPlan() {
                                   {day.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                                 </div>
                                 <div className="space-y-3">
-                                  {Object.entries(dayMeals).map(([mealType, meal]: [string, any]) => (
+                                  {sortMealsByTime(dayMeals).map(([mealType, meal]: [string, any]) => (
                                     <div key={mealType} className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
                                       {/* Cabeçalho da refeição */}
                                       <div className="flex justify-between items-center mb-3">
-                                        <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
-                                          {getMealTypeName(mealType)}
-                                        </h4>
+                                        <div className="flex items-center gap-3">
+                                          <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+                                            {getMealTypeName(mealType)}
+                                          </h4>
+                                          <span className="text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-md font-medium">
+                                            {meal.time || getMealTime(mealType)}
+                                          </span>
+                                        </div>
                                         <div className="flex gap-2">
                                           {meal.calories && (
                                             <div className="text-sm bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-3 py-1 rounded-full font-medium">

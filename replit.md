@@ -10,6 +10,14 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-01 23:30**
+- ✓ Added meal times to nutrition schedules (07:00, 12:00, 15:00, 19:00)
+- ✓ Replaced "snack" with "Lanche" throughout the system
+- ✓ Implemented chronological meal ordering by time in schedules
+- ✓ Enhanced meal display with time badges showing when to eat
+- ✓ Updated AI meal plan generation to include time fields
+- ✓ Fixed fallback meal plans to use "lanche" instead of "snack"
+
 **2025-07-01 22:10**
 - ✓ Fixed light mode in Progress page (daily progress card now works correctly)
 - ✓ Added specific daily chart showing user progress throughout hours
