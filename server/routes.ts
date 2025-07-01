@@ -1148,6 +1148,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Export plan as PDF
+  app.post('/api/export-plan-pdf', isAuthenticated, async (req: any, res) => {
+    try {
+      const { planId } = req.body;
+      const userId = req.user.claims.sub;
+      
+      // Get user data
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get plan data from history
+      const planHistory = await storage.getMealPlanHistory(userId);
+      const plan = planHistory.find(p => p.id === planId);
+      
+      if (!plan) {
+        return res.status(404).json({ message: "Plan not found" });
+      }
+
+      // Generate PDF content based on plan type
+      const isPlanDiet = (plan.dailyCalories || 0) > 0;
+      
+      // Simple PDF generation using HTML template
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>${plan.name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            h1 { color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }
+            h2 { color: #1f2937; margin-top: 30px; }
+            .meta { background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0; }
+            .meal-day { background: #fafafa; padding: 15px; margin: 10px 0; border-radius: 5px; }
+            .exercise { background: #f0f9ff; padding: 10px; margin: 5px 0; border-radius: 5px; }
+            .macros { display: flex; gap: 20px; }
+            .macro { text-align: center; padding: 10px; background: #e5e7eb; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <h1>🥗 ${plan.name}</h1>
+          
+          <div class="meta">
+            <p><strong>Tipo:</strong> ${isPlanDiet ? 'Plano Nutricional' : 'Plano de Treino'}</p>
+            <p><strong>Usuário:</strong> ${user.firstName} ${user.lastName}</p>
+            <p><strong>Criado em:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
+            <p><strong>Descrição:</strong> ${plan.description}</p>
+          </div>
+
+          ${isPlanDiet ? `
+            <h2>📊 Metas Nutricionais</h2>
+            <div class="macros">
+              <div class="macro">
+                <h3>${plan.dailyCalories}</h3>
+                <p>Calorias/dia</p>
+              </div>
+              <div class="macro">
+                <h3>${plan.macroProtein}g</h3>
+                <p>Proteína</p>
+              </div>
+              <div class="macro">
+                <h3>${plan.macroCarbs}g</h3>
+                <p>Carboidratos</p>
+              </div>
+              <div class="macro">
+                <h3>${plan.macroFat}g</h3>
+                <p>Gordura</p>
+              </div>
+            </div>
+
+            <h2>🍽️ Cronograma de Refeições</h2>
+            ${plan.meals ? Object.entries(plan.meals).map(([day, dayMeals]) => `
+              <div class="meal-day">
+                <h3>${day.charAt(0).toUpperCase() + day.slice(1)}</h3>
+                ${Object.entries(dayMeals).map(([mealType, meal]) => `
+                  <p><strong>${mealType}:</strong> ${meal.name} ${meal.calories ? `(~${meal.calories} kcal)` : ''}</p>
+                `).join('')}
+              </div>
+            `).join('') : '<p>Cronograma não disponível</p>'}
+          ` : `
+            <h2>💪 Cronograma de Treinos</h2>
+            ${plan.meals ? Object.entries(plan.meals).map(([day, workout]) => `
+              <div class="meal-day">
+                <h3>${day.charAt(0).toUpperCase() + day.slice(1)}</h3>
+                ${Object.entries(workout).map(([exerciseType, exercise]) => `
+                  <div class="exercise">
+                    <strong>${exerciseType}:</strong> 
+                    ${typeof exercise === 'object' && exercise.name ? exercise.name : exercise}
+                    ${typeof exercise === 'object' && exercise.reps ? ` - ${exercise.reps} reps` : ''}
+                    ${typeof exercise === 'object' && exercise.sets ? ` - ${exercise.sets} séries` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            `).join('') : '<p>Cronograma não disponível</p>'}
+          `}
+
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280;">
+            <p>Gerado por NutrIA - Seu assistente nutricional com IA</p>
+            <p>Data de geração: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Return HTML as PDF (browser will handle conversion)
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${plan.name}.html"`);
+      res.send(htmlContent);
+
+    } catch (error) {
+      console.error("Error exporting plan PDF:", error);
+      res.status(500).json({ message: "Failed to export plan PDF" });
+    }
+  });
+
   // Legacy meal plan endpoints for backward compatibility
   app.get('/api/my-meal-plan', isAuthenticated, async (req: any, res) => {
     try {

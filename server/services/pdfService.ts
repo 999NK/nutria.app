@@ -9,6 +9,7 @@ export interface ReportData {
   startDate: string;
   endDate: string;
   type: 'daily' | 'weekly' | 'monthly';
+  plan?: any; // Plan data for detailed PDF export
 }
 
 class PDFService {
