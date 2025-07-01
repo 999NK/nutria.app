@@ -309,7 +309,7 @@ export default function MyPlan() {
                                       {/* O que comer */}
                                       <div className="mb-3">
                                         <div className="text-base text-gray-800 dark:text-gray-200 mb-2 leading-relaxed">
-                                          <strong>Alimentos:</strong> {meal.name || meal.description || 'Refeição balanceada'}
+                                          <strong>Alimentos:</strong> {meal.description || meal.name || 'Refeição balanceada'}
                                         </div>
                                         {meal.ingredients && meal.ingredients.length > 0 && (
                                           <div className="text-sm text-gray-600 dark:text-gray-400">
