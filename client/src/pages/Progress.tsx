@@ -160,11 +160,11 @@ export default function Progress() {
     const remainingCalories = Math.max(0, targetCalories - totalCalories);
 
     return (
-      <Card className="bg-gray-900 text-white border-gray-700 shadow-2xl">
+      <Card className="bg-gray-900 dark:bg-gray-900 bg-white dark:text-white text-gray-900 border-gray-200 dark:border-gray-700 shadow-lg">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white text-lg">Progresso Diário</CardTitle>
-            <span className="text-gray-400 text-sm">
+            <CardTitle className="text-gray-900 dark:text-white text-lg">Progresso Diário</CardTitle>
+            <span className="text-gray-600 dark:text-gray-400 text-sm">
               {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
             </span>
           </div>
@@ -179,7 +179,8 @@ export default function Progress() {
                   cx="90"
                   cy="90"
                   r="75"
-                  stroke="rgb(31, 41, 55)"
+                  stroke="rgb(229, 231, 235)"
+                  className="dark:stroke-gray-600"
                   strokeWidth="8"
                   fill="none"
                 />
@@ -199,11 +200,11 @@ export default function Progress() {
               </svg>
               {/* Center content */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-3xl font-bold text-green-400">
+                <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                   {totalCalories}
                 </div>
-                <div className="text-sm text-gray-300">kcal</div>
-                <div className="text-xs text-gray-500">
+                <div className="text-sm text-gray-600 dark:text-gray-300">kcal</div>
+                <div className="text-xs text-gray-500 dark:text-gray-500">
                   {remainingCalories} restantes
                 </div>
               </div>
@@ -215,10 +216,10 @@ export default function Progress() {
             {/* Protein */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-blue-400 font-medium">Proteína</span>
-                <span className="text-white font-semibold">{currentProtein}g</span>
+                <span className="text-blue-600 dark:text-blue-400 font-medium">Proteína</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{currentProtein}g</span>
               </div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div 
                   className="bg-blue-500 h-2 rounded-full transition-all duration-700"
                   style={{ width: `${Math.min(100, (currentProtein / ((user as any)?.dailyProtein || 120)) * 100)}%` }}
@@ -229,10 +230,10 @@ export default function Progress() {
             {/* Carbohydrates */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-yellow-400 font-medium">Carboidratos</span>
-                <span className="text-white font-semibold">{currentCarbs}g</span>
+                <span className="text-yellow-600 dark:text-yellow-400 font-medium">Carboidratos</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{currentCarbs}g</span>
               </div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div 
                   className="bg-yellow-500 h-2 rounded-full transition-all duration-700"
                   style={{ width: `${Math.min(100, (currentCarbs / ((user as any)?.dailyCarbs || 250)) * 100)}%` }}
@@ -243,10 +244,10 @@ export default function Progress() {
             {/* Fat */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-orange-400 font-medium">Gordura</span>
-                <span className="text-white font-semibold">{currentFat}g</span>
+                <span className="text-orange-600 dark:text-orange-400 font-medium">Gordura</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{currentFat}g</span>
               </div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div 
                   className="bg-orange-500 h-2 rounded-full transition-all duration-700"
                   style={{ width: `${Math.min(100, (currentFat / ((user as any)?.dailyFat || 67)) * 100)}%` }}
@@ -297,29 +298,46 @@ export default function Progress() {
           <MacronutrientChart />
         </div>
         <div className="lg:col-span-2 space-y-6">
-          {/* Additional stats or content can go here */}
+          {/* Gráfico do Dia do Usuário */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
-                Resumo Nutricional
+                <BarChart3 className="w-5 h-5 text-blue-600" />
+                Progresso ao Longo do Dia
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">
-                    {Math.round((((dailyNutrition as any)?.calories || 0) / ((user as any)?.dailyCalories || 2000)) * 100)}%
-                  </div>
-                  <div className="text-sm text-green-700 dark:text-green-400">Meta Calórica</div>
-                </div>
-                <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {Math.round((((dailyNutrition as any)?.protein || 0) / ((user as any)?.dailyProtein || 120)) * 100)}%
-                  </div>
-                  <div className="text-sm text-blue-700 dark:text-blue-400">Meta Proteína</div>
-                </div>
-              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={hourlyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis 
+                    dataKey="hour" 
+                    stroke="#64748b"
+                    fontSize={12}
+                    tickFormatter={(hour) => `${hour}h`}
+                  />
+                  <YAxis 
+                    stroke="#64748b"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    }}
+                    formatter={(value, name) => [
+                      `${value} ${name === 'calories' ? 'kcal' : 'g'}`,
+                      name === 'calories' ? 'Calorias' : 
+                      name === 'protein' ? 'Proteínas' : 'Total'
+                    ]}
+                  />
+                  <Bar dataKey="calories" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </div>
@@ -562,60 +580,43 @@ export default function Progress() {
           </Card>
         )}
 
-        {/* Macro Distribution Pie Chart */}
-        {macroDistribution.some(item => item.value > 0) && (
-          <Card className="w-full bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-xl">
-                <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
-                  <BarChart3 className="w-5 h-5 text-white" />
+        {/* Resumo Nutricional Simplificado */}
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-green-600" />
+              Resumo das Metas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="text-lg font-bold text-green-600">
+                  {Math.round((((dailyNutrition as any)?.calories || 0) / ((user as any)?.dailyCalories || 2000)) * 100)}%
                 </div>
-                Distribuição de Macronutrientes
-              </CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Proporção atual dos macronutrientes consumidos hoje
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <PieChart>
-                  <Pie
-                    data={macroDistribution}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={120}
-                    innerRadius={60}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {macroDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value, name) => [`${value}g`, name]}
-                    contentStyle={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                      border: 'none',
-                      borderRadius: '12px',
-                      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-                    }}
-                  />
-                  <Legend 
-                    verticalAlign="bottom" 
-                    height={36}
-                    iconType="circle"
-                    wrapperStyle={{
-                      paddingTop: '20px',
-                      fontSize: '14px'
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
+                <div className="text-xs text-green-700 dark:text-green-400">Calorias</div>
+              </div>
+              <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="text-lg font-bold text-blue-600">
+                  {Math.round((((dailyNutrition as any)?.protein || 0) / ((user as any)?.dailyProtein || 120)) * 100)}%
+                </div>
+                <div className="text-xs text-blue-700 dark:text-blue-400">Proteína</div>
+              </div>
+              <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <div className="text-lg font-bold text-yellow-600">
+                  {Math.round((((dailyNutrition as any)?.carbs || 0) / ((user as any)?.dailyCarbs || 250)) * 100)}%
+                </div>
+                <div className="text-xs text-yellow-700 dark:text-yellow-400">Carboidratos</div>
+              </div>
+              <div className="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                <div className="text-lg font-bold text-orange-600">
+                  {Math.round((((dailyNutrition as any)?.fat || 0) / ((user as any)?.dailyFat || 67)) * 100)}%
+                </div>
+                <div className="text-xs text-orange-700 dark:text-orange-400">Gorduras</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
@@ -777,43 +778,7 @@ export default function Progress() {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
-      <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-          <TabsTrigger 
-            value="daily" 
-            className="rounded-lg font-medium data-[state=active]:bg-white data-[state=active]:shadow-md"
-          >
-            <Activity className="w-4 h-4 mr-2" />
-            Diário
-          </TabsTrigger>
-          <TabsTrigger 
-            value="weekly"
-            className="rounded-lg font-medium data-[state=active]:bg-white data-[state=active]:shadow-md"
-          >
-            <TrendingUp className="w-4 h-4 mr-2" />
-            Semanal
-          </TabsTrigger>
-          <TabsTrigger 
-            value="monthly"
-            className="rounded-lg font-medium data-[state=active]:bg-white data-[state=active]:shadow-md"
-          >
-            <Calendar className="w-4 h-4 mr-2" />
-            Mensal
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="daily" className="mt-6">
-          {renderHourlyView()}
-        </TabsContent>
-
-        <TabsContent value="weekly" className="mt-6">
-          {renderWeeklyView()}
-        </TabsContent>
-
-        <TabsContent value="monthly" className="mt-6">
-          {renderMonthlyView()}
-        </TabsContent>
-      </Tabs>
+      {renderHourlyView()}
     </div>
   );
 }
