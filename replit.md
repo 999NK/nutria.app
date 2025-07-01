@@ -10,6 +10,14 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-01 22:10**
+- ✓ Fixed light mode in Progress page (daily progress card now works correctly)
+- ✓ Added specific daily chart showing user progress throughout hours
+- ✓ Simplified progress page by removing excessive tabs (weekly and monthly)
+- ✓ Implemented proper colors for light and dark mode in all elements
+- ✓ Replaced complex pie chart with simple goal summary
+- ✓ Fixed specific food display in nutrition schedule (e.g., "pão, 2 fatias de mussarela")
+
 **2025-07-01 22:05**
 - ✓ Configured AI meal plan generation to match exact user nutritional goals
 - ✓ Implemented intelligent goal extraction from user profile (calories, protein, carbs, fat)
