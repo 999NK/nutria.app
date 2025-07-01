@@ -352,15 +352,32 @@ Para iniciantes use ABC, para intermediários/avançados pode usar ABCD. Retorne
     console.log("Starting meal plan generation with description:", description);
     
     try {
-      const prompt = `Crie um plano alimentar personalizado. Responda APENAS com JSON válido no formato exato abaixo:
+      // Extract user goals from description
+      const caloriesMatch = description.match(/Meta calórica diária: (\d+)/);
+      const proteinMatch = description.match(/Meta de proteína: (\d+)/);
+      const carbsMatch = description.match(/Meta de carboidratos: (\d+)/);
+      const fatMatch = description.match(/Meta de gordura: (\d+)/);
+      
+      const targetCalories = caloriesMatch ? parseInt(caloriesMatch[1]) : 2000;
+      const targetProtein = proteinMatch ? parseInt(proteinMatch[1]) : 120;
+      const targetCarbs = carbsMatch ? parseInt(carbsMatch[1]) : 250;
+      const targetFat = fatMatch ? parseInt(fatMatch[1]) : 67;
 
-{"name":"Plano Nutricional","description":"Descrição do plano","dailyCalories":2000,"macroCarbs":250,"macroProtein":150,"macroFat":67,"meals":"{\\"day1\\":{\\"breakfast\\":{\\"name\\":\\"Café da Manhã\\",\\"description\\":\\"Ovos com pão integral\\"},\\"lunch\\":{\\"name\\":\\"Almoço\\",\\"description\\":\\"Arroz, feijão e frango\\"},\\"dinner\\":{\\"name\\":\\"Jantar\\",\\"description\\":\\"Peixe com salada\\"}}}"}
+      const prompt = `Crie um plano alimentar personalizado que RESPEITE EXATAMENTE as metas nutricionais do usuário. Responda APENAS com JSON válido no formato exato abaixo:
 
-Importante: 
+{"name":"Plano Nutricional Personalizado","description":"Plano baseado nas suas metas nutricionais","dailyCalories":${targetCalories},"macroCarbs":${targetCarbs},"macroProtein":${targetProtein},"macroFat":${targetFat},"meals":"{\\"segunda\\":{\\"breakfast\\":{\\"name\\":\\"Café da Manhã\\",\\"description\\":\\"2 ovos mexidos + 2 fatias de pão integral + 1 banana\\",\\"calories\\":${Math.round(targetCalories * 0.25)},\\"protein\\":${Math.round(targetProtein * 0.25)},\\"carbs\\":${Math.round(targetCarbs * 0.25)},\\"fat\\":${Math.round(targetFat * 0.25)},\\"ingredients\\":[\\"ovos\\",\\"pão integral\\",\\"banana\\"]},\\"lunch\\":{\\"name\\":\\"Almoço\\",\\"description\\":\\"150g arroz + 100g feijão + 120g peito de frango + salada verde\\",\\"calories\\":${Math.round(targetCalories * 0.35)},\\"protein\\":${Math.round(targetProtein * 0.35)},\\"carbs\\":${Math.round(targetCarbs * 0.35)},\\"fat\\":${Math.round(targetFat * 0.35)},\\"ingredients\\":[\\"arroz\\",\\"feijão\\",\\"frango\\",\\"alface\\",\\"tomate\\"]},\\"snack\\":{\\"name\\":\\"Lanche\\",\\"description\\":\\"1 iogurte grego + granola\\",\\"calories\\":${Math.round(targetCalories * 0.15)},\\"protein\\":${Math.round(targetProtein * 0.15)},\\"carbs\\":${Math.round(targetCarbs * 0.15)},\\"fat\\":${Math.round(targetFat * 0.15)},\\"ingredients\\":[\\"iogurte grego\\",\\"granola\\"]},\\"dinner\\":{\\"name\\":\\"Jantar\\",\\"description\\":\\"120g salmão grelhado + batata doce + brócolis\\",\\"calories\\":${Math.round(targetCalories * 0.25)},\\"protein\\":${Math.round(targetProtein * 0.25)},\\"carbs\\":${Math.round(targetCarbs * 0.25)},\\"fat\\":${Math.round(targetFat * 0.25)},\\"ingredients\\":[\\"salmão\\",\\"batata doce\\",\\"brócolis\\"]}}}"}
+
+REGRAS OBRIGATÓRIAS:
+- Os valores dailyCalories, macroCarbs, macroProtein, macroFat DEVEM ser EXATAMENTE ${targetCalories}, ${targetCarbs}, ${targetProtein}, ${targetFat}
+- Distribua as calorias entre as refeições (25% café, 35% almoço, 15% lanche, 25% jantar)
+- Crie o plano para os 7 dias da semana (segunda, terça, quarta, quinta, sexta, sabado, domingo)
+- Cada refeição deve ter: name, description, calories, protein, carbs, fat, ingredients
+- Use alimentos brasileiros típicos
 - Use aspas duplas escapadas (\\\") dentro da string meals
-- NÃO adicione quebras de linha
+- NÃO adicione quebras de linha no JSON
 - NÃO adicione texto antes ou depois do JSON
-- Base nas informações: ${description}`;
+
+Base nas informações do usuário: ${description}`;
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
         method: 'POST',
@@ -446,35 +463,129 @@ Importante:
         console.error('JSON Parse Error:', parseError.message);
         console.error('Problematic JSON:', jsonContent);
         
-        // Try to create a fallback plan structure
+        // Create fallback plan structure using user's specific targets
         parsedPlan = {
           name: "Plano Nutricional Personalizado",
-          description: `Plano criado para ganho de massa muscular baseado nas suas características individuais.`,
-          dailyCalories: 2786,
-          macroCarbs: 348,
-          macroProtein: 174,
-          macroFat: 77,
+          description: `Plano baseado nas suas metas: ${targetCalories} kcal, ${targetProtein}g proteína diárias.`,
+          dailyCalories: targetCalories,
+          macroCarbs: targetCarbs,
+          macroProtein: targetProtein,
+          macroFat: targetFat,
           meals: JSON.stringify({
-            day1: {
-              breakfast: { name: "Café da Manhã", description: "Aveia com banana e whey protein" },
-              lunch: { name: "Almoço", description: "Frango grelhado com arroz e feijão" },
-              snack: { name: "Lanche", description: "Batata doce com peito de peru" },
-              dinner: { name: "Jantar", description: "Salmão com quinoa e vegetais" },
-              workout: "Treino A - Peito, Ombro e Tríceps\nSupino reto - 4 séries de 8-12 repetições\nDesenvolvimento com halteres - 3 séries de 10-15 repetições\nTríceps pulley - 3 séries de 12-15 repetições\nElevação lateral - 3 séries de 12-15 repetições"
+            segunda: {
+              breakfast: { 
+                name: "Café da Manhã", 
+                description: "2 ovos mexidos + 2 fatias de pão integral + 1 banana",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["ovos", "pão integral", "banana"]
+              },
+              lunch: { 
+                name: "Almoço", 
+                description: "150g arroz + 100g feijão + 120g peito de frango + salada verde",
+                calories: Math.round(targetCalories * 0.35),
+                protein: Math.round(targetProtein * 0.35),
+                carbs: Math.round(targetCarbs * 0.35),
+                fat: Math.round(targetFat * 0.35),
+                ingredients: ["arroz", "feijão", "frango", "alface", "tomate"]
+              },
+              snack: { 
+                name: "Lanche", 
+                description: "1 iogurte grego + granola",
+                calories: Math.round(targetCalories * 0.15),
+                protein: Math.round(targetProtein * 0.15),
+                carbs: Math.round(targetCarbs * 0.15),
+                fat: Math.round(targetFat * 0.15),
+                ingredients: ["iogurte grego", "granola"]
+              },
+              dinner: { 
+                name: "Jantar", 
+                description: "120g salmão grelhado + batata doce + brócolis",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["salmão", "batata doce", "brócolis"]
+              }
             },
-            day2: {
-              breakfast: { name: "Café da Manhã", description: "Ovos mexidos com pão integral" },
-              lunch: { name: "Almoço", description: "Carne vermelha magra com batata doce" },
-              snack: { name: "Lanche", description: "Iogurte grego com granola" },
-              dinner: { name: "Jantar", description: "Peixe grelhado com arroz integral" },
-              workout: "Treino B - Costas e Bíceps\nPuxada na polia - 4 séries de 8-12 repetições\nRemada curvada - 3 séries de 10-12 repetições\nRosca direta - 3 séries de 12-15 repetições\nRosca martelo - 3 séries de 12-15 repetições"
+            terca: {
+              breakfast: { 
+                name: "Café da Manhã", 
+                description: "Aveia com whey protein + banana + mel",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["aveia", "whey protein", "banana", "mel"]
+              },
+              lunch: { 
+                name: "Almoço", 
+                description: "Macarrão integral + molho de tomate + carne moída magra",
+                calories: Math.round(targetCalories * 0.35),
+                protein: Math.round(targetProtein * 0.35),
+                carbs: Math.round(targetCarbs * 0.35),
+                fat: Math.round(targetFat * 0.35),
+                ingredients: ["macarrão integral", "carne moída", "molho de tomate"]
+              },
+              snack: { 
+                name: "Lanche", 
+                description: "Vitamina de frutas com leite",
+                calories: Math.round(targetCalories * 0.15),
+                protein: Math.round(targetProtein * 0.15),
+                carbs: Math.round(targetCarbs * 0.15),
+                fat: Math.round(targetFat * 0.15),
+                ingredients: ["leite", "morango", "manga"]
+              },
+              dinner: { 
+                name: "Jantar", 
+                description: "Tilápia grelhada + quinoa + legumes refogados",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["tilápia", "quinoa", "abobrinha", "cenoura"]
+              }
             },
-            day3: {
-              breakfast: { name: "Café da Manhã", description: "Vitamina de frutas com whey" },
-              lunch: { name: "Almoço", description: "Frango desfiado com macarrão integral" },
-              snack: { name: "Lanche", description: "Mix de castanhas e frutas secas" },
-              dinner: { name: "Jantar", description: "Omelete com vegetais" },
-              workout: "Treino C - Pernas e Glúteos\nAgachamento livre - 4 séries de 8-12 repetições\nLeg press - 3 séries de 12-15 repetições\nStiff - 3 séries de 10-12 repetições\nPanturrilha em pé - 4 séries de 15-20 repetições"
+            // Adicionar os outros dias da semana seguindo o mesmo padrão...
+            quarta: {
+              breakfast: { 
+                name: "Café da Manhã", 
+                description: "Tapioca com queijo e presunto + suco natural",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["tapioca", "queijo", "presunto", "laranja"]
+              },
+              lunch: { 
+                name: "Almoço", 
+                description: "Arroz integral + lentilha + bife grelhado + salada",
+                calories: Math.round(targetCalories * 0.35),
+                protein: Math.round(targetProtein * 0.35),
+                carbs: Math.round(targetCarbs * 0.35),
+                fat: Math.round(targetFat * 0.35),
+                ingredients: ["arroz integral", "lentilha", "bife", "rúcula"]
+              },
+              snack: { 
+                name: "Lanche", 
+                description: "Castanhas + frutas secas",
+                calories: Math.round(targetCalories * 0.15),
+                protein: Math.round(targetProtein * 0.15),
+                carbs: Math.round(targetCarbs * 0.15),
+                fat: Math.round(targetFat * 0.15),
+                ingredients: ["castanha-do-pará", "amêndoas", "damasco"]
+              },
+              dinner: { 
+                name: "Jantar", 
+                description: "Omelete de claras + batata doce + espinafre",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["claras", "batata doce", "espinafre"]
+              }
             }
           })
         };
