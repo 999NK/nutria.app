@@ -281,16 +281,38 @@ export default function MyPlan() {
                       {expandedCards.nutrition && (
                         <div className="border-t pt-4">
                           <h4 className="font-medium mb-3">Cronograma de Alimentação</h4>
-                          <div className="space-y-2 max-h-60 overflow-y-auto">
+                          <div className="space-y-3 max-h-80 overflow-y-auto">
                             {activeNutritionPlan.meals && 
                              Object.entries(activeNutritionPlan.meals).map(([day, dayMeals]: [string, any]) => (
-                              <div key={day} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                <div className="font-medium text-sm capitalize mb-2">{day}</div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div key={day} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <div className="font-semibold text-sm capitalize mb-3 text-gray-900 dark:text-gray-100 border-b pb-2">{day}</div>
+                                <div className="space-y-2">
                                   {Object.entries(dayMeals).map(([mealType, meal]: [string, any]) => (
-                                    <div key={mealType} className="text-xs p-2 bg-white dark:bg-gray-700 rounded">
-                                      <div className="font-medium">{getMealTypeName(mealType)}</div>
-                                      <div className="text-gray-600 dark:text-gray-400">{meal.name}</div>
+                                    <div key={mealType} className="p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
+                                      <div className="flex justify-between items-start mb-2">
+                                        <div className="font-medium text-sm text-gray-900 dark:text-gray-100">{getMealTypeName(mealType)}</div>
+                                        {meal.calories && (
+                                          <div className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-2 py-1 rounded">
+                                            {meal.calories} kcal
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">{meal.name || meal.description}</div>
+                                      {meal.ingredients && meal.ingredients.length > 0 && (
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                          <div className="font-medium mb-1">Ingredientes:</div>
+                                          <div className="flex flex-wrap gap-1">
+                                            {meal.ingredients.slice(0, 3).map((ingredient: string, idx: number) => (
+                                              <span key={idx} className="bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded text-xs">
+                                                {ingredient}
+                                              </span>
+                                            ))}
+                                            {meal.ingredients.length > 3 && (
+                                              <span className="text-gray-400">+{meal.ingredients.length - 3} mais</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
                                   ))}
                                 </div>
@@ -373,27 +395,84 @@ export default function MyPlan() {
                       {expandedCards.workout && (
                         <div className="border-t pt-4">
                           <h4 className="font-medium mb-3">Cronograma de Treinos</h4>
-                          <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {activeWorkoutPlan.meals && 
-                             Object.entries(activeWorkoutPlan.meals).map(([day, workout]: [string, any]) => (
-                              <div key={day} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                <div className="font-medium text-sm capitalize mb-2">{day}</div>
-                                <div className="space-y-2">
-                                  {Object.entries(workout).map(([exerciseType, exercise]: [string, any]) => (
-                                    <div key={exerciseType} className="text-xs p-2 bg-white dark:bg-gray-700 rounded">
-                                      <div className="font-medium">{exerciseType}</div>
-                                      <div className="text-gray-600 dark:text-gray-400">
-                                        {typeof exercise === 'object' && exercise.name ? exercise.name : 
-                                         typeof exercise === 'string' ? exercise : 'Exercício'}
+                          <div className="space-y-3 max-h-80 overflow-y-auto">
+                            {(activeWorkoutPlan.workouts || activeWorkoutPlan.meals) && 
+                             Object.entries(activeWorkoutPlan.workouts || activeWorkoutPlan.meals).map(([day, workout]: [string, any]) => (
+                              <div key={day} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <div className="font-semibold text-sm capitalize mb-3 text-gray-900 dark:text-gray-100 border-b pb-2 flex items-center gap-2">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                  {day.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                                </div>
+                                <div className="space-y-3">
+                                  {Array.isArray(workout) ? 
+                                    // Handle array of exercises
+                                    workout.map((exercise: any, index: number) => (
+                                      <div key={index} className="p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
+                                        <div className="flex justify-between items-start mb-2">
+                                          <div className="font-medium text-sm text-gray-900 dark:text-gray-100">
+                                            {exercise.name || `Exercício ${index + 1}`}
+                                          </div>
+                                          {exercise.muscleGroup && (
+                                            <div className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded">
+                                              {exercise.muscleGroup}
+                                            </div>
+                                          )}
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-2 mb-2">
+                                          {exercise.sets && (
+                                            <div className="text-center p-2 bg-gray-50 dark:bg-gray-600 rounded">
+                                              <div className="text-xs text-gray-500 dark:text-gray-400">Séries</div>
+                                              <div className="font-semibold text-sm">{exercise.sets}</div>
+                                            </div>
+                                          )}
+                                          {exercise.reps && (
+                                            <div className="text-center p-2 bg-gray-50 dark:bg-gray-600 rounded">
+                                              <div className="text-xs text-gray-500 dark:text-gray-400">Reps</div>
+                                              <div className="font-semibold text-sm">{exercise.reps}</div>
+                                            </div>
+                                          )}
+                                          {exercise.rest && (
+                                            <div className="text-center p-2 bg-gray-50 dark:bg-gray-600 rounded">
+                                              <div className="text-xs text-gray-500 dark:text-gray-400">Descanso</div>
+                                              <div className="font-semibold text-sm">{exercise.rest}</div>
+                                            </div>
+                                          )}
+                                        </div>
+                                        {exercise.description && (
+                                          <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-600 p-2 rounded">
+                                            <strong>Técnica:</strong> {exercise.description}
+                                          </div>
+                                        )}
                                       </div>
-                                      {typeof exercise === 'object' && exercise.reps && (
-                                        <div className="text-gray-500 text-xs">{exercise.reps} reps</div>
-                                      )}
-                                      {typeof exercise === 'object' && exercise.sets && (
-                                        <div className="text-gray-500 text-xs">{exercise.sets} séries</div>
-                                      )}
-                                    </div>
-                                  ))}
+                                    )) :
+                                    // Handle object structure
+                                    Object.entries(workout).map(([exerciseType, exercise]: [string, any]) => (
+                                      <div key={exerciseType} className="p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600">
+                                        <div className="font-medium text-sm text-gray-900 dark:text-gray-100 mb-2">{exerciseType}</div>
+                                        <div className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                                          {typeof exercise === 'object' && exercise.name ? exercise.name : 
+                                           typeof exercise === 'string' ? exercise : 'Exercício'}
+                                        </div>
+                                        <div className="flex gap-3 text-xs">
+                                          {typeof exercise === 'object' && exercise.sets && (
+                                            <span className="bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
+                                              {exercise.sets} séries
+                                            </span>
+                                          )}
+                                          {typeof exercise === 'object' && exercise.reps && (
+                                            <span className="bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
+                                              {exercise.reps} reps
+                                            </span>
+                                          )}
+                                          {typeof exercise === 'object' && exercise.rest && (
+                                            <span className="bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
+                                              {exercise.rest} descanso
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))
+                                  }
                                 </div>
                               </div>
                             ))}
