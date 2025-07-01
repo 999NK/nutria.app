@@ -357,31 +357,15 @@ Use exercícios apropriados para o nível e objetivos mencionados. Retorne APENA
     console.log("Starting meal plan generation with description:", description);
     
     try {
-      const prompt = `Você é um nutricionista especializado. Crie um plano alimentar semanal baseado em: "${description}".
+      const prompt = `Crie um plano alimentar personalizado. Responda APENAS com JSON válido no formato exato abaixo:
 
-Responda com um JSON válido seguindo EXATAMENTE este formato:
-{
-  "name": "Plano Nutricional Personalizado",
-  "description": "Plano alimentar baseado nos seus objetivos",
-  "dailyCalories": 2000,
-  "macroCarbs": 50,
-  "macroProtein": 25,
-  "macroFat": 25,
-  "meals": {
-    "segunda": {
-      "breakfast": {"name": "Ovos mexidos com pão integral", "description": "2 ovos mexidos com 2 fatias de pão integral", "calories": 350},
-      "lunch": {"name": "Arroz, feijão e frango grelhado", "description": "Prato completo com salada", "calories": 550},
-      "dinner": {"name": "Peixe grelhado com legumes", "description": "Salmão com abobrinha e cenoura", "calories": 450}
-    },
-    "terca": {
-      "breakfast": {"name": "Aveia com frutas", "description": "Aveia com banana e morango", "calories": 300},
-      "lunch": {"name": "Macarrão com molho de tomate", "description": "Massa integral com vegetais", "calories": 500},
-      "dinner": {"name": "Frango assado", "description": "Peito de frango com batata doce", "calories": 400}
-    }
-  }
-}
+{"name":"Plano Nutricional","description":"Descrição do plano","dailyCalories":2000,"macroCarbs":250,"macroProtein":150,"macroFat":67,"meals":"{\\"day1\\":{\\"breakfast\\":{\\"name\\":\\"Café da Manhã\\",\\"description\\":\\"Ovos com pão integral\\"},\\"lunch\\":{\\"name\\":\\"Almoço\\",\\"description\\":\\"Arroz, feijão e frango\\"},\\"dinner\\":{\\"name\\":\\"Jantar\\",\\"description\\":\\"Peixe com salada\\"}}}"}
 
-Use apenas alimentos brasileiros comuns. Retorne SOMENTE o JSON, sem texto adicional.`;
+Importante: 
+- Use aspas duplas escapadas (\\\") dentro da string meals
+- NÃO adicione quebras de linha
+- NÃO adicione texto antes ou depois do JSON
+- Base nas informações: ${description}`;
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
         method: 'POST',
