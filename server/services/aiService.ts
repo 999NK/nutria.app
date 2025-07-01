@@ -365,13 +365,15 @@ Para iniciantes use ABC, para intermediários/avançados pode usar ABCD. Retorne
 
       const prompt = `Crie um plano alimentar personalizado que RESPEITE EXATAMENTE as metas nutricionais do usuário. Responda APENAS com JSON válido no formato exato abaixo:
 
-{"name":"Plano Nutricional Personalizado","description":"Plano baseado nas suas metas nutricionais","dailyCalories":${targetCalories},"macroCarbs":${targetCarbs},"macroProtein":${targetProtein},"macroFat":${targetFat},"meals":"{\\"segunda\\":{\\"breakfast\\":{\\"name\\":\\"Café da Manhã\\",\\"description\\":\\"2 ovos mexidos + 2 fatias de pão integral + 1 banana\\",\\"calories\\":${Math.round(targetCalories * 0.25)},\\"protein\\":${Math.round(targetProtein * 0.25)},\\"carbs\\":${Math.round(targetCarbs * 0.25)},\\"fat\\":${Math.round(targetFat * 0.25)},\\"ingredients\\":[\\"ovos\\",\\"pão integral\\",\\"banana\\"]},\\"lunch\\":{\\"name\\":\\"Almoço\\",\\"description\\":\\"150g arroz + 100g feijão + 120g peito de frango + salada verde\\",\\"calories\\":${Math.round(targetCalories * 0.35)},\\"protein\\":${Math.round(targetProtein * 0.35)},\\"carbs\\":${Math.round(targetCarbs * 0.35)},\\"fat\\":${Math.round(targetFat * 0.35)},\\"ingredients\\":[\\"arroz\\",\\"feijão\\",\\"frango\\",\\"alface\\",\\"tomate\\"]},\\"snack\\":{\\"name\\":\\"Lanche\\",\\"description\\":\\"1 iogurte grego + granola\\",\\"calories\\":${Math.round(targetCalories * 0.15)},\\"protein\\":${Math.round(targetProtein * 0.15)},\\"carbs\\":${Math.round(targetCarbs * 0.15)},\\"fat\\":${Math.round(targetFat * 0.15)},\\"ingredients\\":[\\"iogurte grego\\",\\"granola\\"]},\\"dinner\\":{\\"name\\":\\"Jantar\\",\\"description\\":\\"120g salmão grelhado + batata doce + brócolis\\",\\"calories\\":${Math.round(targetCalories * 0.25)},\\"protein\\":${Math.round(targetProtein * 0.25)},\\"carbs\\":${Math.round(targetCarbs * 0.25)},\\"fat\\":${Math.round(targetFat * 0.25)},\\"ingredients\\":[\\"salmão\\",\\"batata doce\\",\\"brócolis\\"]}}}"}
+{"name":"Plano Nutricional Personalizado","description":"Plano baseado nas suas metas nutricionais","dailyCalories":${targetCalories},"macroCarbs":${targetCarbs},"macroProtein":${targetProtein},"macroFat":${targetFat},"meals":"{\\"segunda\\":{\\"breakfast\\":{\\"name\\":\\"Café da Manhã\\",\\"description\\":\\"2 ovos mexidos + 2 fatias de pão integral + 1 banana\\",\\"time\\":\\"07:00\\",\\"calories\\":${Math.round(targetCalories * 0.25)},\\"protein\\":${Math.round(targetProtein * 0.25)},\\"carbs\\":${Math.round(targetCarbs * 0.25)},\\"fat\\":${Math.round(targetFat * 0.25)},\\"ingredients\\":[\\"ovos\\",\\"pão integral\\",\\"banana\\"]},\\"lunch\\":{\\"name\\":\\"Almoço\\",\\"description\\":\\"150g arroz + 100g feijão + 120g peito de frango + salada verde\\",\\"time\\":\\"12:00\\",\\"calories\\":${Math.round(targetCalories * 0.35)},\\"protein\\":${Math.round(targetProtein * 0.35)},\\"carbs\\":${Math.round(targetCarbs * 0.35)},\\"fat\\":${Math.round(targetFat * 0.35)},\\"ingredients\\":[\\"arroz\\",\\"feijão\\",\\"frango\\",\\"alface\\",\\"tomate\\"]},\\"lanche\\":{\\"name\\":\\"Lanche\\",\\"description\\":\\"1 iogurte grego + granola\\",\\"time\\":\\"15:00\\",\\"calories\\":${Math.round(targetCalories * 0.15)},\\"protein\\":${Math.round(targetProtein * 0.15)},\\"carbs\\":${Math.round(targetCarbs * 0.15)},\\"fat\\":${Math.round(targetFat * 0.15)},\\"ingredients\\":[\\"iogurte grego\\",\\"granola\\"]},\\"dinner\\":{\\"name\\":\\"Jantar\\",\\"description\\":\\"120g salmão grelhado + batata doce + brócolis\\",\\"time\\":\\"19:00\\",\\"calories\\":${Math.round(targetCalories * 0.25)},\\"protein\\":${Math.round(targetProtein * 0.25)},\\"carbs\\":${Math.round(targetCarbs * 0.25)},\\"fat\\":${Math.round(targetFat * 0.25)},\\"ingredients\\":[\\"salmão\\",\\"batata doce\\",\\"brócolis\\"]}}}"}
 
 REGRAS OBRIGATÓRIAS:
 - Os valores dailyCalories, macroCarbs, macroProtein, macroFat DEVEM ser EXATAMENTE ${targetCalories}, ${targetCarbs}, ${targetProtein}, ${targetFat}
 - Distribua as calorias entre as refeições (25% café, 35% almoço, 15% lanche, 25% jantar)
 - Crie o plano para os 7 dias da semana (segunda, terça, quarta, quinta, sexta, sabado, domingo)
-- Cada refeição deve ter: name, description, calories, protein, carbs, fat, ingredients
+- Cada refeição deve ter: name, description, time, calories, protein, carbs, fat, ingredients
+- SEMPRE inclua o campo "time" com horários: café (07:00), almoço (12:00), lanche (15:00), jantar (19:00)
+- Use "lanche" ao invés de "snack" nas chaves das refeições
 - Use alimentos brasileiros típicos
 - Use aspas duplas escapadas (\\\") dentro da string meals
 - NÃO adicione quebras de linha no JSON
@@ -514,6 +516,7 @@ Base nas informações do usuário: ${description}`;
               breakfast: { 
                 name: "Café da Manhã", 
                 description: "Aveia com whey protein + banana + mel",
+                time: "07:00",
                 calories: Math.round(targetCalories * 0.25),
                 protein: Math.round(targetProtein * 0.25),
                 carbs: Math.round(targetCarbs * 0.25),
@@ -523,15 +526,17 @@ Base nas informações do usuário: ${description}`;
               lunch: { 
                 name: "Almoço", 
                 description: "Macarrão integral + molho de tomate + carne moída magra",
+                time: "12:00",
                 calories: Math.round(targetCalories * 0.35),
                 protein: Math.round(targetProtein * 0.35),
                 carbs: Math.round(targetCarbs * 0.35),
                 fat: Math.round(targetFat * 0.35),
                 ingredients: ["macarrão integral", "carne moída", "molho de tomate"]
               },
-              snack: { 
+              lanche: { 
                 name: "Lanche", 
                 description: "Vitamina de frutas com leite",
+                time: "15:00",
                 calories: Math.round(targetCalories * 0.15),
                 protein: Math.round(targetProtein * 0.15),
                 carbs: Math.round(targetCarbs * 0.15),
@@ -541,6 +546,7 @@ Base nas informações do usuário: ${description}`;
               dinner: { 
                 name: "Jantar", 
                 description: "Tilápia grelhada + quinoa + legumes refogados",
+                time: "19:00",
                 calories: Math.round(targetCalories * 0.25),
                 protein: Math.round(targetProtein * 0.25),
                 carbs: Math.round(targetCarbs * 0.25),
@@ -610,17 +616,17 @@ Base nas informações do usuário: ${description}`;
         macroFat: 80,
         meals: JSON.stringify({
           day1: {
-            breakfast: { name: "Café da Manhã", description: "Aveia com banana, leite desnatado e whey protein", calories: 450 },
-            lunch: { name: "Almoço", description: "Peito de frango grelhado, arroz integral, feijão carioca e salada", calories: 650 },
-            snack: { name: "Lanche da Tarde", description: "Batata doce assada com peito de peru", calories: 380 },
-            dinner: { name: "Jantar", description: "Salmão grelhado, quinoa e brócolis", calories: 520 },
+            breakfast: { name: "Café da Manhã", description: "Aveia com banana, leite desnatado e whey protein", time: "07:00", calories: 450 },
+            lunch: { name: "Almoço", description: "Peito de frango grelhado, arroz integral, feijão carioca e salada", time: "12:00", calories: 650 },
+            lanche: { name: "Lanche", description: "Batata doce assada com peito de peru", time: "15:00", calories: 380 },
+            dinner: { name: "Jantar", description: "Salmão grelhado, quinoa e brócolis", time: "19:00", calories: 520 },
             workout: "Treino A - Peito, Ombro e Tríceps\n• Supino reto - 4 séries de 8-12 repetições\n• Supino inclinado com halteres - 3 séries de 10-12 repetições\n• Desenvolvimento militar - 3 séries de 8-10 repetições\n• Elevação lateral - 3 séries de 12-15 repetições\n• Tríceps pulley - 3 séries de 12-15 repetições\n• Tríceps francês - 3 séries de 10-12 repetições"
           },
           day2: {
-            breakfast: { name: "Café da Manhã", description: "Ovos mexidos, pão integral e abacate", calories: 420 },
-            lunch: { name: "Almoço", description: "Carne vermelha magra, batata doce e legumes refogados", calories: 680 },
-            snack: { name: "Lanche da Tarde", description: "Iogurte grego com granola e frutas vermelhas", calories: 350 },
-            dinner: { name: "Jantar", description: "Peixe branco grelhado com arroz integral e aspargos", calories: 490 },
+            breakfast: { name: "Café da Manhã", description: "Ovos mexidos, pão integral e abacate", time: "07:00", calories: 420 },
+            lunch: { name: "Almoço", description: "Carne vermelha magra, batata doce e legumes refogados", time: "12:00", calories: 680 },
+            lanche: { name: "Lanche", description: "Iogurte grego com granola e frutas vermelhas", time: "15:00", calories: 350 },
+            dinner: { name: "Jantar", description: "Peixe branco grelhado com arroz integral e aspargos", time: "19:00", calories: 490 },
             workout: "Treino B - Costas e Bíceps\n• Barra fixa ou pulley - 4 séries de 8-12 repetições\n• Remada curvada - 4 séries de 8-10 repetições\n• Remada unilateral - 3 séries de 10-12 repetições\n• Pulldown - 3 séries de 12-15 repetições\n• Rosca direta - 4 séries de 10-12 repetições\n• Rosca martelo - 3 séries de 12-15 repetições"
           },
           day3: {
