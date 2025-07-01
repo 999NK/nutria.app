@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Target, Plus, Check, Dumbbell, Utensils, Download, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
+import { Calendar, Target, Plus, Check, Dumbbell, Utensils, Download, ChevronDown, ChevronUp, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,6 +30,7 @@ export default function MyPlan() {
   const [selectedPlanType, setSelectedPlanType] = useState<'diet' | 'workout'>('diet');
   const [userDescription, setUserDescription] = useState("");
   const [expandedCards, setExpandedCards] = useState<{[key: string]: boolean}>({});
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
 
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading } = useAuth();
