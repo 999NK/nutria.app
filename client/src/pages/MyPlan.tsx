@@ -23,6 +23,7 @@ interface MealPlan {
   macroFat: number;
   isActive: boolean;
   createdAt: string;
+  type?: string;
 }
 
 export default function MyPlan() {
@@ -73,11 +74,9 @@ export default function MyPlan() {
     refetchOnWindowFocus: false,
   });
 
-  // Find active nutrition and workout plans
-  const activeNutritionPlan = activePlan && isPlanDiet(activePlan) ? activePlan : 
-                              planHistory.find(p => isPlanDiet(p) && p.isActive);
-  const activeWorkoutPlan = activePlan && !isPlanDiet(activePlan) ? activePlan : 
-                           planHistory.find(p => !isPlanDiet(p) && p.isActive);
+  // Active plans are already separated above - no need to search in history
+  const activeNutritionPlan = nutritionPlan;
+  const activeWorkoutPlan = workoutPlan;
 
   const generatePlanMutation = useMutation({
     mutationFn: async (data: { type: string; description: string }) => {
