@@ -319,45 +319,77 @@ export default function Dashboard() {
             </Button>
           </div>
           
-          {activePlan ? (
+          {(workoutPlan || nutritionPlan) ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Treino do Dia */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-800">
-                    <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
-                    </svg>
+              {workoutPlan && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-800">
+                      <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100">Treino de Hoje</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{workoutPlan.name}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100">Treino de Hoje</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{activePlan.name}</p>
-                  </div>
-                </div>
-                
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plano ativo</span>
-                    <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
-                      Ver detalhes
-                    </Button>
-                  </div>
-                  <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                    {activePlan.dailyCalories && (
-                      <div>🎯 Meta: {activePlan.dailyCalories} kcal/dia</div>
-                    )}
-                    {activePlan.macroProtein && (
-                      <div>💪 Proteína: {activePlan.macroProtein}g</div>
-                    )}
-                    {activePlan.macroCarbs && (
-                      <div>🍞 Carboidratos: {activePlan.macroCarbs}g</div>
-                    )}
-                    {activePlan.macroFat && (
-                      <div>🥑 Gorduras: {activePlan.macroFat}g</div>
-                    )}
+                  
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plano ativo</span>
+                      <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
+                        Ver detalhes
+                      </Button>
+                    </div>
+                    <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                      <div>💪 Plano de Treino</div>
+                      <div>📋 {workoutPlan.description}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* Nutrição do Dia */}
+              {nutritionPlan && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-green-100 dark:bg-green-800">
+                      <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100">Nutrição de Hoje</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{nutritionPlan.name}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plano ativo</span>
+                      <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
+                        Ver detalhes
+                      </Button>
+                    </div>
+                    <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                      {nutritionPlan.dailyCalories && (
+                        <div>🎯 Meta: {nutritionPlan.dailyCalories} kcal/dia</div>
+                      )}
+                      {nutritionPlan.macroProtein && (
+                        <div>💪 Proteína: {nutritionPlan.macroProtein}g</div>
+                      )}
+                      {nutritionPlan.macroCarbs && (
+                        <div>🍞 Carboidratos: {nutritionPlan.macroCarbs}g</div>
+                      )}
+                      {nutritionPlan.macroFat && (
+                        <div>🥑 Gorduras: {nutritionPlan.macroFat}g</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Informações do Plano */}
               <div className="space-y-3">
@@ -369,7 +401,7 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-gray-100">Seu Plano Atual</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Plano ativo desde {new Date(activePlan.createdAt).toLocaleDateString('pt-BR')}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Planos ativos {(nutritionPlan && workoutPlan) ? '(Nutrição + Treino)' : (nutritionPlan ? '(Nutrição)' : '(Treino)')}</p>
                   </div>
                 </div>
                 
@@ -381,10 +413,17 @@ export default function Dashboard() {
                     </Button>
                   </div>
                   <div className="text-xs text-gray-600 dark:text-gray-400">
-                    {activePlan.description ? (
-                      <p className="line-clamp-3">{activePlan.description}</p>
+                    {nutritionPlan && workoutPlan ? (
+                      <div className="space-y-1">
+                        <p>💪 Treino: {workoutPlan.name}</p>
+                        <p>🍽️ Nutrição: {nutritionPlan.name}</p>
+                      </div>
+                    ) : nutritionPlan ? (
+                      <p>🍽️ {nutritionPlan.description || nutritionPlan.name}</p>
+                    ) : workoutPlan ? (
+                      <p>💪 {workoutPlan.description || workoutPlan.name}</p>
                     ) : (
-                      <p>Plano personalizado baseado nos seus objetivos nutricionais</p>
+                      <p>Plano personalizado baseado nos seus objetivos</p>
                     )}
                   </div>
                 </div>
@@ -410,119 +449,7 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Daily Progress Summary with Half Donut Chart */}
-      <Card className="bg-gray-900 dark:bg-gray-900 border-gray-700">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white">Progresso Diário</h2>
-            <span className="text-sm text-gray-400">{todayFormatted}</span>
-          </div>
-          
-          {/* Nutrition Progress - Green Circle */}
-          <div className="flex flex-col lg:flex-row items-center gap-6">
-            {/* Green Circle Chart */}
-            <div className="relative flex justify-center items-center">
-              <div className="relative">
-                <svg width="140" height="140" className="transform -rotate-90">
-                  {/* Background circle */}
-                  <circle
-                    cx="70"
-                    cy="70"
-                    r="60"
-                    stroke="rgb(55, 65, 81)"
-                    strokeWidth="6"
-                    fill="none"
-                    className="opacity-20"
-                  />
-                  {/* Progress circle */}
-                  <circle
-                    cx="70"
-                    cy="70"
-                    r="60"
-                    stroke="#22c55e"
-                    strokeWidth="6"
-                    fill="none"
-                    strokeDasharray={`${2 * Math.PI * 60}`}
-                    strokeDashoffset={`${2 * Math.PI * 60 * (1 - Math.min(1, caloriesConsumed / caloriesGoal))}`}
-                    strokeLinecap="round"
-                    className="transition-all duration-700"
-                  />
-                </svg>
-                {/* Center content */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="text-3xl font-bold text-white">
-                    {caloriesConsumed}
-                  </div>
-                  <div className="text-sm text-gray-300">kcal</div>
-                  <div className="text-xs text-gray-400">
-                    {caloriesRemaining} restantes
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Macros Summary - Horizontal Bars like the reference image */}
-            <div className="flex-1 space-y-4 w-full">
-              {/* Protein */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-blue-400 font-medium">Proteína</span>
-                  <span className="text-white font-semibold">{proteinConsumed.toFixed(0)}g</span>
-                </div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div 
-                    className="bg-blue-500 h-2 rounded-full transition-all duration-700"
-                    style={{ width: `${Math.min(100, (proteinConsumed / proteinGoal) * 100)}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Carbohydrates */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-yellow-400 font-medium">Carboidratos</span>
-                  <span className="text-white font-semibold">{carbsConsumed.toFixed(0)}g</span>
-                </div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div 
-                    className="bg-yellow-500 h-2 rounded-full transition-all duration-700"
-                    style={{ width: `${Math.min(100, (carbsConsumed / carbsGoal) * 100)}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Fat */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-orange-400 font-medium">Gordura</span>
-                  <span className="text-white font-semibold">{fatConsumed.toFixed(0)}g</span>
-                </div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div 
-                    className="bg-orange-500 h-2 rounded-full transition-all duration-700"
-                    style={{ width: `${Math.min(100, (fatConsumed / fatGoal) * 100)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Daily Summary */}
-          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Resumo do Dia</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-gray-600 dark:text-gray-400">Calorias restantes:</p>
-                <p className="font-semibold text-green-600 dark:text-green-400">{caloriesRemaining} kcal</p>
-              </div>
-              <div>
-                <p className="text-gray-600 dark:text-gray-400">Meta diária:</p>
-                <p className="font-semibold text-gray-900 dark:text-white">{caloriesGoal} kcal</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Quick Add Meal */}
       <Card>

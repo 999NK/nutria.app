@@ -53,13 +53,17 @@ export default function MyPlan() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  // Fetch active plan
-  const { data: activePlan, isLoading: activePlanLoading } = useQuery<MealPlan>({
+  // Fetch active plans (can be multiple - nutrition and workout)
+  const { data: activePlans = [], isLoading: activePlanLoading } = useQuery<MealPlan[]>({
     queryKey: ["/api/user-plans/active"],
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
+
+  // Separate nutrition and workout plans
+  const nutritionPlan = activePlans.find(plan => plan.type === 'nutrition' || !plan.type);
+  const workoutPlan = activePlans.find(plan => plan.type === 'workout');
 
   // Fetch plan history
   const { data: planHistory = [], isLoading: historyLoading } = useQuery<MealPlan[]>({
