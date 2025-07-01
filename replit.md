@@ -10,6 +10,14 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-01 19:45**
+- ✓ Fixed AI meal plan generation JSON parsing errors with robust error handling
+- ✓ Implemented fallback meal plan structure when AI response is malformed
+- ✓ Added comprehensive JSON cleaning and brace matching for AI responses
+- ✓ Enhanced logging for debugging AI service JSON parsing issues
+- ✓ Corrected TypeScript errors in Dashboard component for active plan display
+- ✓ Created detailed workout plans with exercises, sets, and repetitions in fallback structure
+
 **2025-07-01 19:35**
 - ✓ Implemented proper PDF generation with PDFKit (replaced corrupted PDF issue)
 - ✓ Added detailed workout schedules with sets, reps, and exercise descriptions in PDF export

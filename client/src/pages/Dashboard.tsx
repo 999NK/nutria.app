@@ -74,7 +74,7 @@ export default function Dashboard() {
   });
 
   // Fetch active plan for "Hoje no seu Plano" section
-  const { data: activePlan } = useQuery({
+  const { data: activePlan } = useQuery<any>({
     queryKey: ["/api/user-plans/active"],
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,

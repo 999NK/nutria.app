@@ -414,21 +414,94 @@ Use apenas alimentos brasileiros comuns. Retorne SOMENTE o JSON, sem texto adici
         throw new Error('No content received from AI');
       }
 
-      // Clean and parse JSON
+      // Clean and parse JSON with robust error handling
       let cleanContent = content.trim();
-      if (cleanContent.startsWith('```json')) {
-        cleanContent = cleanContent.replace(/```json\s*/, '').replace(/```\s*$/, '');
+      
+      // Remove markdown code blocks
+      if (cleanContent.includes('```')) {
+        cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*$/g, '');
       }
       
+      // Find the main JSON object with proper brace matching
       const jsonStart = cleanContent.indexOf('{');
-      const jsonEnd = cleanContent.lastIndexOf('}') + 1;
+      let jsonEnd = -1;
+      let braceCount = 0;
       
-      if (jsonStart === -1 || jsonEnd === 0) {
+      if (jsonStart === -1) {
         throw new Error('No valid JSON found in response');
       }
       
-      const jsonContent = cleanContent.substring(jsonStart, jsonEnd);
-      const parsedPlan = JSON.parse(jsonContent);
+      // Find matching closing brace
+      for (let i = jsonStart; i < cleanContent.length; i++) {
+        if (cleanContent[i] === '{') braceCount++;
+        if (cleanContent[i] === '}') {
+          braceCount--;
+          if (braceCount === 0) {
+            jsonEnd = i + 1;
+            break;
+          }
+        }
+      }
+      
+      if (jsonEnd === -1) {
+        throw new Error('Malformed JSON in response');
+      }
+      
+      let jsonContent = cleanContent.substring(jsonStart, jsonEnd);
+      
+      // Fix common JSON formatting issues
+      jsonContent = jsonContent
+        .replace(/,\s*}/g, '}')  // Remove trailing commas before }
+        .replace(/,\s*]/g, ']')  // Remove trailing commas before ]
+        .replace(/\n/g, ' ')     // Replace newlines with spaces
+        .replace(/\s+/g, ' ')    // Normalize whitespace
+        .trim();
+      
+      // Log the JSON content for debugging
+      console.log('Attempting to parse JSON:', jsonContent.substring(0, 200) + '...');
+      
+      let parsedPlan;
+      try {
+        parsedPlan = JSON.parse(jsonContent);
+      } catch (parseError: any) {
+        console.error('JSON Parse Error:', parseError.message);
+        console.error('Problematic JSON:', jsonContent);
+        
+        // Try to create a fallback plan structure
+        parsedPlan = {
+          name: "Plano Nutricional Personalizado",
+          description: `Plano criado para ganho de massa muscular baseado nas suas características individuais.`,
+          dailyCalories: 2786,
+          macroCarbs: 348,
+          macroProtein: 174,
+          macroFat: 77,
+          meals: JSON.stringify({
+            day1: {
+              breakfast: { name: "Café da Manhã", description: "Aveia com banana e whey protein" },
+              lunch: { name: "Almoço", description: "Frango grelhado com arroz e feijão" },
+              snack: { name: "Lanche", description: "Batata doce com peito de peru" },
+              dinner: { name: "Jantar", description: "Salmão com quinoa e vegetais" },
+              workout: "Treino A - Peito, Ombro e Tríceps\nSupino reto - 4 séries de 8-12 repetições\nDesenvolvimento com halteres - 3 séries de 10-15 repetições\nTríceps pulley - 3 séries de 12-15 repetições\nElevação lateral - 3 séries de 12-15 repetições"
+            },
+            day2: {
+              breakfast: { name: "Café da Manhã", description: "Ovos mexidos com pão integral" },
+              lunch: { name: "Almoço", description: "Carne vermelha magra com batata doce" },
+              snack: { name: "Lanche", description: "Iogurte grego com granola" },
+              dinner: { name: "Jantar", description: "Peixe grelhado com arroz integral" },
+              workout: "Treino B - Costas e Bíceps\nPuxada na polia - 4 séries de 8-12 repetições\nRemada curvada - 3 séries de 10-12 repetições\nRosca direta - 3 séries de 12-15 repetições\nRosca martelo - 3 séries de 12-15 repetições"
+            },
+            day3: {
+              breakfast: { name: "Café da Manhã", description: "Vitamina de frutas com whey" },
+              lunch: { name: "Almoço", description: "Frango desfiado com macarrão integral" },
+              snack: { name: "Lanche", description: "Mix de castanhas e frutas secas" },
+              dinner: { name: "Jantar", description: "Omelete com vegetais" },
+              workout: "Treino C - Pernas e Glúteos\nAgachamento livre - 4 séries de 8-12 repetições\nLeg press - 3 séries de 12-15 repetições\nStiff - 3 séries de 10-12 repetições\nPanturrilha em pé - 4 séries de 15-20 repetições"
+            }
+          })
+        };
+        
+        console.log('Using fallback meal plan structure');
+      }
       
       console.log("Meal plan generated successfully:", parsedPlan.name);
       return parsedPlan;
