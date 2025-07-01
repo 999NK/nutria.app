@@ -471,13 +471,17 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(mealPlans.createdAt));
   }
 
-  async createMealPlan(mealPlan: InsertMealPlan): Promise<MealPlan> {
-    // First, deactivate any existing active plan
+  async createMealPlan(mealPlan: InsertMealPlan & { type?: string }): Promise<MealPlan> {
+    // First, deactivate any existing active plan of the same type
     if (mealPlan.isActive) {
+      const planType = mealPlan.type || 'nutrition';
       await db
         .update(mealPlans)
         .set({ isActive: false, updatedAt: new Date() })
-        .where(eq(mealPlans.userId, mealPlan.userId));
+        .where(and(
+          eq(mealPlans.userId, mealPlan.userId),
+          eq(mealPlans.type, planType)
+        ));
     }
 
     const [result] = await db

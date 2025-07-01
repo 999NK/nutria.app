@@ -268,7 +268,9 @@ class AIService {
 
   async generateWorkoutPlan(description: string): Promise<any> {
     try {
-      const prompt = `Você é um personal trainer especializado. Crie um plano de treino semanal COMPLETO em português brasileiro baseado na descrição: "${description}".
+      const prompt = `Você é um personal trainer especializado. Crie um plano de treino em português brasileiro baseado na descrição: "${description}".
+
+IMPORTANTE: Use sistema de fichas (A, B, C, D) ao invés de dias da semana.
 
 FORMATO EXATO DA RESPOSTA (JSON válido):
 {
@@ -276,45 +278,38 @@ FORMATO EXATO DA RESPOSTA (JSON válido):
   "description": "Descrição detalhada do plano de treino",
   "type": "workout",
   "workouts": {
-    "segunda": {
-      "name": "Treino A - Peito e Tríceps",
+    "A": {
+      "name": "Treino A - Peito, Ombro e Tríceps",
       "exercises": [
         {"name": "Supino reto", "sets": 4, "reps": "8-12", "rest": "90s"},
         {"name": "Supino inclinado", "sets": 3, "reps": "10-12", "rest": "60s"},
-        {"name": "Crucifixo", "sets": 3, "reps": "12-15", "rest": "60s"},
+        {"name": "Desenvolvimento", "sets": 3, "reps": "8-10", "rest": "90s"},
         {"name": "Tríceps pulley", "sets": 3, "reps": "12-15", "rest": "45s"}
       ],
       "duration": "60-75 minutos"
     },
-    "terca": {
+    "B": {
       "name": "Treino B - Costas e Bíceps",
       "exercises": [
         {"name": "Puxada frontal", "sets": 4, "reps": "8-12", "rest": "90s"},
-        {"name": "Remada baixa", "sets": 3, "reps": "10-12", "rest": "60s"}
+        {"name": "Remada curvada", "sets": 3, "reps": "8-10", "rest": "90s"},
+        {"name": "Rosca direta", "sets": 3, "reps": "10-12", "rest": "60s"}
       ],
       "duration": "60-75 minutos"
     },
-    "quarta": {"name": "Descanso", "exercises": [], "duration": "0 minutos"},
-    "quinta": {
-      "name": "Treino C - Pernas",
+    "C": {
+      "name": "Treino C - Pernas e Glúteos",
       "exercises": [
-        {"name": "Agachamento", "sets": 4, "reps": "8-12", "rest": "90s"}
+        {"name": "Agachamento", "sets": 4, "reps": "8-12", "rest": "2min"},
+        {"name": "Leg press", "sets": 3, "reps": "12-15", "rest": "90s"},
+        {"name": "Stiff", "sets": 3, "reps": "10-12", "rest": "90s"}
       ],
-      "duration": "60-75 minutos"
-    },
-    "sexta": {
-      "name": "Treino D - Ombros",
-      "exercises": [
-        {"name": "Desenvolvimento", "sets": 4, "reps": "8-12", "rest": "90s"}
-      ],
-      "duration": "45-60 minutos"
-    },
-    "sabado": {"name": "Cardio", "exercises": [{"name": "Esteira", "sets": 1, "reps": "30 min", "rest": "0s"}], "duration": "30 minutos"},
-    "domingo": {"name": "Descanso", "exercises": [], "duration": "0 minutos"}
+      "duration": "75-90 minutos"
+    }
   }
 }
 
-Use exercícios apropriados para o nível e objetivos mencionados. Retorne APENAS o JSON válido.`;
+Para iniciantes use ABC, para intermediários/avançados pode usar ABCD. Retorne APENAS o JSON válido.`;
 
       const response = await fetch(`${this.baseUrl}/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
         method: 'POST',

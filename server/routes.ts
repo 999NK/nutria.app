@@ -828,6 +828,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             macroProtein: 0,
             macroFat: 0,
             isActive: true,
+            type: "workout",
           });
           
           response = `✅ **Plano de Treino Criado com Sucesso!**\n\n🏋️ **${aiPlan.name}**\n\n${aiPlan.description}\n\nSeu plano de treino personalizado foi criado e ativado automaticamente! Você pode visualizá-lo na seção "Meu Plano" para ver todos os exercícios detalhados, séries e repetições.\n\n💡 **Dica:** Consulte sempre um profissional de educação física antes de iniciar qualquer rotina de exercícios.`;
@@ -1161,6 +1162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         macroProtein: 0,
         macroFat: 0,
         isActive: true,
+        type: "workout",
       });
       console.log("Workout plan saved successfully with ID:", workoutPlan.id);
 

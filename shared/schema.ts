@@ -182,6 +182,7 @@ export const mealPlans = pgTable("meal_plans", {
   macroProtein: integer("macro_protein").default(0),
   macroFat: integer("macro_fat").default(0),
   isActive: boolean("is_active").default(false),
+  type: varchar("type", { length: 20 }).default("nutrition"), // "nutrition" or "workout"
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
