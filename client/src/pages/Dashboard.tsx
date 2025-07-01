@@ -73,13 +73,17 @@ export default function Dashboard() {
     refetchOnWindowFocus: false,
   });
 
-  // Fetch active plan for "Hoje no seu Plano" section
-  const { data: activePlan } = useQuery<any>({
+  // Fetch active plans for "Hoje no seu Plano" section (can be multiple - nutrition and workout)
+  const { data: activePlans = [] } = useQuery<any[]>({
     queryKey: ["/api/user-plans/active"],
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
+
+  // Separate nutrition and workout plans
+  const nutritionPlan = activePlans.find(plan => plan.type === 'nutrition' || !plan.type);
+  const workoutPlan = activePlans.find(plan => plan.type === 'workout');
 
   const todayFormatted = format(new Date(), "EEEE, dd 'de' MMMM", { locale: ptBR });
 

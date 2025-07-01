@@ -34,7 +34,7 @@ import {
   type InsertDailyProgress,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, sql, gte, lte, or, isNull } from "drizzle-orm";
+import { eq, and, desc, sql, gte, lte, or, isNull, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -88,6 +88,7 @@ export interface IStorage {
   getMealPlanHistory(userId: string): Promise<MealPlan[]>;
   createMealPlan(mealPlan: InsertMealPlan): Promise<MealPlan>;
   updateMealPlan(id: number, mealPlan: Partial<InsertMealPlan>): Promise<MealPlan>;
+  activateMealPlan(id: number, userId: string): Promise<MealPlan>;
   deleteMealPlan(id: number): Promise<void>;
 }
 
@@ -532,7 +533,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(mealPlans.userId, userId),
         eq(mealPlans.type, planType),
-        ne(mealPlans.id, id)
+        sql`${mealPlans.id} != ${id}`
       ));
 
     // Activate the target plan

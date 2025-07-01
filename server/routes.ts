@@ -1230,9 +1230,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/user-plans/:id/activate', isAuthenticated, async (req: any, res) => {
     try {
       const planId = parseInt(req.params.id);
-      // For now, use meal plan methods
-      const updatedPlan = await storage.updateMealPlan(planId, { isActive: true });
-      res.json(updatedPlan);
+      const userId = req.user.claims.sub;
+      // Use the new activation method that preserves different plan types
+      const activatedPlan = await storage.activateMealPlan(planId, userId);
+      res.json(activatedPlan);
     } catch (error) {
       console.error("Error activating plan:", error);
       res.status(500).json({ message: "Failed to activate plan" });
