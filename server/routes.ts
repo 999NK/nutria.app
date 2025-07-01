@@ -874,6 +874,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             macroProtein: aiPlan.macroProtein,
             macroFat: aiPlan.macroFat,
             isActive: true,
+            type: "nutrition",
           });
           
           response = `✅ **Plano Alimentar Criado com Sucesso!**\n\n🍽️ **${aiPlan.name}**\n\n${aiPlan.description}\n\n📊 **Metas Diárias:**\n- Calorias: ${aiPlan.dailyCalories} kcal\n- Proteínas: ${aiPlan.macroProtein}g\n- Carboidratos: ${aiPlan.macroCarbs}g\n- Gorduras: ${aiPlan.macroFat}g\n\nSeu plano alimentar personalizado foi criado e ativado! Visite "Meu Plano" para ver todas as refeições detalhadas.\n\n💡 **Dica:** Sempre consulte um nutricionista para orientações personalizadas.`;
@@ -1097,7 +1098,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       console.log("Creating meal plan in database...");
-      const mealPlan = await storage.createMealPlan(simplePlan);
+      const mealPlan = await storage.createMealPlan({
+        ...simplePlan,
+        type: "nutrition"
+      });
       console.log("Meal plan saved successfully with ID:", mealPlan.id);
       console.log("=== MEAL PLAN GENERATION SUCCESS ===");
 
