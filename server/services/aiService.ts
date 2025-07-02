@@ -426,23 +426,47 @@ Crie um plano motivador e profissional adequado ao objetivo do usuário. Para in
       const targetCarbs = carbsMatch ? parseInt(carbsMatch[1]) : 250;
       const targetFat = fatMatch ? parseInt(fatMatch[1]) : 67;
 
-      const prompt = `Crie um plano alimentar personalizado que RESPEITE EXATAMENTE as metas nutricionais do usuário. Responda APENAS com JSON válido no formato exato abaixo:
+      const prompt = `Você é um Nutricionista virtual altamente qualificado, com amplo conhecimento em:
 
-{"name":"Plano Nutricional Personalizado","description":"Plano baseado nas suas metas nutricionais","dailyCalories":${targetCalories},"macroCarbs":${targetCarbs},"macroProtein":${targetProtein},"macroFat":${targetFat},"meals":"{\\"segunda\\":{\\"breakfast\\":{\\"name\\":\\"Café da Manhã\\",\\"description\\":\\"2 ovos mexidos + 2 fatias de pão integral + 1 banana\\",\\"time\\":\\"07:00\\",\\"calories\\":${Math.round(targetCalories * 0.25)},\\"protein\\":${Math.round(targetProtein * 0.25)},\\"carbs\\":${Math.round(targetCarbs * 0.25)},\\"fat\\":${Math.round(targetFat * 0.25)},\\"ingredients\\":[\\"ovos\\",\\"pão integral\\",\\"banana\\"]},\\"lunch\\":{\\"name\\":\\"Almoço\\",\\"description\\":\\"150g arroz + 100g feijão + 120g peito de frango + salada verde\\",\\"time\\":\\"12:00\\",\\"calories\\":${Math.round(targetCalories * 0.35)},\\"protein\\":${Math.round(targetProtein * 0.35)},\\"carbs\\":${Math.round(targetCarbs * 0.35)},\\"fat\\":${Math.round(targetFat * 0.35)},\\"ingredients\\":[\\"arroz\\",\\"feijão\\",\\"frango\\",\\"alface\\",\\"tomate\\"]},\\"lanche\\":{\\"name\\":\\"Lanche\\",\\"description\\":\\"1 iogurte grego + granola\\",\\"time\\":\\"15:00\\",\\"calories\\":${Math.round(targetCalories * 0.15)},\\"protein\\":${Math.round(targetProtein * 0.15)},\\"carbs\\":${Math.round(targetCarbs * 0.15)},\\"fat\\":${Math.round(targetFat * 0.15)},\\"ingredients\\":[\\"iogurte grego\\",\\"granola\\"]},\\"dinner\\":{\\"name\\":\\"Jantar\\",\\"description\\":\\"120g salmão grelhado + batata doce + brócolis\\",\\"time\\":\\"19:00\\",\\"calories\\":${Math.round(targetCalories * 0.25)},\\"protein\\":${Math.round(targetProtein * 0.25)},\\"carbs\\":${Math.round(targetCarbs * 0.25)},\\"fat\\":${Math.round(targetFat * 0.25)},\\"ingredients\\":[\\"salmão\\",\\"batata doce\\",\\"brócolis\\"]}}}"}
+• Nutrição esportiva e clínica
+• Bioquímica dos alimentos e metabolismo energético  
+• Planejamento de dietas individualizadas
+• Estratégias para controle de peso, ganho de massa magra e melhora da saúde geral
+
+Seu objetivo é criar planos alimentares personalizados utilizando os dados previamente cadastrados pelo usuário.
+
+Diretrizes principais:
+• Utilize sempre os dados já armazenados no cadastro do usuário (considere que o usuário já forneceu informações sobre objetivo principal, peso, altura, idade, sexo, nível de atividade física, restrições alimentares e preferências)
+• Não solicite novamente estas informações ao usuário
+• Ao criar o plano nutricional:
+  - Calcule a estimativa de calorias diárias: ${targetCalories} kcal
+  - Distribua macronutrientes: ${targetProtein}g proteínas, ${targetCarbs}g carboidratos, ${targetFat}g gorduras
+  - Monte cardápio dividido por refeições com porções específicas
+  - Priorize alimentos naturais e nutritivos
+  - Inclua horários das refeições (07:00, 12:00, 15:00, 19:00)
+
+Utilize exatamente este formato de saída:
+Nome da refeição
+Lista dos alimentos com quantidades aproximadas  
+Valor energético e macros estimados por refeição
+
+Baseado na seguinte descrição do usuário:
+"${description}"
+
+Responda APENAS com JSON válido no formato exato abaixo:
+{"name":"Plano Nutricional Personalizado","description":"Plano baseado nas suas metas nutricionais com alimentos nutritivos e naturais","dailyCalories":${targetCalories},"macroCarbs":${targetCarbs},"macroProtein":${targetProtein},"macroFat":${targetFat},"meals":"{\\"segunda\\":{\\"breakfast\\":{\\"name\\":\\"Café da Manhã\\",\\"description\\":\\"3 ovos mexidos + 2 fatias de pão integral + 1 banana média\\",\\"time\\":\\"07:00\\",\\"calories\\":${Math.round(targetCalories * 0.25)},\\"protein\\":${Math.round(targetProtein * 0.25)},\\"carbs\\":${Math.round(targetCarbs * 0.25)},\\"fat\\":${Math.round(targetFat * 0.25)},\\"ingredients\\":[\\"ovos\\",\\"pão integral\\",\\"banana\\"]},\\"lunch\\":{\\"name\\":\\"Almoço\\",\\"description\\":\\"150g peito de frango grelhado + 100g arroz integral + 80g brócolis + salada de folhas com azeite\\",\\"time\\":\\"12:00\\",\\"calories\\":${Math.round(targetCalories * 0.35)},\\"protein\\":${Math.round(targetProtein * 0.35)},\\"carbs\\":${Math.round(targetCarbs * 0.35)},\\"fat\\":${Math.round(targetFat * 0.35)},\\"ingredients\\":[\\"frango\\",\\"arroz integral\\",\\"brócolis\\",\\"folhas verdes\\",\\"azeite\\"]},\\"lanche\\":{\\"name\\":\\"Lanche\\",\\"description\\":\\"1 iogurte natural integral (170g) + 1 punhado de castanhas (30g)\\",\\"time\\":\\"15:00\\",\\"calories\\":${Math.round(targetCalories * 0.15)},\\"protein\\":${Math.round(targetProtein * 0.15)},\\"carbs\\":${Math.round(targetCarbs * 0.15)},\\"fat\\":${Math.round(targetFat * 0.15)},\\"ingredients\\":[\\"iogurte natural\\",\\"castanhas\\"]},\\"dinner\\":{\\"name\\":\\"Jantar\\",\\"description\\":\\"120g salmão grelhado + 100g batata doce assada + legumes refogados\\",\\"time\\":\\"19:00\\",\\"calories\\":${Math.round(targetCalories * 0.25)},\\"protein\\":${Math.round(targetProtein * 0.25)},\\"carbs\\":${Math.round(targetCarbs * 0.25)},\\"fat\\":${Math.round(targetFat * 0.25)},\\"ingredients\\":[\\"salmão\\",\\"batata doce\\",\\"legumes\\"]}}}"}
 
 REGRAS OBRIGATÓRIAS:
 - Os valores dailyCalories, macroCarbs, macroProtein, macroFat DEVEM ser EXATAMENTE ${targetCalories}, ${targetCarbs}, ${targetProtein}, ${targetFat}
-- Distribua as calorias entre as refeições (25% café, 35% almoço, 15% lanche, 25% jantar)
-- Crie o plano para os 7 dias da semana (segunda, terça, quarta, quinta, sexta, sabado, domingo)
-- Cada refeição deve ter: name, description, time, calories, protein, carbs, fat, ingredients
-- SEMPRE inclua o campo "time" com horários: café (07:00), almoço (12:00), lanche (15:00), jantar (19:00)
-- Use "lanche" ao invés de "snack" nas chaves das refeições
-- Use alimentos brasileiros típicos
+- Distribua as calorias: 25% café da manhã, 35% almoço, 15% lanche, 25% jantar
+- Crie plano para 7 dias (segunda, terça, quarta, quinta, sexta, sabado, domingo)
+- Cada refeição: name, description, time, calories, protein, carbs, fat, ingredients
+- Horários fixos: café (07:00), almoço (12:00), lanche (15:00), jantar (19:00)
+- Use "lanche" nas chaves (não "snack")
+- Priorize alimentos brasileiros naturais e nutritivos
 - Use aspas duplas escapadas (\\\") dentro da string meals
 - NÃO adicione quebras de linha no JSON
-- NÃO adicione texto antes ou depois do JSON
-
-Base nas informações do usuário: ${description}`;
+- Seja claro, objetivo e motivador no plano alimentar`;
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
         method: 'POST',

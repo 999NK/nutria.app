@@ -10,6 +10,14 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-02 04:50**
+- ✓ Fixed layout alignment in plan cards (nutrition and workout)
+- ✓ Reduced button sizes for better proportions (h-8, px-3, text-xs)
+- ✓ Corrected icon sizing in export buttons (w-3 h-3)
+- ✓ Updated AI nutrition generation with personalized Nutritionist prompt
+- ✓ Enhanced nutrition AI with professional dietary expertise and structured format
+- ✓ Improved vertical alignment using items-start in card headers
+
 **2025-07-02 04:35**
 - ✓ Enhanced workout cronogram UX with horizontal scrolling cards (swipe left/right)
 - ✓ Fixed theme compatibility - workout cards now follow app's dark/light mode

@@ -1,12 +1,36 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Target, Plus, Check, Dumbbell, Utensils, Download, ChevronDown, ChevronUp, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Calendar,
+  Target,
+  Plus,
+  Check,
+  Dumbbell,
+  Utensils,
+  Download,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -28,9 +52,13 @@ interface MealPlan {
 
 export default function MyPlan() {
   const [activeTab, setActiveTab] = useState("current");
-  const [selectedPlanType, setSelectedPlanType] = useState<'diet' | 'workout'>('diet');
+  const [selectedPlanType, setSelectedPlanType] = useState<"diet" | "workout">(
+    "diet",
+  );
   const [userDescription, setUserDescription] = useState("");
-  const [expandedCards, setExpandedCards] = useState<{[key: string]: boolean}>({});
+  const [expandedCards, setExpandedCards] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
 
   const { toast } = useToast();
@@ -55,7 +83,9 @@ export default function MyPlan() {
   }, [isAuthenticated, isLoading, toast]);
 
   // Fetch active plans (can be multiple - nutrition and workout)
-  const { data: activePlans = [], isLoading: activePlanLoading } = useQuery<MealPlan[]>({
+  const { data: activePlans = [], isLoading: activePlanLoading } = useQuery<
+    MealPlan[]
+  >({
     queryKey: ["/api/user-plans/active"],
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
@@ -63,11 +93,15 @@ export default function MyPlan() {
   });
 
   // Separate nutrition and workout plans
-  const nutritionPlan = activePlans.find(plan => plan.type === 'nutrition' || !plan.type);
-  const workoutPlan = activePlans.find(plan => plan.type === 'workout');
+  const nutritionPlan = activePlans.find(
+    (plan) => plan.type === "nutrition" || !plan.type,
+  );
+  const workoutPlan = activePlans.find((plan) => plan.type === "workout");
 
   // Fetch plan history
-  const { data: planHistory = [], isLoading: historyLoading } = useQuery<MealPlan[]>({
+  const { data: planHistory = [], isLoading: historyLoading } = useQuery<
+    MealPlan[]
+  >({
     queryKey: ["/api/user-plans/history"],
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
@@ -80,18 +114,21 @@ export default function MyPlan() {
 
   const generatePlanMutation = useMutation({
     mutationFn: async (data: { type: string; description: string }) => {
-      const endpoint = data.type === 'diet' ? '/api/generate-meal-plan' : '/api/generate-workout-plan';
+      const endpoint =
+        data.type === "diet"
+          ? "/api/generate-meal-plan"
+          : "/api/generate-workout-plan";
       const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description: data.description }),
       });
-      if (!response.ok) throw new Error('Failed to generate plan');
+      if (!response.ok) throw new Error("Failed to generate plan");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user-plans/active'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/user-plans/history'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user-plans/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user-plans/history"] });
       setUserDescription("");
       setActiveTab("current");
       toast({
@@ -119,14 +156,14 @@ export default function MyPlan() {
   const activatePlanMutation = useMutation({
     mutationFn: async (planId: number) => {
       const response = await fetch(`/api/user-plans/${planId}/activate`, {
-        method: 'POST',
+        method: "POST",
       });
-      if (!response.ok) throw new Error('Failed to activate plan');
+      if (!response.ok) throw new Error("Failed to activate plan");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user-plans/active'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/user-plans/history'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user-plans/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user-plans/history"] });
       toast({
         title: "Plano ativado com sucesso!",
         description: "Seu plano agora está ativo.",
@@ -158,29 +195,32 @@ export default function MyPlan() {
       });
       return;
     }
-    generatePlanMutation.mutate({ type: selectedPlanType, description: userDescription });
+    generatePlanMutation.mutate({
+      type: selectedPlanType,
+      description: userDescription,
+    });
   };
 
   const handleExportPlan = async (plan: MealPlan) => {
     try {
-      const response = await fetch('/api/export-plan-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/export-plan-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ planId: plan.id }),
       });
-      
-      if (!response.ok) throw new Error('Failed to export PDF');
-      
+
+      if (!response.ok) throw new Error("Failed to export PDF");
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
+      const a = document.createElement("a");
+      a.style.display = "none";
       a.href = url;
       a.download = `${plan.name}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
-      
+
       toast({
         title: "PDF exportado com sucesso!",
         description: "O arquivo foi baixado para seu dispositivo.",
@@ -199,7 +239,9 @@ export default function MyPlan() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando seus planos...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Carregando seus planos...
+          </p>
         </div>
       </div>
     );
@@ -226,9 +268,14 @@ export default function MyPlan() {
                         <Utensils className="w-6 h-6 text-green-600 dark:text-green-400" />
                       </div>
                       <div>
-                        <CardTitle className="text-lg font-bold">Plano de Nutrição Atual</CardTitle>
+                        <CardTitle className="text-lg font-bold">
+                          Plano de Nutrição Atual
+                        </CardTitle>
                         {activeNutritionPlan && (
-                          <Badge variant="outline" className="text-green-700 bg-green-50 border-green-200 text-xs mt-1">
+                          <Badge
+                            variant="outline"
+                            className="text-green-700 bg-green-50 border-green-200 text-xs mt-1"
+                          >
                             <Check className="w-3 h-3 mr-1" />
                             Ativo
                           </Badge>
@@ -236,9 +283,14 @@ export default function MyPlan() {
                       </div>
                     </div>
                     {activeNutritionPlan && (
-                      <Button variant="outline" size="sm" onClick={() => handleExportPlan(activeNutritionPlan)} className="h-8 px-3 text-xs">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleExportPlan(activeNutritionPlan)}
+                        className="h-8 px-3 text-xs"
+                      >
                         <Download className="w-3 h-3 mr-1" />
-                        Exportar PDF
+                        Salvar
                       </Button>
                     )}
                   </div>
@@ -255,23 +307,32 @@ export default function MyPlan() {
                         </p>
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                            <div className="text-sm text-gray-600 dark:text-gray-400">Calorias</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              Calorias
+                            </div>
                             <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
                               {activeNutritionPlan.dailyCalories}
                             </div>
                           </div>
                           <div className="text-center p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
-                            <div className="text-sm text-gray-600 dark:text-gray-400">Proteína</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              Proteína
+                            </div>
                             <div className="font-bold text-lg text-green-600 dark:text-green-400">
                               {activeNutritionPlan.macroProtein}g
                             </div>
                           </div>
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="w-full"
-                          onClick={() => setExpandedCards(prev => ({...prev, nutrition: !prev.nutrition}))}
+                          onClick={() =>
+                            setExpandedCards((prev) => ({
+                              ...prev,
+                              nutrition: !prev.nutrition,
+                            }))
+                          }
                         >
                           {expandedCards.nutrition ? (
                             <>
@@ -286,30 +347,50 @@ export default function MyPlan() {
                           )}
                         </Button>
                       </div>
-                      
+
                       {expandedCards.nutrition && (
                         <div className="border-t pt-4">
-                          <h4 className="font-medium mb-3">Cronograma Nutricional</h4>
+                          <h4 className="font-medium mb-3">
+                            Cronograma Nutricional
+                          </h4>
                           <div className="space-y-3 max-h-80 overflow-y-auto">
-                            {activeNutritionPlan.meals && 
-                             Object.entries(typeof activeNutritionPlan.meals === 'string' ? JSON.parse(activeNutritionPlan.meals) : activeNutritionPlan.meals).map(([day, dayMeals]: [string, any]) => (
-                              <div key={day} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                <h5 className="font-semibold mb-3 capitalize">{day}</h5>
-                                <div className="space-y-2">
-                                  {Object.entries(dayMeals).map(([mealType, meal]: [string, any]) => (
-                                    <div key={mealType} className="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
-                                      <div>
-                                        <div className="font-medium">{meal.name}</div>
-                                        <div className="text-sm text-gray-600 dark:text-gray-400">{meal.description}</div>
-                                      </div>
-                                      <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                                        {meal.calories} kcal
-                                      </div>
-                                    </div>
-                                  ))}
+                            {activeNutritionPlan.meals &&
+                              Object.entries(
+                                typeof activeNutritionPlan.meals === "string"
+                                  ? JSON.parse(activeNutritionPlan.meals)
+                                  : activeNutritionPlan.meals,
+                              ).map(([day, dayMeals]: [string, any]) => (
+                                <div
+                                  key={day}
+                                  className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                                >
+                                  <h5 className="font-semibold mb-3 capitalize">
+                                    {day}
+                                  </h5>
+                                  <div className="space-y-2">
+                                    {Object.entries(dayMeals).map(
+                                      ([mealType, meal]: [string, any]) => (
+                                        <div
+                                          key={mealType}
+                                          className="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded"
+                                        >
+                                          <div>
+                                            <div className="font-medium">
+                                              {meal.name}
+                                            </div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                                              {meal.description}
+                                            </div>
+                                          </div>
+                                          <div className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                                            {meal.calories} kcal
+                                          </div>
+                                        </div>
+                                      ),
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              ))}
                           </div>
                         </div>
                       )}
@@ -319,7 +400,11 @@ export default function MyPlan() {
                       <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
                         Nenhum plano de nutrição ativo
                       </p>
-                      <Button variant="outline" size="sm" onClick={() => setActiveTab("manual")}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setActiveTab("manual")}
+                      >
                         <Plus className="w-4 h-4 mr-2" />
                         Criar plano
                       </Button>
@@ -337,9 +422,14 @@ export default function MyPlan() {
                         <Dumbbell className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div>
-                        <CardTitle className="text-lg font-bold">Plano de Treino Atual</CardTitle>
+                        <CardTitle className="text-lg font-bold">
+                          Plano de Treino Atual
+                        </CardTitle>
                         {activeWorkoutPlan && (
-                          <Badge variant="outline" className="text-blue-700 bg-blue-50 border-blue-200 text-xs mt-1">
+                          <Badge
+                            variant="outline"
+                            className="text-blue-700 bg-blue-50 border-blue-200 text-xs mt-1"
+                          >
                             <Check className="w-3 h-3 mr-1" />
                             Ativo
                           </Badge>
@@ -347,9 +437,14 @@ export default function MyPlan() {
                       </div>
                     </div>
                     {activeWorkoutPlan && (
-                      <Button variant="outline" size="sm" onClick={() => handleExportPlan(activeWorkoutPlan)} className="h-8 px-3 text-xs">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleExportPlan(activeWorkoutPlan)}
+                        className="h-8 px-3 text-xs"
+                      >
                         <Download className="w-3 h-3 mr-1" />
-                        Exportar PDF
+                        Salvar
                       </Button>
                     )}
                   </div>
@@ -364,11 +459,16 @@ export default function MyPlan() {
                         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
                           {activeWorkoutPlan.description}
                         </p>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="w-full"
-                          onClick={() => setExpandedCards(prev => ({...prev, workout: !prev.workout}))}
+                          onClick={() =>
+                            setExpandedCards((prev) => ({
+                              ...prev,
+                              workout: !prev.workout,
+                            }))
+                          }
                         >
                           {expandedCards.workout ? (
                             <>
@@ -383,19 +483,27 @@ export default function MyPlan() {
                           )}
                         </Button>
                       </div>
-                      
+
                       {expandedCards.workout && (
                         <div className="border-t pt-4">
                           <div className="flex items-center justify-between mb-4">
-                            <h4 className="font-medium text-gray-900 dark:text-gray-100">Cronograma de Treinos</h4>
+                            <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                              Cronograma de Treinos
+                            </h4>
                             <div className="flex items-center gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                  const container = document.getElementById('workout-container');
+                                  const container =
+                                    document.getElementById(
+                                      "workout-container",
+                                    );
                                   if (container) {
-                                    container.scrollBy({ left: -320, behavior: 'smooth' });
+                                    container.scrollBy({
+                                      left: -320,
+                                      behavior: "smooth",
+                                    });
                                   }
                                 }}
                                 className="h-8 w-8 p-0"
@@ -406,9 +514,15 @@ export default function MyPlan() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                  const container = document.getElementById('workout-container');
+                                  const container =
+                                    document.getElementById(
+                                      "workout-container",
+                                    );
                                   if (container) {
-                                    container.scrollBy({ left: 320, behavior: 'smooth' });
+                                    container.scrollBy({
+                                      left: 320,
+                                      behavior: "smooth",
+                                    });
                                   }
                                 }}
                                 className="h-8 w-8 p-0"
@@ -417,45 +531,71 @@ export default function MyPlan() {
                               </Button>
                             </div>
                           </div>
-                          <div 
+                          <div
                             id="workout-container"
-                            className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory" 
-                            style={{ maxHeight: '600px' }}
+                            className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory"
+                            style={{ maxHeight: "600px" }}
                           >
-                            {activeWorkoutPlan.meals && 
-                             Object.entries(typeof activeWorkoutPlan.meals === 'string' ? JSON.parse(activeWorkoutPlan.meals) : activeWorkoutPlan.meals).map(([workoutLetter, workout]: [string, any]) => (
-                              <div key={workoutLetter} className="flex-shrink-0 w-80 bg-gray-100 dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 snap-start" style={{ maxHeight: '550px', overflow: 'hidden' }}>
-                                <div className="text-center mb-4">
-                                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                                    {workout.name || `Treino ${workoutLetter.toUpperCase()}`}
-                                  </h3>
-                                  {workout.duration && (
-                                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                                      Duração: {workout.duration}
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                <div className="bg-white dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-                                  <div className="grid grid-cols-2 bg-gray-50 dark:bg-gray-600 text-gray-900 dark:text-gray-100 font-semibold text-sm">
-                                    <div className="p-3 border-r border-gray-200 dark:border-gray-500">Exercício</div>
-                                    <div className="p-3 text-center">Séries e Repetições</div>
-                                  </div>
-                                  <div className="max-h-64 overflow-y-auto">
-                                    {workout.exercises && workout.exercises.map((exercise: any, index: number) => (
-                                      <div key={index} className={`grid grid-cols-2 text-sm ${index % 2 === 0 ? 'bg-white dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-600'}`}>
-                                        <div className="p-3 border-r border-gray-200 dark:border-gray-500 text-gray-900 dark:text-gray-100 font-medium">
-                                          {exercise.name || `Exercício ${index + 1}`}
+                            {activeWorkoutPlan.meals &&
+                              Object.entries(
+                                typeof activeWorkoutPlan.meals === "string"
+                                  ? JSON.parse(activeWorkoutPlan.meals)
+                                  : activeWorkoutPlan.meals,
+                              ).map(
+                                ([workoutLetter, workout]: [string, any]) => (
+                                  <div
+                                    key={workoutLetter}
+                                    className="flex-shrink-0 w-80 bg-gray-100 dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 snap-start"
+                                    style={{
+                                      maxHeight: "550px",
+                                      overflow: "hidden",
+                                    }}
+                                  >
+                                    <div className="text-center mb-4">
+                                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                                        {workout.name ||
+                                          `Treino ${workoutLetter.toUpperCase()}`}
+                                      </h3>
+                                      {workout.duration && (
+                                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                                          Duração: {workout.duration}
                                         </div>
-                                        <div className="p-3 text-center text-gray-900 dark:text-gray-100 font-semibold">
-                                          {exercise.sets || '4'} × {exercise.reps || '8-10'}
+                                      )}
+                                    </div>
+
+                                    <div className="bg-white dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                                      <div className="grid grid-cols-2 bg-gray-50 dark:bg-gray-600 text-gray-900 dark:text-gray-100 font-semibold text-sm">
+                                        <div className="p-3 border-r border-gray-200 dark:border-gray-500">
+                                          Exercício
+                                        </div>
+                                        <div className="p-3 text-center">
+                                          Séries e Repetições
                                         </div>
                                       </div>
-                                    ))}
+                                      <div className="max-h-64 overflow-y-auto">
+                                        {workout.exercises &&
+                                          workout.exercises.map(
+                                            (exercise: any, index: number) => (
+                                              <div
+                                                key={index}
+                                                className={`grid grid-cols-2 text-sm ${index % 2 === 0 ? "bg-white dark:bg-gray-700" : "bg-gray-50 dark:bg-gray-600"}`}
+                                              >
+                                                <div className="p-3 border-r border-gray-200 dark:border-gray-500 text-gray-900 dark:text-gray-100 font-medium">
+                                                  {exercise.name ||
+                                                    `Exercício ${index + 1}`}
+                                                </div>
+                                                <div className="p-3 text-center text-gray-900 dark:text-gray-100 font-semibold">
+                                                  {exercise.sets || "4"} ×{" "}
+                                                  {exercise.reps || "8-10"}
+                                                </div>
+                                              </div>
+                                            ),
+                                          )}
+                                      </div>
+                                    </div>
                                   </div>
-                                </div>
-                              </div>
-                            ))}
+                                ),
+                              )}
                           </div>
                         </div>
                       )}
@@ -465,7 +605,11 @@ export default function MyPlan() {
                       <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
                         Nenhum plano de treino ativo
                       </p>
-                      <Button variant="outline" size="sm" onClick={() => setActiveTab("manual")}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setActiveTab("manual")}
+                      >
                         <Plus className="w-4 h-4 mr-2" />
                         Criar plano
                       </Button>
@@ -492,7 +636,11 @@ export default function MyPlan() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentHistoryIndex(prev => Math.max(0, prev - 1))}
+                        onClick={() =>
+                          setCurrentHistoryIndex((prev) =>
+                            Math.max(0, prev - 1),
+                          )
+                        }
                         disabled={currentHistoryIndex === 0}
                       >
                         <ChevronLeft className="w-4 h-4 mr-2" />
@@ -504,8 +652,14 @@ export default function MyPlan() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentHistoryIndex(prev => Math.min(planHistory.length - 1, prev + 1))}
-                        disabled={currentHistoryIndex === planHistory.length - 1}
+                        onClick={() =>
+                          setCurrentHistoryIndex((prev) =>
+                            Math.min(planHistory.length - 1, prev + 1),
+                          )
+                        }
+                        disabled={
+                          currentHistoryIndex === planHistory.length - 1
+                        }
                       >
                         Próximo
                         <ChevronRight className="w-4 h-4 ml-2" />
@@ -525,11 +679,22 @@ export default function MyPlan() {
                                 {planHistory[currentHistoryIndex].description}
                               </CardDescription>
                               <div className="flex gap-2 mt-2">
-                                <Badge variant={isPlanDiet(planHistory[currentHistoryIndex]) ? "default" : "secondary"}>
-                                  {isPlanDiet(planHistory[currentHistoryIndex]) ? "Nutrição" : "Treino"}
+                                <Badge
+                                  variant={
+                                    isPlanDiet(planHistory[currentHistoryIndex])
+                                      ? "default"
+                                      : "secondary"
+                                  }
+                                >
+                                  {isPlanDiet(planHistory[currentHistoryIndex])
+                                    ? "Nutrição"
+                                    : "Treino"}
                                 </Badge>
                                 {planHistory[currentHistoryIndex].isActive && (
-                                  <Badge variant="outline" className="text-green-700 bg-green-50 border-green-200">
+                                  <Badge
+                                    variant="outline"
+                                    className="text-green-700 bg-green-50 border-green-200"
+                                  >
                                     Ativo
                                   </Badge>
                                 )}
@@ -537,20 +702,36 @@ export default function MyPlan() {
                             </div>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-8 px-3 text-xs">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 px-3 text-xs"
+                                >
                                   Ações
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent>
                                 {!planHistory[currentHistoryIndex].isActive && (
-                                  <DropdownMenuItem onClick={() => activatePlanMutation.mutate(planHistory[currentHistoryIndex].id)}>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      activatePlanMutation.mutate(
+                                        planHistory[currentHistoryIndex].id,
+                                      )
+                                    }
+                                  >
                                     <RotateCcw className="w-4 h-4 mr-2" />
                                     Ativar Plano
                                   </DropdownMenuItem>
                                 )}
-                                <DropdownMenuItem onClick={() => handleExportPlan(planHistory[currentHistoryIndex])}>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleExportPlan(
+                                      planHistory[currentHistoryIndex],
+                                    )
+                                  }
+                                >
                                   <Download className="w-4 h-4 mr-2" />
-                                  Exportar PDF
+                                  Salvar
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -558,30 +739,48 @@ export default function MyPlan() {
                         </CardHeader>
                         <CardContent>
                           <div className="text-sm text-gray-600 dark:text-gray-400">
-                            Criado em: {new Date(planHistory[currentHistoryIndex].createdAt).toLocaleDateString('pt-BR')}
+                            Criado em:{" "}
+                            {new Date(
+                              planHistory[currentHistoryIndex].createdAt,
+                            ).toLocaleDateString("pt-BR")}
                           </div>
                           {isPlanDiet(planHistory[currentHistoryIndex]) && (
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                               <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                                <div className="text-sm text-gray-600 dark:text-gray-400">Calorias</div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                  Calorias
+                                </div>
                                 <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
-                                  {planHistory[currentHistoryIndex].dailyCalories}
+                                  {
+                                    planHistory[currentHistoryIndex]
+                                      .dailyCalories
+                                  }
                                 </div>
                               </div>
                               <div className="text-center p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
-                                <div className="text-sm text-gray-600 dark:text-gray-400">Proteína</div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                  Proteína
+                                </div>
                                 <div className="font-bold text-lg text-green-600 dark:text-green-400">
-                                  {planHistory[currentHistoryIndex].macroProtein}g
+                                  {
+                                    planHistory[currentHistoryIndex]
+                                      .macroProtein
+                                  }
+                                  g
                                 </div>
                               </div>
                               <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
-                                <div className="text-sm text-gray-600 dark:text-gray-400">Carboidratos</div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                  Carboidratos
+                                </div>
                                 <div className="font-bold text-lg text-yellow-600 dark:text-yellow-400">
                                   {planHistory[currentHistoryIndex].macroCarbs}g
                                 </div>
                               </div>
                               <div className="text-center p-3 bg-red-50 dark:bg-red-900/30 rounded-lg">
-                                <div className="text-sm text-gray-600 dark:text-gray-400">Gordura</div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                  Gordura
+                                </div>
                                 <div className="font-bold text-lg text-red-600 dark:text-red-400">
                                   {planHistory[currentHistoryIndex].macroFat}g
                                 </div>
@@ -595,7 +794,9 @@ export default function MyPlan() {
                 ) : (
                   <div className="text-center py-12">
                     <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">Nenhum plano no histórico</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">
+                      Nenhum plano no histórico
+                    </p>
                     <p className="text-gray-400 dark:text-gray-500 text-sm">
                       Crie seu primeiro plano na aba "Criar Plano"
                     </p>
@@ -608,9 +809,12 @@ export default function MyPlan() {
           <TabsContent value="manual" className="space-y-6">
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle className="text-2xl">Criar Plano Personalizado</CardTitle>
+                <CardTitle className="text-2xl">
+                  Criar Plano Personalizado
+                </CardTitle>
                 <CardDescription className="text-base">
-                  Desenvolva seu plano ideal baseado nas suas características e objetivos pessoais
+                  Desenvolva seu plano ideal baseado nas suas características e
+                  objetivos pessoais
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -619,25 +823,33 @@ export default function MyPlan() {
                   <label className="text-sm font-medium">Tipo de Plano</label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Button
-                      variant={selectedPlanType === 'diet' ? 'default' : 'outline'}
-                      onClick={() => setSelectedPlanType('diet')}
+                      variant={
+                        selectedPlanType === "diet" ? "default" : "outline"
+                      }
+                      onClick={() => setSelectedPlanType("diet")}
                       className="h-16 flex items-center gap-3"
                     >
                       <Utensils className="w-5 h-5" />
                       <div className="text-left">
                         <div className="font-semibold">Plano Nutricional</div>
-                        <div className="text-xs opacity-70">Cardápio e refeições</div>
+                        <div className="text-xs opacity-70">
+                          Cardápio e refeições
+                        </div>
                       </div>
                     </Button>
                     <Button
-                      variant={selectedPlanType === 'workout' ? 'default' : 'outline'}
-                      onClick={() => setSelectedPlanType('workout')}
+                      variant={
+                        selectedPlanType === "workout" ? "default" : "outline"
+                      }
+                      onClick={() => setSelectedPlanType("workout")}
                       className="h-16 flex items-center gap-3"
                     >
                       <Dumbbell className="w-5 h-5" />
                       <div className="text-left">
                         <div className="font-semibold">Plano de Treino</div>
-                        <div className="text-xs opacity-70">Exercícios e rotina</div>
+                        <div className="text-xs opacity-70">
+                          Exercícios e rotina
+                        </div>
                       </div>
                     </Button>
                   </div>
@@ -649,9 +861,10 @@ export default function MyPlan() {
                     Descreva seus objetivos e preferências
                   </label>
                   <Textarea
-                    placeholder={selectedPlanType === 'diet' 
-                      ? "Ex: Quero um plano para ganho de massa muscular, com refeições brasileiras típicas, sem lactose..."
-                      : "Ex: Quero um treino para hipertrofia, 3x por semana, focado em peito, costas e pernas..."
+                    placeholder={
+                      selectedPlanType === "diet"
+                        ? "Ex: Quero um plano para ganho de massa muscular, com refeições brasileiras típicas, sem lactose..."
+                        : "Ex: Quero um treino para hipertrofia, 3x por semana, focado em peito, costas e pernas..."
                     }
                     value={userDescription}
                     onChange={(e) => setUserDescription(e.target.value)}
@@ -659,9 +872,11 @@ export default function MyPlan() {
                   />
                 </div>
 
-                <Button 
+                <Button
                   onClick={handleGeneratePlan}
-                  disabled={generatePlanMutation.isPending || !userDescription.trim()}
+                  disabled={
+                    generatePlanMutation.isPending || !userDescription.trim()
+                  }
                   className="w-full h-12"
                 >
                   {generatePlanMutation.isPending ? (
@@ -672,7 +887,10 @@ export default function MyPlan() {
                   ) : (
                     <>
                       <Target className="w-4 h-4 mr-2" />
-                      Gerar {selectedPlanType === 'diet' ? 'Plano Nutricional' : 'Plano de Treino'}
+                      Gerar{" "}
+                      {selectedPlanType === "diet"
+                        ? "Plano Nutricional"
+                        : "Plano de Treino"}
                     </>
                   )}
                 </Button>
