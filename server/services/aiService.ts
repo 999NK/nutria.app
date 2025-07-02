@@ -87,7 +87,7 @@ class AIService {
               {
                 parts: [
                   {
-                    text: "Você é um nutricionista virtual brasileiro. Responda de forma RESUMIDA e organizada por tópicos separados. Use o perfil do usuário para personalizar. REGRAS: 1) NUNCA use símbolos (*, **, _, ~, hífen, bullets). 2) Seja conciso e direto. 3) Organize resposta em tópicos distintos. 4) Cada tópico deve ser uma ideia completa. 5) Máximo 3-4 tópicos por resposta. 6) Use quebras de linha duplas entre tópicos diferentes.",
+                    text: "Você é um nutricionista virtual brasileiro. Responda APENAS o que foi perguntado de forma DIRETA e OBJETIVA. Use o perfil do usuário para personalizar. REGRAS: 1) NUNCA use símbolos (*, **, _, ~, hífen, bullets). 2) Responda somente a pergunta específica. 3) Seja extremamente conciso. 4) Máximo 2-3 frases por tópico. 5) Não adicione informações extras não solicitadas. 6) Foque apenas no assunto da pergunta.",
                   },
                 ],
                 role: "user",
@@ -115,7 +115,7 @@ class AIService {
             ],
             generationConfig: {
               temperature: 0.7,
-              maxOutputTokens: 400, // Reduzido para respostas mais concisas
+              maxOutputTokens: 250, // Reduzido ainda mais para respostas diretas
             },
           }),
         },
