@@ -884,27 +884,50 @@ REGRAS OBRIGATÓRIAS - SIGA RIGOROSAMENTE:
         macroCarbs: 348,
         macroProtein: 175,
         macroFat: 80,
-        // @ts-ignore
         meals: JSON.stringify({
-          day1: {
-            breakfast: { name: "Café da Manhã", description: "Aveia com banana, leite desnatado e whey protein", time: "07:00", calories: 450 },
-            lunch: { name: "Almoço", description: "Peito de frango grelhado, arroz integral, feijão carioca e salada", time: "12:00", calories: 650 },
-            lanche: { name: "Lanche", description: "Batata doce assada com peito de peru", time: "15:00", calories: 380 },
-            dinner: { name: "Jantar", description: "Salmão grelhado, quinoa e brócolis", time: "19:00", calories: 520 }
+          segunda: {
+            breakfast: { name: "Café da Manhã", description: "Aveia com banana, leite desnatado e whey protein", time: "07:00", calories: 450, protein: 44, carbs: 87, fat: 20, ingredients: ["aveia", "banana", "leite", "whey"] },
+            lunch: { name: "Almoço", description: "Peito de frango grelhado, arroz integral, feijão carioca e salada", time: "12:00", calories: 650, protein: 61, carbs: 122, fat: 28, ingredients: ["frango", "arroz integral", "feijão", "salada"] },
+            lanche: { name: "Lanche", description: "Batata doce assada com peito de peru", time: "15:00", calories: 380, protein: 26, carbs: 52, fat: 12, ingredients: ["batata doce", "peito de peru"] },
+            dinner: { name: "Jantar", description: "Salmão grelhado, quinoa e brócolis", time: "19:00", calories: 520, protein: 44, carbs: 87, fat: 20, ingredients: ["salmão", "quinoa", "brócolis"] }
           },
-          day2: {
-            breakfast: { name: "Café da Manhã", description: "Ovos mexidos, pão integral e abacate", time: "07:00", calories: 420 },
-            lunch: { name: "Almoço", description: "Carne vermelha magra, batata doce e legumes refogados", time: "12:00", calories: 680 },
-            lanche: { name: "Lanche", description: "Iogurte grego com granola e frutas vermelhas", time: "15:00", calories: 350 },
-            dinner: { name: "Jantar", description: "Peixe branco grelhado com arroz integral e aspargos", time: "19:00", calories: 490 }
+          terca: {
+            breakfast: { name: "Café da Manhã", description: "Ovos mexidos, pão integral e abacate", time: "07:00", calories: 420, protein: 44, carbs: 87, fat: 20, ingredients: ["ovos", "pão integral", "abacate"] },
+            lunch: { name: "Almoço", description: "Carne vermelha magra, batata doce e legumes refogados", time: "12:00", calories: 680, protein: 61, carbs: 122, fat: 28, ingredients: ["carne magra", "batata doce", "legumes"] },
+            lanche: { name: "Lanche", description: "Iogurte grego com granola e frutas vermelhas", time: "15:00", calories: 350, protein: 26, carbs: 52, fat: 12, ingredients: ["iogurte grego", "granola", "frutas"] },
+            dinner: { name: "Jantar", description: "Peixe branco grelhado com arroz integral e aspargos", time: "19:00", calories: 490, protein: 44, carbs: 87, fat: 20, ingredients: ["peixe", "arroz integral", "aspargos"] }
           },
-          day3: {
-            breakfast: { name: "Café da Manhã", description: "Smoothie de frutas com whey protein e aveia", time: "07:00", calories: 480 },
-            lunch: { name: "Almoço", description: "Frango desfiado, macarrão integral e molho de tomate", time: "12:00", calories: 620 },
-            lanche: { name: "Lanche da Tarde", description: "Mix de castanhas e frutas secas", time: "15:00", calories: 400 },
-            dinner: { name: "Jantar", description: "Omelete com vegetais e queijo cottage", time: "19:00", calories: 450 }
+          quarta: {
+            breakfast: { name: "Café da Manhã", description: "Smoothie de frutas com whey protein e aveia", time: "07:00", calories: 480, protein: 44, carbs: 87, fat: 20, ingredients: ["frutas", "whey", "aveia"] },
+            lunch: { name: "Almoço", description: "Frango desfiado, macarrão integral e molho de tomate", time: "12:00", calories: 620, protein: 61, carbs: 122, fat: 28, ingredients: ["frango", "macarrão integral", "molho"] },
+            lanche: { name: "Lanche", description: "Mix de castanhas e frutas secas", time: "15:00", calories: 400, protein: 26, carbs: 52, fat: 12, ingredients: ["castanhas", "frutas secas"] },
+            dinner: { name: "Jantar", description: "Omelete com vegetais e queijo cottage", time: "19:00", calories: 450, protein: 44, carbs: 87, fat: 20, ingredients: ["ovos", "vegetais", "queijo cottage"] }
+          },
+          quinta: {
+            breakfast: { name: "Café da Manhã", description: "Tapioca com queijo e presunto", time: "07:00", calories: 450, protein: 44, carbs: 87, fat: 20, ingredients: ["tapioca", "queijo", "presunto"] },
+            lunch: { name: "Almoço", description: "Bife grelhado, arroz e feijão preto", time: "12:00", calories: 650, protein: 61, carbs: 122, fat: 28, ingredients: ["bife", "arroz", "feijão preto"] },
+            lanche: { name: "Lanche", description: "Vitamina de banana com leite", time: "15:00", calories: 380, protein: 26, carbs: 52, fat: 12, ingredients: ["banana", "leite"] },
+            dinner: { name: "Jantar", description: "Tilápia com batata doce e salada", time: "19:00", calories: 520, protein: 44, carbs: 87, fat: 20, ingredients: ["tilápia", "batata doce", "salada"] }
+          },
+          sexta: {
+            breakfast: { name: "Café da Manhã", description: "Pão francês com requeijão e café", time: "07:00", calories: 420, protein: 44, carbs: 87, fat: 20, ingredients: ["pão francês", "requeijão", "café"] },
+            lunch: { name: "Almoço", description: "Feijoada light com arroz e couve", time: "12:00", calories: 680, protein: 61, carbs: 122, fat: 28, ingredients: ["feijão preto", "carne magra", "arroz", "couve"] },
+            lanche: { name: "Lanche", description: "Sanduíche natural de peito de peru", time: "15:00", calories: 350, protein: 26, carbs: 52, fat: 12, ingredients: ["pão integral", "peito de peru", "alface"] },
+            dinner: { name: "Jantar", description: "Frango assado com mandioca", time: "19:00", calories: 490, protein: 44, carbs: 87, fat: 20, ingredients: ["frango", "mandioca"] }
+          },
+          sabado: {
+            breakfast: { name: "Café da Manhã", description: "Panqueca de aveia com frutas", time: "07:00", calories: 480, protein: 44, carbs: 87, fat: 20, ingredients: ["aveia", "ovos", "frutas"] },
+            lunch: { name: "Almoço", description: "Picanha magra com arroz e salada", time: "12:00", calories: 620, protein: 61, carbs: 122, fat: 28, ingredients: ["picanha magra", "arroz", "salada"] },
+            lanche: { name: "Lanche", description: "Açaí com granola", time: "15:00", calories: 400, protein: 26, carbs: 52, fat: 12, ingredients: ["açaí", "granola"] },
+            dinner: { name: "Jantar", description: "Pizza caseira integral", time: "19:00", calories: 450, protein: 44, carbs: 87, fat: 20, ingredients: ["massa integral", "queijo", "tomate"] }
+          },
+          domingo: {
+            breakfast: { name: "Café da Manhã", description: "Torrada com abacate e café", time: "07:00", calories: 450, protein: 44, carbs: 87, fat: 20, ingredients: ["pão integral", "abacate", "café"] },
+            lunch: { name: "Almoço", description: "Churrasco com farofa e vinagrete", time: "12:00", calories: 650, protein: 61, carbs: 122, fat: 28, ingredients: ["carne", "farofa", "vinagrete"] },
+            lanche: { name: "Lanche", description: "Sorvete natural com castanhas", time: "15:00", calories: 380, protein: 26, carbs: 52, fat: 12, ingredients: ["sorvete natural", "castanhas"] },
+            dinner: { name: "Jantar", description: "Sopa de legumes com pão", time: "19:00", calories: 520, protein: 44, carbs: 87, fat: 20, ingredients: ["legumes", "pão integral"] }
           }
-        }) as any
+        })
       };
     }
   }
