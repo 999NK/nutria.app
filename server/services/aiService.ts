@@ -344,7 +344,52 @@ Para iniciantes use ABC, para intermediários/avançados pode usar ABCD. Retorne
       return JSON.parse(jsonContent);
     } catch (error) {
       console.error('Error generating workout plan with AI:', error);
-      throw new Error('Failed to generate workout plan');
+      
+      // Return structured fallback workout plan
+      return {
+        name: "Plano de Treino ABC",
+        description: "Treino dividido em 3 dias focando em diferentes grupos musculares para desenvolvimento muscular completo",
+        type: "workout",
+        workoutType: "ABC",
+        workouts: {
+          A: {
+            name: "Treino A - Peito, Ombro e Tríceps",
+            exercises: [
+              { name: "Supino reto", sets: 4, reps: "8-12", rest: "90s", technique: "Controle na descida, explosivo na subida" },
+              { name: "Supino inclinado com halteres", sets: 3, reps: "10-12", rest: "60s", technique: "Amplitude completa do movimento" },
+              { name: "Desenvolvimento militar", sets: 3, reps: "8-10", rest: "90s", technique: "Core contraído, movimento controlado" },
+              { name: "Elevação lateral", sets: 3, reps: "12-15", rest: "45s", technique: "Ligeira flexão do cotovelo" },
+              { name: "Tríceps pulley", sets: 3, reps: "12-15", rest: "45s", technique: "Cotovelos fixos ao corpo" },
+              { name: "Tríceps francês", sets: 3, reps: "10-12", rest: "60s", technique: "Apenas antebraço em movimento" }
+            ],
+            duration: "60-75 minutos"
+          },
+          B: {
+            name: "Treino B - Costas e Bíceps",
+            exercises: [
+              { name: "Barra fixa (ou pulley)", sets: 4, reps: "8-12", rest: "90s", technique: "Peito para fora, escápulas retraídas" },
+              { name: "Remada curvada", sets: 4, reps: "8-10", rest: "90s", technique: "Tronco inclinado 45°, squeeze no final" },
+              { name: "Remada unilateral", sets: 3, reps: "10-12", rest: "60s", technique: "Apoio firme, cotovelo próximo ao corpo" },
+              { name: "Pulldown", sets: 3, reps: "12-15", rest: "60s", technique: "Puxar até o peito, controle na volta" },
+              { name: "Rosca direta", sets: 4, reps: "10-12", rest: "60s", technique: "Cotovelos fixos, movimento completo" },
+              { name: "Rosca martelo", sets: 3, reps: "12-15", rest: "45s", technique: "Pegada neutra, alternado ou simultâneo" }
+            ],
+            duration: "60-75 minutos"
+          },
+          C: {
+            name: "Treino C - Pernas e Glúteos",
+            exercises: [
+              { name: "Agachamento livre", sets: 4, reps: "8-12", rest: "2-3min", technique: "Descer até coxa paralela, peso nos calcanhares" },
+              { name: "Leg press", sets: 4, reps: "12-15", rest: "90s", technique: "Amplitude completa, não travar joelhos" },
+              { name: "Stiff", sets: 4, reps: "10-12", rest: "90s", technique: "Quadril para trás, pernas semi-flexionadas" },
+              { name: "Afundo", sets: 3, reps: "12 cada perna", rest: "60s", technique: "Joelho da frente não ultrapassa a ponta do pé" },
+              { name: "Panturrilha em pé", sets: 4, reps: "15-20", rest: "45s", technique: "Amplitude máxima, pausa no topo" },
+              { name: "Panturrilha sentado", sets: 3, reps: "15-20", rest: "45s", technique: "Contração sustentada no topo" }
+            ],
+            duration: "75-90 minutos"
+          }
+        }
+      };
     }
   }
 

@@ -43,18 +43,6 @@ export default function AiChat() {
     },
     {
       id: "2",
-      content: "💡 Perguntas comuns:",
-      role: "assistant",
-      timestamp: new Date(),
-    },
-    {
-      id: "3", 
-      content: "• Como posso melhorar minha alimentação? 🥕\n• Quantas refeições por dia? 🍽️\n• Como posso substituir o açúcar nas receitas? 🍎",
-      role: "assistant",
-      timestamp: new Date(),
-    },
-    {
-      id: "4",
       content: "Como posso ajudar hoje? 😄",
       role: "assistant",
       timestamp: new Date(),
@@ -70,8 +58,6 @@ export default function AiChat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -173,7 +159,8 @@ export default function AiChat() {
   }
 
   return (
-    <div className="flex flex-col h-full pb-20">{/* Space for bottom navigation */}
+    <div className="flex flex-col h-full pb-20">
+      {/* Space for bottom navigation */}
 
       {/* Chat Messages Container */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 pb-40 md:pb-32">
@@ -220,9 +207,9 @@ export default function AiChat() {
             </div>
           </div>
         ))}
-        
+
         {/* Suggested Questions - Show after initial messages */}
-        {messages.length === 4 && (
+        {messages.length === 2 && (
           <div className="px-4 py-4">
             <div className="flex flex-wrap gap-2">
               {suggestedQuestions.map((question, index) => (
@@ -239,7 +226,7 @@ export default function AiChat() {
             </div>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 
