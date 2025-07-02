@@ -794,7 +794,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isDietPlan = /\b(dieta|alimenta[çc][ãa]o|nutri[çc][ãa]o|cardápio|menu|refei[çc][ãa]o|comida|prote[íi]na|carboidrato|gordura|caloria|massa\s*magra|emagre[çc]er|emagrecer|perder\s*peso|ganhar\s*peso)\b/i.test(lowerMessage) && !isWorkoutPlan;
       const isPlanCreation = /\b(criar|gerar|montar|fazer|desenvolver|elaborar|sugerir|preciso\s*de|quero|gostaria)\b/i.test(lowerMessage) && /\b(plano|programa|rotina|cronograma)\b/i.test(lowerMessage);
       
-      let response: string;
+      let response: string | string[];
       
       if (isPlanCreation && isWorkoutPlan) {
         // Auto-generate workout plan
@@ -831,7 +831,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             type: "workout",
           });
           
-          response = `✅ **Plano de Treino Criado com Sucesso!**\n\n🏋️ **${aiPlan.name}**\n\n${aiPlan.description}\n\nSeu plano de treino personalizado foi criado e ativado automaticamente! Você pode visualizá-lo na seção "Meu Plano" para ver todos os exercícios detalhados, séries e repetições.\n\n💡 **Dica:** Consulte sempre um profissional de educação física antes de iniciar qualquer rotina de exercícios.`;
+          response = [`Plano de Treino Criado com Sucesso! ${aiPlan.name}.`, `${aiPlan.description}`, `Seu plano de treino personalizado foi criado e ativado automaticamente!`, `Você pode visualizá-lo na seção Meu Plano para ver todos os exercícios detalhados.`, `Dica: Consulte sempre um profissional de educação física antes de iniciar qualquer rotina de exercícios.`];
           
           console.log("Auto workout plan created successfully:", workoutPlan.id);
         } catch (error) {
@@ -877,7 +877,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             type: "nutrition",
           });
           
-          response = `✅ **Plano Alimentar Criado com Sucesso!**\n\n🍽️ **${aiPlan.name}**\n\n${aiPlan.description}\n\n📊 **Metas Diárias:**\n- Calorias: ${aiPlan.dailyCalories} kcal\n- Proteínas: ${aiPlan.macroProtein}g\n- Carboidratos: ${aiPlan.macroCarbs}g\n- Gorduras: ${aiPlan.macroFat}g\n\nSeu plano alimentar personalizado foi criado e ativado! Visite "Meu Plano" para ver todas as refeições detalhadas.\n\n💡 **Dica:** Sempre consulte um nutricionista para orientações personalizadas.`;
+          response = [`Plano Alimentar Criado com Sucesso! ${aiPlan.name}.`, `${aiPlan.description}`, `Metas Diárias: Calorias ${aiPlan.dailyCalories} kcal.`, `Proteínas ${aiPlan.macroProtein}g, Carboidratos ${aiPlan.macroCarbs}g, Gorduras ${aiPlan.macroFat}g.`, `Seu plano alimentar personalizado foi criado e ativado!`, `Visite Meu Plano para ver todas as refeições detalhadas.`, `Dica: Sempre consulte um nutricionista para orientações personalizadas.`];
           
           console.log("Auto meal plan created successfully:", mealPlan.id);
         } catch (error) {
