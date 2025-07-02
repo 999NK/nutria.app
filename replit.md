@@ -10,6 +10,13 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-02 05:30**
+- ✓ Implemented personalized AI chat responses based on user profile characteristics
+- ✓ AI now considers weight, height, age, goals, activity level, and nutrition targets in all responses
+- ✓ Enhanced system prompt to provide specific advice tailored to individual user profiles
+- ✓ Added comprehensive user context to every chat interaction (not just plan generation)
+- ✓ AI responses now automatically personalized without requiring user to repeat their information
+
 **2025-07-02 05:29**
 - ✓ Enhanced AI chat to provide detailed, informative responses divided into multiple messages
 - ✓ Fixed Gemini API JSON structure errors with proper content validation

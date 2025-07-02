@@ -882,11 +882,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log("Auto meal plan created successfully:", mealPlan.id);
         } catch (error) {
           console.error("Error creating auto meal plan:", error);
-          response = await aiService.getChatResponse(message, userHistory);
+          const user = await storage.getUser(userId);
+          const userContext = `
+PERFIL DO USUÁRIO:
+- Peso: ${user?.weight || 'não informado'} kg
+- Altura: ${user?.height || 'não informado'} cm
+- Idade: ${user?.age || 'não informado'} anos
+- Objetivo: ${user?.goal || 'não informado'}
+- Nível de atividade: ${user?.activityLevel || 'não informado'}
+- Meta diária de calorias: ${user?.dailyCalories || 'não definida'} kcal
+- Meta diária de proteína: ${user?.dailyProtein || 'não definida'}g
+- Meta diária de carboidratos: ${user?.dailyCarbs || 'não definida'}g
+- Meta diária de gordura: ${user?.dailyFat || 'não definida'}g
+
+PERGUNTA DO USUÁRIO: ${message}`;
+
+          response = await aiService.getChatResponse(userContext, userHistory);
         }
       } else {
-        // Normal chat response
-        response = await aiService.getChatResponse(message, userHistory);
+        // Normal chat response with user profile context
+        const user = await storage.getUser(userId);
+        const userContext = `
+PERFIL DO USUÁRIO:
+- Peso: ${user?.weight || 'não informado'} kg
+- Altura: ${user?.height || 'não informado'} cm
+- Idade: ${user?.age || 'não informado'} anos
+- Objetivo: ${user?.goal || 'não informado'}
+- Nível de atividade: ${user?.activityLevel || 'não informado'}
+- Meta diária de calorias: ${user?.dailyCalories || 'não definida'} kcal
+- Meta diária de proteína: ${user?.dailyProtein || 'não definida'}g
+- Meta diária de carboidratos: ${user?.dailyCarbs || 'não definida'}g
+- Meta diária de gordura: ${user?.dailyFat || 'não definida'}g
+
+PERGUNTA DO USUÁRIO: ${message}`;
+
+        response = await aiService.getChatResponse(userContext, userHistory);
       }
       
       // Add AI response to history - handle both string and array responses
