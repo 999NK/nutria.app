@@ -10,13 +10,13 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
-**2025-07-02 19:19**
-- ✓ Enhanced "Hoje no seu Plano" dashboard section with workout navigation
-- ✓ Added button to cycle through workout sessions (A → B → C → A)
-- ✓ Implemented display of ALL exercises in current workout instead of showing "+2 exercícios"
-- ✓ Added "Próxima Refeição" feature showing next meal based on current time
-- ✓ Enhanced nutrition section to display upcoming meal details with calories and foods
-- ✓ Fixed server crash caused by WebSocket connection issues and restarted successfully
+**2025-07-02 19:23**
+- ✓ Fixed workout navigation button to switch fichas directly in dashboard card (A → B → C → A)
+- ✓ Removed navigation to MyPlan page - now changes workout display in-place
+- ✓ Enhanced "Próxima Refeição" to show complete nutritional values (calories, protein, carbs)
+- ✓ Removed generic daily goals from next meal section - now focuses on specific meal data
+- ✓ Improved fallback messages for when meal data is unavailable
+- ✓ Added state management for current workout index to persist user's selection
 
 **2025-07-02 19:15**
 - ✓ Fixed AI responses to stay strictly relevant to the specific question asked

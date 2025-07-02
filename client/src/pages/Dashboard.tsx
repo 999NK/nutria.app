@@ -22,6 +22,7 @@ export default function Dashboard() {
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentNutritionalDay, setCurrentNutritionalDay] = useState(getNutritionalDay());
+  const [currentWorkoutIndex, setCurrentWorkoutIndex] = useState(0);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -352,12 +353,11 @@ export default function Dashboard() {
                         // Check multiple possible structures
                         const workouts = workoutData.workouts || workoutData;
                         
-                        // Get today's workout (A, B, or C rotation)
-                        const dayOfWeek = new Date().getDay(); // 0=Sunday, 1=Monday, etc.
+                        // Get workout keys and current workout based on state
                         const workoutKeys = Object.keys(workouts).filter(key => ['A', 'B', 'C', 'D'].includes(key));
                         
                         if (workoutKeys.length > 0) {
-                          const todayWorkoutKey = workoutKeys[dayOfWeek % workoutKeys.length];
+                          const todayWorkoutKey = workoutKeys[currentWorkoutIndex % workoutKeys.length];
                           const todayWorkout = workouts[todayWorkoutKey];
                           
                           if (todayWorkout && (todayWorkout.name || todayWorkout.exercises)) {
@@ -373,9 +373,8 @@ export default function Dashboard() {
                                       size="sm" 
                                       className="h-auto px-2 py-1 text-xs border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900"
                                       onClick={() => {
-                                        // Navigate to next workout (A > B > C > A)
-                                        const nextWorkoutKey = workoutKeys[(workoutKeys.indexOf(todayWorkoutKey) + 1) % workoutKeys.length];
-                                        setLocation('/my-plan');
+                                        // Switch to next workout directly in the card
+                                        setCurrentWorkoutIndex((prevIndex) => (prevIndex + 1) % workoutKeys.length);
                                       }}
                                     >
                                       → {workoutKeys[(workoutKeys.indexOf(todayWorkoutKey) + 1) % workoutKeys.length]}
@@ -498,16 +497,27 @@ export default function Dashboard() {
                                 {nextMealData.foods && nextMealData.foods.slice(0, 2).map((food: string, index: number) => (
                                   <div key={index}>• {food}</div>
                                 ))}
-                                {nextMealData.calories && (
-                                  <div className="text-green-600 dark:text-green-400 font-medium">
-                                    {nextMealData.calories} kcal
-                                  </div>
-                                )}
+                                <div className="flex gap-4 text-xs pt-1">
+                                  {nextMealData.calories && (
+                                    <span className="text-green-600 dark:text-green-400 font-medium">
+                                      {nextMealData.calories} kcal
+                                    </span>
+                                  )}
+                                  {nextMealData.protein && (
+                                    <span className="text-blue-600 dark:text-blue-400">
+                                      {nextMealData.protein}g prot.
+                                    </span>
+                                  )}
+                                  {nextMealData.carbs && (
+                                    <span className="text-orange-600 dark:text-orange-400">
+                                      {nextMealData.carbs}g carb.
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             ) : (
                               <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                                <div>Meta diária: {nutritionPlan.dailyCalories} kcal</div>
-                                <div>Proteína: {nutritionPlan.macroProtein}g</div>
+                                <div>Aguardando dados da refeição...</div>
                               </div>
                             )}
                           </>
@@ -517,11 +527,11 @@ export default function Dashboard() {
                         return (
                           <>
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plano ativo</span>
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Próxima Refeição</span>
                             </div>
                             <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                              <div>Meta: {nutritionPlan.dailyCalories} kcal/dia</div>
-                              <div>Proteína: {nutritionPlan.macroProtein}g</div>
+                              <div>Dados da refeição não disponíveis</div>
+                              <div>Consulte o plano completo para mais detalhes</div>
                             </div>
                           </>
                         );
