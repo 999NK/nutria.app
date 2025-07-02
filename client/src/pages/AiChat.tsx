@@ -89,13 +89,31 @@ export default function AiChat() {
       return response.json();
     },
     onSuccess: (data) => {
-      const assistantMessage: Message = {
-        id: Date.now().toString(),
-        content: data.response,
-        role: "assistant",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+      // Handle array of responses - send them sequentially with delay
+      if (Array.isArray(data.response) && data.response.length > 1) {
+        // Send messages sequentially with 500ms delay
+        data.response.forEach((content: string, index: number) => {
+          setTimeout(() => {
+            const assistantMessage: Message = {
+              id: `${Date.now()}-${index}`,
+              content: content,
+              role: "assistant",
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, assistantMessage]);
+          }, index * 500);
+        });
+      } else {
+        // Single message or first message of array
+        const content = Array.isArray(data.response) ? data.response[0] : data.response;
+        const assistantMessage: Message = {
+          id: Date.now().toString(),
+          content: content,
+          role: "assistant",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
     },
     onError: (error: any) => {
       if (isUnauthorizedError(error)) {
