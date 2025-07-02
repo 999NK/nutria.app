@@ -41,6 +41,24 @@ export default function AiChat() {
       role: "assistant",
       timestamp: new Date(),
     },
+    {
+      id: "2",
+      content: "💡 Perguntas comuns:",
+      role: "assistant",
+      timestamp: new Date(),
+    },
+    {
+      id: "3", 
+      content: "• Como posso melhorar minha alimentação? 🥕\n• Quantas refeições por dia? 🍽️\n• Como posso substituir o açúcar nas receitas? 🍎",
+      role: "assistant",
+      timestamp: new Date(),
+    },
+    {
+      id: "4",
+      content: "Como posso ajudar hoje? 😄",
+      role: "assistant",
+      timestamp: new Date(),
+    },
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -53,31 +71,7 @@ export default function AiChat() {
     scrollToBottom();
   }, [messages]);
 
-  // Send introduction sequence as separate messages
-  useEffect(() => {
-    if (isAuthenticated && messages.length === 1) {
-      const introSequence = [
-        "💡 Perguntas comuns:",
-        "• Como posso melhorar minha alimentação? 🥕\n• Quantas refeições por dia? 🍽️\n• Como posso substituir o açúcar nas receitas? 🍎",
-        "Como posso ajudar hoje? 😄",
-      ];
 
-      introSequence.forEach((message, index) => {
-        setTimeout(
-          () => {
-            const introMessage: Message = {
-              id: `intro-${index + 2}`,
-              content: message,
-              role: "assistant",
-              timestamp: new Date(),
-            };
-            setMessages((prev) => [...prev, introMessage]);
-          },
-          (index + 1) * 500,
-        ); // 1.5 seconds between each message
-      });
-    }
-  }, [isAuthenticated, messages.length]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -226,27 +220,28 @@ export default function AiChat() {
             </div>
           </div>
         ))}
+        
+        {/* Suggested Questions - Show after initial messages */}
+        {messages.length === 4 && (
+          <div className="px-4 py-4">
+            <div className="flex flex-wrap gap-2">
+              {suggestedQuestions.map((question, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs h-8 px-3 rounded-full"
+                  onClick={() => handleSuggestedQuestion(question)}
+                >
+                  {question}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+        
         <div ref={messagesEndRef} />
       </div>
-
-      {/* Suggested Questions */}
-      {messages.length <= 4 && (
-        <div className="px-4 py-2">
-          <div className="flex flex-wrap gap-2">
-            {suggestedQuestions.map((question, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                className="text-xs h-8 px-3 rounded-full"
-                onClick={() => handleSuggestedQuestion(question)}
-              >
-                {question}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Input Area */}
       <div className="fixed bottom-16 md:bottom-4 left-0 right-0 px-4 md:px-6">

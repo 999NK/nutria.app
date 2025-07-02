@@ -10,6 +10,13 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-02 03:45**
+- ✓ Fixed AI Chat initialization to show all intro messages immediately
+- ✓ Removed delayed message sequence that was causing incomplete display
+- ✓ Repositioned suggestion buttons to appear after intro messages in chat area
+- ✓ Fixed suggested questions disappearing correctly when user interacts
+- ✓ Improved AI Chat UX with proper message flow and suggestions placement
+
 **2025-07-02 03:40**
 - ✓ Removed floating + button from mobile pages (no longer needed for food addition)
 - ✓ Fixed chat input overlapping content in AI Chat page
