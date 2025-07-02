@@ -386,11 +386,45 @@ export default function MyPlan() {
                       
                       {expandedCards.workout && (
                         <div className="border-t pt-4">
-                          <h4 className="font-medium mb-4 text-gray-900 dark:text-gray-100">Cronograma de Treinos</h4>
-                          <div className="flex overflow-x-auto gap-4 pb-4 max-h-96 snap-x snap-mandatory">
+                          <div className="flex items-center justify-between mb-4">
+                            <h4 className="font-medium text-gray-900 dark:text-gray-100">Cronograma de Treinos</h4>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const container = document.getElementById('workout-container');
+                                  if (container) {
+                                    container.scrollBy({ left: -320, behavior: 'smooth' });
+                                  }
+                                }}
+                                className="h-8 w-8 p-0"
+                              >
+                                <ChevronLeft className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const container = document.getElementById('workout-container');
+                                  if (container) {
+                                    container.scrollBy({ left: 320, behavior: 'smooth' });
+                                  }
+                                }}
+                                className="h-8 w-8 p-0"
+                              >
+                                <ChevronRight className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div 
+                            id="workout-container"
+                            className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory" 
+                            style={{ maxHeight: '600px' }}
+                          >
                             {activeWorkoutPlan.meals && 
                              Object.entries(typeof activeWorkoutPlan.meals === 'string' ? JSON.parse(activeWorkoutPlan.meals) : activeWorkoutPlan.meals).map(([workoutLetter, workout]: [string, any]) => (
-                              <div key={workoutLetter} className="flex-shrink-0 w-80 bg-gray-100 dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 snap-start">
+                              <div key={workoutLetter} className="flex-shrink-0 w-80 bg-gray-100 dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 snap-start" style={{ maxHeight: '550px', overflow: 'hidden' }}>
                                 <div className="text-center mb-4">
                                   <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                                     {workout.name || `Treino ${workoutLetter.toUpperCase()}`}
@@ -407,16 +441,18 @@ export default function MyPlan() {
                                     <div className="p-3 border-r border-gray-200 dark:border-gray-500">Exercício</div>
                                     <div className="p-3 text-center">Séries e Repetições</div>
                                   </div>
-                                  {workout.exercises && workout.exercises.map((exercise: any, index: number) => (
-                                    <div key={index} className={`grid grid-cols-2 text-sm ${index % 2 === 0 ? 'bg-white dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-600'}`}>
-                                      <div className="p-3 border-r border-gray-200 dark:border-gray-500 text-gray-900 dark:text-gray-100 font-medium">
-                                        {exercise.name || `Exercício ${index + 1}`}
+                                  <div className="max-h-64 overflow-y-auto">
+                                    {workout.exercises && workout.exercises.map((exercise: any, index: number) => (
+                                      <div key={index} className={`grid grid-cols-2 text-sm ${index % 2 === 0 ? 'bg-white dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-600'}`}>
+                                        <div className="p-3 border-r border-gray-200 dark:border-gray-500 text-gray-900 dark:text-gray-100 font-medium">
+                                          {exercise.name || `Exercício ${index + 1}`}
+                                        </div>
+                                        <div className="p-3 text-center text-gray-900 dark:text-gray-100 font-semibold">
+                                          {exercise.sets || '4'} × {exercise.reps || '8-10'}
+                                        </div>
                                       </div>
-                                      <div className="p-3 text-center text-gray-900 dark:text-gray-100 font-semibold">
-                                        {exercise.sets || '4'} × {exercise.reps || '8-10'}
-                                      </div>
-                                    </div>
-                                  ))}
+                                    ))}
+                                  </div>
                                 </div>
                               </div>
                             ))}

@@ -340,43 +340,57 @@ export default function Dashboard() {
                     {(() => {
                       try {
                         // Parse workout data to extract today's specific workout
-                        const workoutData = workoutPlan.meals ? JSON.parse(workoutPlan.meals) : {};
+                        let workoutData: any = {};
+                        if (workoutPlan.meals) {
+                          if (typeof workoutPlan.meals === 'string') {
+                            workoutData = JSON.parse(workoutPlan.meals);
+                          } else {
+                            workoutData = workoutPlan.meals;
+                          }
+                        }
+
+                        // Check multiple possible structures
                         const workouts = workoutData.workouts || workoutData;
                         
                         // Get today's workout (A, B, or C rotation)
                         const dayOfWeek = new Date().getDay(); // 0=Sunday, 1=Monday, etc.
-                        const workoutKeys = Object.keys(workouts);
-                        const todayWorkoutKey = workoutKeys[dayOfWeek % workoutKeys.length];
-                        const todayWorkout = workouts[todayWorkoutKey];
+                        const workoutKeys = Object.keys(workouts).filter(key => ['A', 'B', 'C', 'D'].includes(key));
                         
-                        if (todayWorkout && todayWorkout.name && todayWorkout.exercises) {
-                          return (
-                            <>
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium text-blue-700 dark:text-blue-400">{todayWorkout.name}</span>
-                                <div className="flex items-center gap-2">
-                                  <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
-                                    Próximo: {workoutKeys[(workoutKeys.indexOf(todayWorkoutKey) + 1) % workoutKeys.length]}
-                                  </Button>
+                        if (workoutKeys.length > 0) {
+                          const todayWorkoutKey = workoutKeys[dayOfWeek % workoutKeys.length];
+                          const todayWorkout = workouts[todayWorkoutKey];
+                          
+                          if (todayWorkout && (todayWorkout.name || todayWorkout.exercises)) {
+                            return (
+                              <>
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
+                                    {todayWorkout.name || `Treino ${todayWorkoutKey}`}
+                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
+                                      Próximo: {workoutKeys[(workoutKeys.indexOf(todayWorkoutKey) + 1) % workoutKeys.length]}
+                                    </Button>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                                {todayWorkout.exercises.slice(0, 3).map((exercise: any, index: number) => (
-                                  <div key={index} className="flex justify-between">
-                                    <span>• {exercise.name}</span>
-                                    <span className="text-blue-600 dark:text-blue-400">
-                                      {exercise.sets}x{exercise.reps}
-                                    </span>
-                                  </div>
-                                ))}
-                                {todayWorkout.exercises.length > 3 && (
-                                  <div className="text-xs text-gray-500 italic">
-                                    +{todayWorkout.exercises.length - 3} exercícios
-                                  </div>
-                                )}
-                              </div>
-                            </>
-                          );
+                                <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                                  {todayWorkout.exercises && todayWorkout.exercises.slice(0, 3).map((exercise: any, index: number) => (
+                                    <div key={index} className="flex justify-between">
+                                      <span>• {exercise.name}</span>
+                                      <span className="text-blue-600 dark:text-blue-400">
+                                        {exercise.sets}x{exercise.reps}
+                                      </span>
+                                    </div>
+                                  ))}
+                                  {todayWorkout.exercises && todayWorkout.exercises.length > 3 && (
+                                    <div className="text-xs text-gray-500 italic">
+                                      +{todayWorkout.exercises.length - 3} exercícios
+                                    </div>
+                                  )}
+                                </div>
+                              </>
+                            );
+                          }
                         }
                       } catch (error) {
                         console.log('Error parsing workout data:', error);
