@@ -458,8 +458,8 @@ export default function MyPlan() {
                         <div className="border-t pt-4">
                           <h4 className="font-medium mb-3">Cronograma de Treinos</h4>
                           <div className="space-y-4 max-h-80 overflow-y-auto">
-                            {activeWorkoutPlan.workouts && 
-                             Object.entries(activeWorkoutPlan.workouts).map(([workoutLetter, workout]: [string, any]) => (
+                            {activeWorkoutPlan.meals && 
+                             Object.entries(typeof activeWorkoutPlan.meals === 'string' ? JSON.parse(activeWorkoutPlan.meals) : activeWorkoutPlan.meals).map(([workoutLetter, workout]: [string, any]) => (
                               <div key={workoutLetter} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                 <div className="font-semibold text-base mb-4 text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-600 pb-2 flex items-center gap-2">
                                   <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
