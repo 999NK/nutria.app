@@ -220,7 +220,7 @@ export default function MyPlan() {
               {/* Card Plano de Nutrição Atual */}
               <Card className="border border-gray-200 dark:border-gray-700">
                 <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-3 rounded-xl bg-green-100 dark:bg-green-800">
                         <Utensils className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -236,8 +236,8 @@ export default function MyPlan() {
                       </div>
                     </div>
                     {activeNutritionPlan && (
-                      <Button variant="outline" size="sm" onClick={() => handleExportPlan(activeNutritionPlan)}>
-                        <Download className="w-4 h-4 mr-2" />
+                      <Button variant="outline" size="sm" onClick={() => handleExportPlan(activeNutritionPlan)} className="h-8 px-3 text-xs">
+                        <Download className="w-3 h-3 mr-1" />
                         Exportar PDF
                       </Button>
                     )}
@@ -331,7 +331,7 @@ export default function MyPlan() {
               {/* Card Plano de Treino Atual */}
               <Card className="border border-gray-200 dark:border-gray-700">
                 <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-800">
                         <Dumbbell className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -347,8 +347,8 @@ export default function MyPlan() {
                       </div>
                     </div>
                     {activeWorkoutPlan && (
-                      <Button variant="outline" size="sm" onClick={() => handleExportPlan(activeWorkoutPlan)}>
-                        <Download className="w-4 h-4 mr-2" />
+                      <Button variant="outline" size="sm" onClick={() => handleExportPlan(activeWorkoutPlan)} className="h-8 px-3 text-xs">
+                        <Download className="w-3 h-3 mr-1" />
                         Exportar PDF
                       </Button>
                     )}
@@ -537,7 +537,7 @@ export default function MyPlan() {
                             </div>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm">
+                                <Button variant="outline" size="sm" className="h-8 px-3 text-xs">
                                   Ações
                                 </Button>
                               </DropdownMenuTrigger>
