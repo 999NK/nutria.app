@@ -368,13 +368,22 @@ export default function Dashboard() {
                                     {todayWorkout.name || `Treino ${todayWorkoutKey}`}
                                   </span>
                                   <div className="flex items-center gap-2">
-                                    <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
-                                      Próximo: {workoutKeys[(workoutKeys.indexOf(todayWorkoutKey) + 1) % workoutKeys.length]}
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      className="h-auto px-2 py-1 text-xs border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900"
+                                      onClick={() => {
+                                        // Navigate to next workout (A > B > C > A)
+                                        const nextWorkoutKey = workoutKeys[(workoutKeys.indexOf(todayWorkoutKey) + 1) % workoutKeys.length];
+                                        setLocation('/my-plan');
+                                      }}
+                                    >
+                                      → {workoutKeys[(workoutKeys.indexOf(todayWorkoutKey) + 1) % workoutKeys.length]}
                                     </Button>
                                   </div>
                                 </div>
                                 <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                                  {todayWorkout.exercises && todayWorkout.exercises.slice(0, 3).map((exercise: any, index: number) => (
+                                  {todayWorkout.exercises && todayWorkout.exercises.map((exercise: any, index: number) => (
                                     <div key={index} className="flex justify-between">
                                       <span>• {exercise.name}</span>
                                       <span className="text-blue-600 dark:text-blue-400">
@@ -382,11 +391,6 @@ export default function Dashboard() {
                                       </span>
                                     </div>
                                   ))}
-                                  {todayWorkout.exercises && todayWorkout.exercises.length > 3 && (
-                                    <div className="text-xs text-gray-500 italic">
-                                      +{todayWorkout.exercises.length - 3} exercícios
-                                    </div>
-                                  )}
                                 </div>
                               </>
                             );
@@ -432,26 +436,97 @@ export default function Dashboard() {
                   </div>
                   
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plano ativo</span>
-                      <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
-                        Ver detalhes
-                      </Button>
-                    </div>
-                    <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                      {nutritionPlan.dailyCalories && (
-                        <div>🎯 Meta: {nutritionPlan.dailyCalories} kcal/dia</div>
-                      )}
-                      {nutritionPlan.macroProtein && (
-                        <div>💪 Proteína: {nutritionPlan.macroProtein}g</div>
-                      )}
-                      {nutritionPlan.macroCarbs && (
-                        <div>🍞 Carboidratos: {nutritionPlan.macroCarbs}g</div>
-                      )}
-                      {nutritionPlan.macroFat && (
-                        <div>🥑 Gorduras: {nutritionPlan.macroFat}g</div>
-                      )}
-                    </div>
+                    {(() => {
+                      try {
+                        // Parse nutrition data to find next meal
+                        let nutritionData: any = {};
+                        if (nutritionPlan.meals) {
+                          if (typeof nutritionPlan.meals === 'string') {
+                            nutritionData = JSON.parse(nutritionPlan.meals);
+                          } else {
+                            nutritionData = nutritionPlan.meals;
+                          }
+                        }
+
+                        // Get current time
+                        const now = new Date();
+                        const currentHour = now.getHours();
+                        
+                        // Define meal times
+                        const mealTimes = [
+                          { time: 7, name: 'Café da Manhã', key: 'cafe' },
+                          { time: 12, name: 'Almoço', key: 'almoco' },
+                          { time: 15, name: 'Lanche', key: 'lanche' },
+                          { time: 19, name: 'Jantar', key: 'jantar' }
+                        ];
+                        
+                        // Find next meal
+                        let nextMeal = mealTimes.find(meal => meal.time > currentHour);
+                        if (!nextMeal) {
+                          nextMeal = mealTimes[0]; // Next day breakfast
+                        }
+                        
+                        // Get today's meals from nutrition data
+                        const todayKey = Object.keys(nutritionData).find(key => 
+                          key.toLowerCase().includes('segunda') || 
+                          key.toLowerCase().includes('today') ||
+                          key === 'day1' ||
+                          Object.keys(nutritionData).indexOf(key) === 0
+                        );
+                        
+                        let nextMealData = null;
+                        if (todayKey && nutritionData[todayKey]) {
+                          nextMealData = nutritionData[todayKey][nextMeal.key];
+                        }
+
+                        return (
+                          <>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                                Próxima Refeição: {nextMeal.name}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {nextMeal.time}:00
+                              </span>
+                            </div>
+                            
+                            {nextMealData ? (
+                              <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                                <div className="font-medium text-gray-700 dark:text-gray-300">
+                                  {nextMealData.name || nextMeal.name}
+                                </div>
+                                {nextMealData.foods && nextMealData.foods.slice(0, 2).map((food: string, index: number) => (
+                                  <div key={index}>• {food}</div>
+                                ))}
+                                {nextMealData.calories && (
+                                  <div className="text-green-600 dark:text-green-400 font-medium">
+                                    {nextMealData.calories} kcal
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                                <div>Meta diária: {nutritionPlan.dailyCalories} kcal</div>
+                                <div>Proteína: {nutritionPlan.macroProtein}g</div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      } catch (error) {
+                        console.log('Error parsing nutrition data:', error);
+                        return (
+                          <>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plano ativo</span>
+                            </div>
+                            <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                              <div>Meta: {nutritionPlan.dailyCalories} kcal/dia</div>
+                              <div>Proteína: {nutritionPlan.macroProtein}g</div>
+                            </div>
+                          </>
+                        );
+                      }
+                    })()}
                   </div>
                 </div>
               )}
