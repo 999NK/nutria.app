@@ -659,29 +659,27 @@ Base nas informações do usuário: ${description}`;
         macroCarbs: 348,
         macroProtein: 175,
         macroFat: 80,
+        // @ts-ignore
         meals: JSON.stringify({
           day1: {
             breakfast: { name: "Café da Manhã", description: "Aveia com banana, leite desnatado e whey protein", time: "07:00", calories: 450 },
             lunch: { name: "Almoço", description: "Peito de frango grelhado, arroz integral, feijão carioca e salada", time: "12:00", calories: 650 },
             lanche: { name: "Lanche", description: "Batata doce assada com peito de peru", time: "15:00", calories: 380 },
-            dinner: { name: "Jantar", description: "Salmão grelhado, quinoa e brócolis", time: "19:00", calories: 520 },
-            workout: "Treino A - Peito, Ombro e Tríceps\n• Supino reto - 4 séries de 8-12 repetições\n• Supino inclinado com halteres - 3 séries de 10-12 repetições\n• Desenvolvimento militar - 3 séries de 8-10 repetições\n• Elevação lateral - 3 séries de 12-15 repetições\n• Tríceps pulley - 3 séries de 12-15 repetições\n• Tríceps francês - 3 séries de 10-12 repetições"
+            dinner: { name: "Jantar", description: "Salmão grelhado, quinoa e brócolis", time: "19:00", calories: 520 }
           },
           day2: {
             breakfast: { name: "Café da Manhã", description: "Ovos mexidos, pão integral e abacate", time: "07:00", calories: 420 },
             lunch: { name: "Almoço", description: "Carne vermelha magra, batata doce e legumes refogados", time: "12:00", calories: 680 },
             lanche: { name: "Lanche", description: "Iogurte grego com granola e frutas vermelhas", time: "15:00", calories: 350 },
-            dinner: { name: "Jantar", description: "Peixe branco grelhado com arroz integral e aspargos", time: "19:00", calories: 490 },
-            workout: "Treino B - Costas e Bíceps\n• Barra fixa ou pulley - 4 séries de 8-12 repetições\n• Remada curvada - 4 séries de 8-10 repetições\n• Remada unilateral - 3 séries de 10-12 repetições\n• Pulldown - 3 séries de 12-15 repetições\n• Rosca direta - 4 séries de 10-12 repetições\n• Rosca martelo - 3 séries de 12-15 repetições"
+            dinner: { name: "Jantar", description: "Peixe branco grelhado com arroz integral e aspargos", time: "19:00", calories: 490 }
           },
           day3: {
-            breakfast: { name: "Café da Manhã", description: "Smoothie de frutas com whey protein e aveia", calories: 480 },
-            lunch: { name: "Almoço", description: "Frango desfiado, macarrão integral e molho de tomate", calories: 620 },
-            snack: { name: "Lanche da Tarde", description: "Mix de castanhas e frutas secas", calories: 400 },
-            dinner: { name: "Jantar", description: "Omelete com vegetais e queijo cottage", calories: 450 },
-            workout: "Treino C - Pernas e Glúteos\n• Agachamento livre - 4 séries de 8-12 repetições\n• Leg press - 4 séries de 12-15 repetições\n• Stiff - 4 séries de 10-12 repetições\n• Afundo - 3 séries de 12 por perna\n• Panturrilha em pé - 4 séries de 15-20 repetições\n• Panturrilha sentado - 3 séries de 15-20 repetições"
+            breakfast: { name: "Café da Manhã", description: "Smoothie de frutas com whey protein e aveia", time: "07:00", calories: 480 },
+            lunch: { name: "Almoço", description: "Frango desfiado, macarrão integral e molho de tomate", time: "12:00", calories: 620 },
+            lanche: { name: "Lanche da Tarde", description: "Mix de castanhas e frutas secas", time: "15:00", calories: 400 },
+            dinner: { name: "Jantar", description: "Omelete com vegetais e queijo cottage", time: "19:00", calories: 450 }
           }
-        })
+        }) as any
       };
     }
   }

@@ -480,6 +480,51 @@ export default function MyPlan() {
                                 <div className="space-y-3">
                                   {workout.exercises && workout.exercises.map((exercise: any, index: number) => (
                                     <div key={index} className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+                                      <div className="flex justify-between items-start mb-3">
+                                        <h5 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+                                          {exercise.name || `Exercício ${index + 1}`}
+                                        </h5>
+                                        <div className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-full font-medium">
+                                          {index + 1}º
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="bg-gray-50 dark:bg-gray-600 rounded-lg p-3 mb-3">
+                                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Especificações:</div>
+                                        <div className="grid grid-cols-3 gap-3">
+                                          <div className="text-center p-2 bg-white dark:bg-gray-700 rounded border">
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">Séries</div>
+                                            <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
+                                              {exercise.sets || '3-4'}
+                                            </div>
+                                          </div>
+                                          <div className="text-center p-2 bg-white dark:bg-gray-700 rounded border">
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">Repetições</div>
+                                            <div className="font-bold text-lg text-green-600 dark:text-green-400">
+                                              {exercise.reps || '8-12'}
+                                            </div>
+                                          </div>
+                                          <div className="text-center p-2 bg-white dark:bg-gray-700 rounded border">
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">Descanso</div>
+                                            <div className="font-bold text-lg text-purple-600 dark:text-purple-400">
+                                              {exercise.rest || '60-90s'}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      {exercise.technique && (
+                                        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                                          <div className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">Técnica:</div>
+                                          <div className="text-sm text-yellow-700 dark:text-yellow-300">{exercise.technique}</div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="space-y-3">
+                                  {workout.exercises && workout.exercises.map((exercise: any, index: number) => (
+                                    <div key={index} className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
                                       {/* Nome do exercício */}
                                       <div className="flex justify-between items-start mb-3">
                                         <h5 className="font-semibold text-lg text-gray-900 dark:text-gray-100">

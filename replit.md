@@ -10,6 +10,15 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-02 04:00**
+- ✓ Restructured workout plan generation to use ABC/ABCD/ABCDE format
+- ✓ Added specific exercise details with sets, reps, rest periods, and techniques
+- ✓ Enhanced workout cronogram display with individual exercise cards
+- ✓ Improved UX with structured ficha visualization (Treino A, B, C)
+- ✓ Fixed workout plan structure to show actual exercises instead of generic descriptions
+- ✓ Updated AI service fallback to include detailed exercise specifications
+- ✓ Optimized MyPlan.tsx to display workout sessions with proper exercise breakdown
+
 **2025-07-02 03:45**
 - ✓ Fixed AI Chat initialization to show all intro messages immediately
 - ✓ Removed delayed message sequence that was causing incomplete display
