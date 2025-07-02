@@ -209,8 +209,9 @@ export default function MyPlan() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 md:pb-6">
       <div className="max-w-6xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="current">Planos Atuais</TabsTrigger>
+            <TabsTrigger value="history">Histórico</TabsTrigger>
             <TabsTrigger value="manual">Criar Plano</TabsTrigger>
           </TabsList>
 
@@ -386,32 +387,32 @@ export default function MyPlan() {
                       {expandedCards.workout && (
                         <div className="border-t pt-4">
                           <h4 className="font-medium mb-4 text-gray-900 dark:text-gray-100">Cronograma de Treinos</h4>
-                          <div className="space-y-6 max-h-96 overflow-y-auto">
+                          <div className="flex overflow-x-auto gap-4 pb-4 max-h-96 snap-x snap-mandatory">
                             {activeWorkoutPlan.meals && 
                              Object.entries(typeof activeWorkoutPlan.meals === 'string' ? JSON.parse(activeWorkoutPlan.meals) : activeWorkoutPlan.meals).map(([workoutLetter, workout]: [string, any]) => (
-                              <div key={workoutLetter} className="bg-slate-700 dark:bg-slate-800 rounded-xl p-5 border border-slate-600">
+                              <div key={workoutLetter} className="flex-shrink-0 w-80 bg-gray-100 dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 snap-start">
                                 <div className="text-center mb-4">
-                                  <h3 className="text-xl font-bold text-white mb-2">
+                                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                                     {workout.name || `Treino ${workoutLetter.toUpperCase()}`}
                                   </h3>
                                   {workout.duration && (
-                                    <div className="text-sm text-slate-300">
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">
                                       Duração: {workout.duration}
                                     </div>
                                   )}
                                 </div>
                                 
-                                <div className="bg-slate-600 dark:bg-slate-700 rounded-lg overflow-hidden">
-                                  <div className="grid grid-cols-2 bg-slate-500 dark:bg-slate-600 text-white font-semibold text-sm">
-                                    <div className="p-3 border-r border-slate-400">Exercício</div>
+                                <div className="bg-white dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                                  <div className="grid grid-cols-2 bg-gray-50 dark:bg-gray-600 text-gray-900 dark:text-gray-100 font-semibold text-sm">
+                                    <div className="p-3 border-r border-gray-200 dark:border-gray-500">Exercício</div>
                                     <div className="p-3 text-center">Séries e Repetições</div>
                                   </div>
                                   {workout.exercises && workout.exercises.map((exercise: any, index: number) => (
-                                    <div key={index} className={`grid grid-cols-2 text-sm ${index % 2 === 0 ? 'bg-slate-600 dark:bg-slate-700' : 'bg-slate-500 dark:bg-slate-600'}`}>
-                                      <div className="p-3 border-r border-slate-400 text-white font-medium">
+                                    <div key={index} className={`grid grid-cols-2 text-sm ${index % 2 === 0 ? 'bg-white dark:bg-gray-700' : 'bg-gray-50 dark:bg-gray-600'}`}>
+                                      <div className="p-3 border-r border-gray-200 dark:border-gray-500 text-gray-900 dark:text-gray-100 font-medium">
                                         {exercise.name || `Exercício ${index + 1}`}
                                       </div>
-                                      <div className="p-3 text-center text-white font-semibold">
+                                      <div className="p-3 text-center text-gray-900 dark:text-gray-100 font-semibold">
                                         {exercise.sets || '4'} × {exercise.reps || '8-10'}
                                       </div>
                                     </div>
@@ -437,6 +438,135 @@ export default function MyPlan() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl">Histórico de Planos</CardTitle>
+                <CardDescription className="text-base">
+                  Visualize e gerencie todos os seus planos anteriores
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {planHistory.length > 0 ? (
+                  <div className="space-y-4">
+                    {/* Navigation controls */}
+                    <div className="flex justify-between items-center mb-6">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentHistoryIndex(prev => Math.max(0, prev - 1))}
+                        disabled={currentHistoryIndex === 0}
+                      >
+                        <ChevronLeft className="w-4 h-4 mr-2" />
+                        Anterior
+                      </Button>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {currentHistoryIndex + 1} de {planHistory.length}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentHistoryIndex(prev => Math.min(planHistory.length - 1, prev + 1))}
+                        disabled={currentHistoryIndex === planHistory.length - 1}
+                      >
+                        Próximo
+                        <ChevronRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
+
+                    {/* Current plan display */}
+                    {planHistory[currentHistoryIndex] && (
+                      <Card className="border-2 border-gray-200 dark:border-gray-700">
+                        <CardHeader>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <CardTitle className="text-lg">
+                                {planHistory[currentHistoryIndex].name}
+                              </CardTitle>
+                              <CardDescription className="mt-1">
+                                {planHistory[currentHistoryIndex].description}
+                              </CardDescription>
+                              <div className="flex gap-2 mt-2">
+                                <Badge variant={isPlanDiet(planHistory[currentHistoryIndex]) ? "default" : "secondary"}>
+                                  {isPlanDiet(planHistory[currentHistoryIndex]) ? "Nutrição" : "Treino"}
+                                </Badge>
+                                {planHistory[currentHistoryIndex].isActive && (
+                                  <Badge variant="outline" className="text-green-700 bg-green-50 border-green-200">
+                                    Ativo
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  Ações
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                {!planHistory[currentHistoryIndex].isActive && (
+                                  <DropdownMenuItem onClick={() => activatePlanMutation.mutate(planHistory[currentHistoryIndex].id)}>
+                                    <RotateCcw className="w-4 h-4 mr-2" />
+                                    Ativar Plano
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem onClick={() => handleExportPlan(planHistory[currentHistoryIndex])}>
+                                  <Download className="w-4 h-4 mr-2" />
+                                  Exportar PDF
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            Criado em: {new Date(planHistory[currentHistoryIndex].createdAt).toLocaleDateString('pt-BR')}
+                          </div>
+                          {isPlanDiet(planHistory[currentHistoryIndex]) && (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                              <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">Calorias</div>
+                                <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
+                                  {planHistory[currentHistoryIndex].dailyCalories}
+                                </div>
+                              </div>
+                              <div className="text-center p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">Proteína</div>
+                                <div className="font-bold text-lg text-green-600 dark:text-green-400">
+                                  {planHistory[currentHistoryIndex].macroProtein}g
+                                </div>
+                              </div>
+                              <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">Carboidratos</div>
+                                <div className="font-bold text-lg text-yellow-600 dark:text-yellow-400">
+                                  {planHistory[currentHistoryIndex].macroCarbs}g
+                                </div>
+                              </div>
+                              <div className="text-center p-3 bg-red-50 dark:bg-red-900/30 rounded-lg">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">Gordura</div>
+                                <div className="font-bold text-lg text-red-600 dark:text-red-400">
+                                  {planHistory[currentHistoryIndex].macroFat}g
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">Nenhum plano no histórico</p>
+                    <p className="text-gray-400 dark:text-gray-500 text-sm">
+                      Crie seu primeiro plano na aba "Criar Plano"
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="manual" className="space-y-6">

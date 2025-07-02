@@ -268,7 +268,31 @@ class AIService {
 
   async generateWorkoutPlan(description: string): Promise<any> {
     try {
-      const prompt = `Você é um personal trainer especializado. Crie um plano de treino em português brasileiro baseado na descrição: "${description}".
+      const prompt = `Você é um Personal Trainer virtual altamente qualificado, com conhecimento profundo em:
+
+• Exercícios de musculação e funcional
+• Anatomia e grupos musculares
+• Prescrição de treinos seguros e eficazes
+• Periodização de treinos e progressão
+
+Seu objetivo é criar planos de treino personalizados utilizando os dados previamente cadastrados pelo usuário.
+
+Diretrizes principais:
+• Utilize sempre os dados já armazenados no cadastro do usuário (considere que o usuário já forneceu informações sobre nível de experiência, objetivo, frequência semanal, histórico de lesões e equipamentos disponíveis)
+• Não solicite novamente estas informações ao usuário
+• Quando gerar o treino, utilize este formato de saída para cada exercício: Nome do exercício / Número de séries / Número de repetições
+
+Exemplo: Supino inclinado / 4 séries / 8-10 repetições
+
+Ao criar o plano:
+• Escolha exercícios adequados ao objetivo e nível
+• Organize os exercícios por grupos musculares (ex.: peito, ombros, tríceps)
+• Sugira quantidades de séries e repetições compatíveis com a meta
+• Inclua variações se necessário (exercícios alternativos)
+• Seja claro, objetivo e profissional
+
+Baseado na seguinte descrição do usuário:
+"${description}"
 
 IMPORTANTE: Use sistema de fichas (A, B, C, D) ao invés de dias da semana.
 
@@ -279,37 +303,31 @@ FORMATO EXATO DA RESPOSTA (JSON válido):
   "type": "workout",
   "workouts": {
     "A": {
-      "name": "Treino A - Peito, Ombro e Tríceps",
+      "name": "Treino A - Push (Peito, Ombro, Tríceps)",
       "exercises": [
-        {"name": "Supino reto", "sets": 4, "reps": "8-12", "rest": "90s"},
-        {"name": "Supino inclinado", "sets": 3, "reps": "10-12", "rest": "60s"},
-        {"name": "Desenvolvimento", "sets": 3, "reps": "8-10", "rest": "90s"},
-        {"name": "Tríceps pulley", "sets": 3, "reps": "12-15", "rest": "45s"}
+        {"name": "Supino inclinado", "sets": 4, "reps": "8-10", "rest": "90s"},
+        {"name": "Desenvolvimento com halteres", "sets": 3, "reps": "8-12", "rest": "60s"}
       ],
       "duration": "60-75 minutos"
     },
     "B": {
-      "name": "Treino B - Costas e Bíceps",
+      "name": "Treino B - Pull (Costas, Bíceps)",
       "exercises": [
-        {"name": "Puxada frontal", "sets": 4, "reps": "8-12", "rest": "90s"},
-        {"name": "Remada curvada", "sets": 3, "reps": "8-10", "rest": "90s"},
-        {"name": "Rosca direta", "sets": 3, "reps": "10-12", "rest": "60s"}
+        {"name": "Puxada frontal", "sets": 4, "reps": "8-12", "rest": "90s"}
       ],
       "duration": "60-75 minutos"
     },
     "C": {
-      "name": "Treino C - Pernas e Glúteos",
+      "name": "Treino C - Legs (Pernas, Glúteos)",
       "exercises": [
-        {"name": "Agachamento", "sets": 4, "reps": "8-12", "rest": "2min"},
-        {"name": "Leg press", "sets": 3, "reps": "12-15", "rest": "90s"},
-        {"name": "Stiff", "sets": 3, "reps": "10-12", "rest": "90s"}
+        {"name": "Agachamento livre", "sets": 4, "reps": "8-12", "rest": "90s"}
       ],
       "duration": "75-90 minutos"
     }
   }
 }
 
-Para iniciantes use ABC, para intermediários/avançados pode usar ABCD. Retorne APENAS o JSON válido.`;
+Crie um plano motivador e profissional adequado ao objetivo do usuário. Para iniciantes use ABC, para intermediários/avançados pode usar ABCD. Retorne APENAS o JSON válido.`;
 
       const response = await fetch(`${this.baseUrl}/models/gemini-1.5-flash:generateContent?key=${this.geminiApiKey}`, {
         method: 'POST',
