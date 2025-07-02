@@ -10,6 +10,13 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-02 05:20**
+- ✓ Modified AI chat responses to send multiple short messages without formatting symbols
+- ✓ Removed all markdown formatting (*, **, _, bullets, etc.) from AI responses
+- ✓ Implemented intelligent text splitting - responses divided into ~100 character chunks
+- ✓ Enhanced response processing to filter out formatting and create natural conversation flow
+- ✓ Updated AI system prompt to avoid symbols and maintain conversational short responses
+
 **2025-07-02 05:03**
 - ✓ Fixed nutrition cronogram to show proper weekdays (Segunda-feira, Terça-feira, etc.)
 - ✓ Expanded fallback nutrition plan to include all 7 days of the week
