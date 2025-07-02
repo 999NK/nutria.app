@@ -101,7 +101,7 @@ export default function AiChat() {
               timestamp: new Date(),
             };
             setMessages((prev) => [...prev, assistantMessage]);
-          }, index * 500);
+          }, index * 1000);
         });
       } else {
         // Single message or first message of array

@@ -87,7 +87,7 @@ class AIService {
               {
                 parts: [
                   {
-                    text: "Você é um nutricionista virtual brasileiro. Responda de forma completa e informativa, mas será dividido em várias mensagens curtas. Use o perfil do usuário para personalizar. REGRAS: 1) NUNCA use símbolos (*, **, _, ~, hífen, bullets). 2) Responda de forma conversacional. 3) Dê informações úteis e práticas. 4) Seja educativo mas objetivo. 5) Forneça dicas específicas baseadas no perfil.",
+                    text: "Você é um nutricionista virtual brasileiro. Responda de forma RESUMIDA e organizada por tópicos separados. Use o perfil do usuário para personalizar. REGRAS: 1) NUNCA use símbolos (*, **, _, ~, hífen, bullets). 2) Seja conciso e direto. 3) Organize resposta em tópicos distintos. 4) Cada tópico deve ser uma ideia completa. 5) Máximo 3-4 tópicos por resposta. 6) Use quebras de linha duplas entre tópicos diferentes.",
                   },
                 ],
                 role: "user",
@@ -115,7 +115,7 @@ class AIService {
             ],
             generationConfig: {
               temperature: 0.7,
-              maxOutputTokens: 600, // Aumentado para permitir mais conteúdo dividido
+              maxOutputTokens: 400, // Reduzido para respostas mais concisas
             },
           }),
         },
@@ -168,57 +168,40 @@ class AIService {
       .replace(/>/g, "") // Remove citações >
       .trim();
 
-    // 2. Dividir em mensagens conversacionais (60-120 caracteres)
+    // 2. Dividir por tópicos/parágrafos naturais
     let parts: string[] = [];
-    const sentences = cleanedResponse.split(/(?<=[.!?])\s+/);
     
-    let currentPart = "";
+    // Primeiro, dividir por quebras de linha duplas (parágrafos)
+    const paragraphs = cleanedResponse.split(/\n\s*\n/);
     
-    for (const sentence of sentences) {
-      const nextLength = currentPart.length + (currentPart ? 1 : 0) + sentence.length;
+    if (paragraphs.length > 1) {
+      // Se já tem parágrafos, usar eles como base
+      parts = paragraphs.map(p => p.trim()).filter(p => p.length > 0);
+    } else {
+      // Se não tem parágrafos, dividir por frases completas mantendo tópicos juntos
+      const sentences = cleanedResponse.split(/(?<=[.!?])\s+/);
+      let currentTopic = "";
       
-      // Se adicionar esta frase ultrapassaria 120 caracteres ou se já temos 60+ caracteres
-      if ((nextLength > 120) || (currentPart.length >= 60 && nextLength > 90)) {
-        if (currentPart.trim()) {
-          parts.push(currentPart.trim());
+      for (const sentence of sentences) {
+        // Se a frase menciona um novo tópico ou é muito diferente, inicia nova mensagem
+        const isNewTopic = sentence.match(/^(Primeiro|Segundo|Terceiro|Além disso|Por outro lado|Importante|Lembre-se|Dica|Atenção)/i);
+        const isLongEnough = currentTopic.length > 80;
+        
+        if (isNewTopic && currentTopic.length > 0) {
+          parts.push(currentTopic.trim());
+          currentTopic = sentence;
+        } else if (isLongEnough && currentTopic.length + sentence.length > 200) {
+          parts.push(currentTopic.trim());
+          currentTopic = sentence;
+        } else {
+          currentTopic += (currentTopic ? " " : "") + sentence;
         }
-        currentPart = sentence;
-      } else {
-        currentPart += (currentPart ? " " : "") + sentence;
+      }
+      
+      if (currentTopic.trim()) {
+        parts.push(currentTopic.trim());
       }
     }
-    
-    // Adiciona a última parte se existir
-    if (currentPart.trim()) {
-      parts.push(currentPart.trim());
-    }
-
-    // 3. Se ainda tiver partes longas, dividir por vírgulas para mensagens menores
-    parts = parts.flatMap((part) => {
-      if (part.length > 130) {
-        const subParts = part.split(/[,:;]\s+/);
-        let result: string[] = [];
-        let current = "";
-        
-        for (const subPart of subParts) {
-          const nextLength = current.length + (current ? 2 : 0) + subPart.length;
-          
-          if (nextLength > 120 && current.length > 0) {
-            result.push(current.trim());
-            current = subPart;
-          } else {
-            current += (current ? ", " : "") + subPart;
-          }
-        }
-        
-        if (current.trim()) {
-          result.push(current.trim());
-        }
-        
-        return result.length > 0 ? result : [part];
-      }
-      return [part];
-    });
 
     // 4. Filtrar partes vazias e muito curtas
     parts = parts
