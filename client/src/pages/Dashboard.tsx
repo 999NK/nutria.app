@@ -321,7 +321,7 @@ export default function Dashboard() {
           
           {(workoutPlan || nutritionPlan) ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Treino do Dia */}
+              {/* Treino de Hoje */}
               {workoutPlan && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
@@ -337,21 +337,72 @@ export default function Dashboard() {
                   </div>
                   
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plano ativo</span>
-                      <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
-                        Ver detalhes
-                      </Button>
-                    </div>
-                    <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                      <div>💪 Plano de Treino</div>
-                      <div>📋 {workoutPlan.description}</div>
-                    </div>
+                    {(() => {
+                      try {
+                        // Parse workout data to extract today's specific workout
+                        const workoutData = workoutPlan.meals ? JSON.parse(workoutPlan.meals) : {};
+                        const workouts = workoutData.workouts || workoutData;
+                        
+                        // Get today's workout (A, B, or C rotation)
+                        const dayOfWeek = new Date().getDay(); // 0=Sunday, 1=Monday, etc.
+                        const workoutKeys = Object.keys(workouts);
+                        const todayWorkoutKey = workoutKeys[dayOfWeek % workoutKeys.length];
+                        const todayWorkout = workouts[todayWorkoutKey];
+                        
+                        if (todayWorkout && todayWorkout.name && todayWorkout.exercises) {
+                          return (
+                            <>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium text-blue-700 dark:text-blue-400">{todayWorkout.name}</span>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
+                                    Próximo: {workoutKeys[(workoutKeys.indexOf(todayWorkoutKey) + 1) % workoutKeys.length]}
+                                  </Button>
+                                </div>
+                              </div>
+                              <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                                {todayWorkout.exercises.slice(0, 3).map((exercise: any, index: number) => (
+                                  <div key={index} className="flex justify-between">
+                                    <span>• {exercise.name}</span>
+                                    <span className="text-blue-600 dark:text-blue-400">
+                                      {exercise.sets}x{exercise.reps}
+                                    </span>
+                                  </div>
+                                ))}
+                                {todayWorkout.exercises.length > 3 && (
+                                  <div className="text-xs text-gray-500 italic">
+                                    +{todayWorkout.exercises.length - 3} exercícios
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          );
+                        }
+                      } catch (error) {
+                        console.log('Error parsing workout data:', error);
+                      }
+                      
+                      // Fallback to original display
+                      return (
+                        <>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plano ativo</span>
+                            <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
+                              Ver detalhes
+                            </Button>
+                          </div>
+                          <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                            <div>💪 Plano de Treino</div>
+                            <div>📋 {workoutPlan.description}</div>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
 
-              {/* Nutrição do Dia */}
+              {/* Dieta do Dia */}
               {nutritionPlan && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
@@ -361,7 +412,7 @@ export default function Dashboard() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900 dark:text-gray-100">Nutrição de Hoje</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100">Dieta do Dia</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">{nutritionPlan.name}</p>
                     </div>
                   </div>
@@ -390,44 +441,6 @@ export default function Dashboard() {
                   </div>
                 </div>
               )}
-
-              {/* Informações do Plano */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-100 dark:bg-green-800">
-                    <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100">Seu Plano Atual</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Planos ativos {(nutritionPlan && workoutPlan) ? '(Nutrição + Treino)' : (nutritionPlan ? '(Nutrição)' : '(Treino)')}</p>
-                  </div>
-                </div>
-                
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Resumo do plano</span>
-                    <Button variant="ghost" size="sm" className="h-auto p-1 text-xs" onClick={() => setLocation('/my-plan')}>
-                      Ver completo
-                    </Button>
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
-                    {nutritionPlan && workoutPlan ? (
-                      <div className="space-y-1">
-                        <p>💪 Treino: {workoutPlan.name}</p>
-                        <p>🍽️ Nutrição: {nutritionPlan.name}</p>
-                      </div>
-                    ) : nutritionPlan ? (
-                      <p>🍽️ {nutritionPlan.description || nutritionPlan.name}</p>
-                    ) : workoutPlan ? (
-                      <p>💪 {workoutPlan.description || workoutPlan.name}</p>
-                    ) : (
-                      <p>Plano personalizado baseado nos seus objetivos</p>
-                    )}
-                  </div>
-                </div>
-              </div>
             </div>
           ) : (
             <div className="text-center py-8">

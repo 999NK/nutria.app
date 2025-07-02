@@ -182,7 +182,7 @@ export default function AiChat() {
     <div className="flex flex-col h-full pb-20">{/* Space for bottom navigation */}
 
       {/* Chat Messages Container */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 pb-40 md:pb-32">
         {messages.map((message) => (
           <div
             key={message.id}

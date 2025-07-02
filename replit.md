@@ -10,6 +10,16 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-02 03:40**
+- ✓ Removed floating + button from mobile pages (no longer needed for food addition)
+- ✓ Fixed chat input overlapping content in AI Chat page
+- ✓ Simplified Dashboard "Hoje no seu Plano" card - removed "Seu plano atual" section
+- ✓ Changed "Nutrição de Hoje" to "Dieta do Dia" throughout Dashboard
+- ✓ Enhanced workout display to show specific exercises (e.g., "Treino A - Push")
+- ✓ Added exercise details with sets/reps (e.g., "Supino reto 4x8-12")
+- ✓ Implemented workout navigation showing next session (A > B > C > A)
+- ✓ Replaced generic workout descriptions with structured exercise lists
+
 **2025-07-02 03:30**
 - ✓ Fixed AI Chat page header to use standard NutrIA layout
 - ✓ Removed custom dark header that appeared incorrectly in light mode  
