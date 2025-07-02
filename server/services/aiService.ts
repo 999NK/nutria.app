@@ -87,7 +87,7 @@ class AIService {
               {
                 parts: [
                   {
-                    text: "Você é um nutricionista virtual especializado em alimentação brasileira. Responda de forma direta e focada na pergunta específica do usuário. REGRAS IMPORTANTES: 1) NUNCA use símbolos de formatação (*, **, _, ~, hífen, bullets). 2) Seja objetivo e direto, responda exatamente o que foi perguntado. 3) Use o perfil do usuário para personalizar a resposta. 4) Mantenha respostas concisas, máximo 300 caracteres por resposta completa. 5) Se precisar dar informações adicionais, seja breve e relevante. 6) Foque no assunto principal da pergunta sem desviar para tópicos gerais.",
+                    text: "Você é um nutricionista virtual especializado em alimentação brasileira. Sempre considere o perfil do usuário (peso, altura, idade, objetivo, nível de atividade, metas nutricionais) ao dar conselhos personalizados. REGRAS IMPORTANTES: 1) NUNCA use símbolos de formatação (*, **, _, ~, hífen, bullets). 2) Responda com informações completas e úteis baseadas no perfil do usuário. 3) Divida respostas longas em partes de até 120 caracteres cada. 4) Cada parte deve ser uma informação completa e útil. 5) Continue automaticamente enviando as próximas partes sem aguardar confirmação. 6) Use as informações do perfil para dar conselhos específicos e personalizados.",
                   },
                 ],
                 role: "user",
@@ -115,7 +115,7 @@ class AIService {
             ],
             generationConfig: {
               temperature: 0.7,
-              maxOutputTokens: 400, // Reduzido para respostas mais focadas e concisas
+              maxOutputTokens: 800, // Aumentado para respostas mais completas
             },
           }),
         },
@@ -168,7 +168,7 @@ class AIService {
       .replace(/>/g, "") // Remove citações >
       .trim();
 
-    // 2. Dividir em mensagens menores (máximo 80 caracteres por mensagem)
+    // 2. Dividir em frases de tamanho ideal (80-140 caracteres)
     let parts: string[] = [];
     const sentences = cleanedResponse.split(/(?<=[.!?])\s+/);
     
@@ -177,9 +177,11 @@ class AIService {
     for (const sentence of sentences) {
       const nextLength = currentPart.length + (currentPart ? 1 : 0) + sentence.length;
       
-      // Se adicionar esta frase ultrapassaria 80 caracteres, criar nova parte
-      if (nextLength > 80 && currentPart.length > 0) {
-        parts.push(currentPart.trim());
+      // Se adicionar esta frase ultrapassaria 140 caracteres ou se já temos 80+ caracteres
+      if ((nextLength > 140) || (currentPart.length >= 80 && nextLength > 80)) {
+        if (currentPart.trim()) {
+          parts.push(currentPart.trim());
+        }
         currentPart = sentence;
       } else {
         currentPart += (currentPart ? " " : "") + sentence;
@@ -191,17 +193,17 @@ class AIService {
       parts.push(currentPart.trim());
     }
 
-    // 3. Se ainda tiver partes longas, dividir por vírgulas
+    // 3. Se ainda tiver partes muito longas, dividir por vírgulas ou dois pontos
     parts = parts.flatMap((part) => {
-      if (part.length > 80) {
-        const subParts = part.split(/,\s+/);
+      if (part.length > 150) {
+        const subParts = part.split(/[,:;]\s+/);
         let result: string[] = [];
         let current = "";
         
         for (const subPart of subParts) {
           const nextLength = current.length + (current ? 2 : 0) + subPart.length;
           
-          if (nextLength > 80 && current.length > 0) {
+          if (nextLength > 140 && current.length > 0) {
             result.push(current.trim());
             current = subPart;
           } else {
