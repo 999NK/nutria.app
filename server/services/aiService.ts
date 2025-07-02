@@ -87,7 +87,7 @@ class AIService {
               {
                 parts: [
                   {
-                    text: "Você é um nutricionista virtual brasileiro. Responda à pergunta de forma OBJETIVA mas pode argumentar naturalmente. Use o perfil do usuário para personalizar. REGRAS: 1) NUNCA use símbolos (*, **, _, ~, hífen, bullets). 2) Foque na pergunta mas pode explicar o porquê. 3) Divida em 2-3 tópicos relacionados à pergunta. 4) Seja conversacional e natural. 5) Use quebras de linha duplas entre tópicos. 6) Argumente de forma educativa mas concisa.",
+                    text: "Você é um nutricionista virtual brasileiro. Responda de forma CONCISA e DIRETA com explicações breves. Use o perfil do usuário para personalizar. REGRAS: 1) NUNCA use símbolos (*, **, _, ~, hífen, bullets). 2) Máximo 2-3 frases por parágrafo. 3) Use quebras de linha duplas entre tópicos. 4) Seja educativo mas muito breve. 5) Explique o essencial sem detalhes excessivos. 6) Foque no que realmente importa para a pergunta.",
                   },
                 ],
                 role: "user",
@@ -115,7 +115,7 @@ class AIService {
             ],
             generationConfig: {
               temperature: 0.7,
-              maxOutputTokens: 350, // Aumentado para permitir argumentação natural
+              maxOutputTokens: 280, // Reduzido para mensagens mais curtas
             },
           }),
         },
@@ -168,38 +168,56 @@ class AIService {
       .replace(/>/g, "") // Remove citações >
       .trim();
 
-    // 2. Dividir por tópicos/parágrafos naturais
+    // 2. Dividir em mensagens curtas e naturais
     let parts: string[] = [];
     
     // Primeiro, dividir por quebras de linha duplas (parágrafos)
     const paragraphs = cleanedResponse.split(/\n\s*\n/);
     
     if (paragraphs.length > 1) {
-      // Se já tem parágrafos, usar eles como base
-      parts = paragraphs.map(p => p.trim()).filter(p => p.length > 0);
+      // Se já tem parágrafos, dividir cada parágrafo em pedaços menores se necessário
+      for (const paragraph of paragraphs) {
+        const trimmedParagraph = paragraph.trim();
+        if (trimmedParagraph.length === 0) continue;
+        
+        if (trimmedParagraph.length <= 150) {
+          parts.push(trimmedParagraph);
+        } else {
+          // Dividir parágrafo longo em frases menores
+          const sentences = trimmedParagraph.split(/(?<=[.!?])\s+/);
+          let currentPart = "";
+          
+          for (const sentence of sentences) {
+            if (currentPart.length + sentence.length > 150 && currentPart.length > 0) {
+              parts.push(currentPart.trim());
+              currentPart = sentence;
+            } else {
+              currentPart += (currentPart ? " " : "") + sentence;
+            }
+          }
+          
+          if (currentPart.trim()) {
+            parts.push(currentPart.trim());
+          }
+        }
+      }
     } else {
-      // Se não tem parágrafos, dividir por frases completas mantendo tópicos juntos
+      // Se não tem parágrafos, dividir por frases mantendo tamanho controlado
       const sentences = cleanedResponse.split(/(?<=[.!?])\s+/);
-      let currentTopic = "";
+      let currentPart = "";
       
       for (const sentence of sentences) {
-        // Se a frase menciona um novo tópico ou é muito diferente, inicia nova mensagem
-        const isNewTopic = sentence.match(/^(Primeiro|Segundo|Terceiro|Além disso|Por outro lado|Importante|Lembre-se|Dica|Atenção)/i);
-        const isLongEnough = currentTopic.length > 80;
-        
-        if (isNewTopic && currentTopic.length > 0) {
-          parts.push(currentTopic.trim());
-          currentTopic = sentence;
-        } else if (isLongEnough && currentTopic.length + sentence.length > 200) {
-          parts.push(currentTopic.trim());
-          currentTopic = sentence;
+        // Limitar cada mensagem a ~150 caracteres
+        if (currentPart.length + sentence.length > 150 && currentPart.length > 0) {
+          parts.push(currentPart.trim());
+          currentPart = sentence;
         } else {
-          currentTopic += (currentTopic ? " " : "") + sentence;
+          currentPart += (currentPart ? " " : "") + sentence;
         }
       }
       
-      if (currentTopic.trim()) {
-        parts.push(currentTopic.trim());
+      if (currentPart.trim()) {
+        parts.push(currentPart.trim());
       }
     }
 
