@@ -43,7 +43,9 @@ export default function Router() {
         <Route path="/my-plan" component={MyPlan} />
         <Route path="/progress" component={Progress} />
         <Route path="/profile" component={Profile} />
-        <Route path="/ai-chat" component={AiChat} />
+        <Route path="/ai-chat">
+          <AiChat />
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </Layout>
