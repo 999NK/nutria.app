@@ -100,15 +100,17 @@ class AIService {
                 ],
                 role: "model",
               },
-              // Add chat history
-              ...chatHistory.map((msg) => ({
-                parts: [{ text: msg.content }],
-                role: msg.role,
-              })),
+              // Add chat history - only if valid
+              ...chatHistory
+                .filter((msg) => msg && msg.content && typeof msg.content === 'string' && msg.role)
+                .map((msg) => ({
+                  parts: [{ text: msg.content }],
+                  role: msg.role === 'user' ? 'user' : 'model',
+                })),
               // Current user message
               {
                 parts: [{ text: message }],
-                role: "user" as const,
+                role: "user",
               },
             ],
             generationConfig: {

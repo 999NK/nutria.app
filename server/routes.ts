@@ -889,8 +889,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         response = await aiService.getChatResponse(message, userHistory);
       }
       
-      // Add AI response to history
-      addToChatHistory(userId, 'model', response);
+      // Add AI response to history - handle both string and array responses
+      const responseText = Array.isArray(response) ? response.join(' ') : response;
+      addToChatHistory(userId, 'model', responseText);
       
       res.json({ response });
     } catch (error) {
