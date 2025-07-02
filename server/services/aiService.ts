@@ -573,6 +573,7 @@ REGRAS OBRIGATÓRIAS - SIGA RIGOROSAMENTE:
               breakfast: { 
                 name: "Café da Manhã", 
                 description: "2 ovos mexidos + 2 fatias de pão integral + 1 banana",
+                time: "07:00",
                 calories: Math.round(targetCalories * 0.25),
                 protein: Math.round(targetProtein * 0.25),
                 carbs: Math.round(targetCarbs * 0.25),
@@ -582,15 +583,17 @@ REGRAS OBRIGATÓRIAS - SIGA RIGOROSAMENTE:
               lunch: { 
                 name: "Almoço", 
                 description: "150g arroz + 100g feijão + 120g peito de frango + salada verde",
+                time: "12:00",
                 calories: Math.round(targetCalories * 0.35),
                 protein: Math.round(targetProtein * 0.35),
                 carbs: Math.round(targetCarbs * 0.35),
                 fat: Math.round(targetFat * 0.35),
                 ingredients: ["arroz", "feijão", "frango", "alface", "tomate"]
               },
-              snack: { 
+              lanche: { 
                 name: "Lanche", 
                 description: "1 iogurte grego + granola",
+                time: "15:00",
                 calories: Math.round(targetCalories * 0.15),
                 protein: Math.round(targetProtein * 0.15),
                 carbs: Math.round(targetCarbs * 0.15),
@@ -600,6 +603,7 @@ REGRAS OBRIGATÓRIAS - SIGA RIGOROSAMENTE:
               dinner: { 
                 name: "Jantar", 
                 description: "120g salmão grelhado + batata doce + brócolis",
+                time: "19:00",
                 calories: Math.round(targetCalories * 0.25),
                 protein: Math.round(targetProtein * 0.25),
                 carbs: Math.round(targetCarbs * 0.25),
@@ -649,11 +653,11 @@ REGRAS OBRIGATÓRIAS - SIGA RIGOROSAMENTE:
                 ingredients: ["tilápia", "quinoa", "abobrinha", "cenoura"]
               }
             },
-            // Adicionar os outros dias da semana seguindo o mesmo padrão...
             quarta: {
               breakfast: { 
                 name: "Café da Manhã", 
                 description: "Tapioca com queijo e presunto + suco natural",
+                time: "07:00",
                 calories: Math.round(targetCalories * 0.25),
                 protein: Math.round(targetProtein * 0.25),
                 carbs: Math.round(targetCarbs * 0.25),
@@ -663,15 +667,17 @@ REGRAS OBRIGATÓRIAS - SIGA RIGOROSAMENTE:
               lunch: { 
                 name: "Almoço", 
                 description: "Arroz integral + lentilha + bife grelhado + salada",
+                time: "12:00",
                 calories: Math.round(targetCalories * 0.35),
                 protein: Math.round(targetProtein * 0.35),
                 carbs: Math.round(targetCarbs * 0.35),
                 fat: Math.round(targetFat * 0.35),
                 ingredients: ["arroz integral", "lentilha", "bife", "rúcula"]
               },
-              snack: { 
+              lanche: { 
                 name: "Lanche", 
                 description: "Castanhas + frutas secas",
+                time: "15:00",
                 calories: Math.round(targetCalories * 0.15),
                 protein: Math.round(targetProtein * 0.15),
                 carbs: Math.round(targetCarbs * 0.15),
@@ -681,11 +687,180 @@ REGRAS OBRIGATÓRIAS - SIGA RIGOROSAMENTE:
               dinner: { 
                 name: "Jantar", 
                 description: "Omelete de claras + batata doce + espinafre",
+                time: "19:00",
                 calories: Math.round(targetCalories * 0.25),
                 protein: Math.round(targetProtein * 0.25),
                 carbs: Math.round(targetCarbs * 0.25),
                 fat: Math.round(targetFat * 0.25),
                 ingredients: ["claras", "batata doce", "espinafre"]
+              }
+            },
+            quinta: {
+              breakfast: { 
+                name: "Café da Manhã", 
+                description: "Pão francês + requeijão + café com leite",
+                time: "07:00",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["pão francês", "requeijão", "leite"]
+              },
+              lunch: { 
+                name: "Almoço", 
+                description: "Batata + carne de panela + refogado de couve",
+                time: "12:00",
+                calories: Math.round(targetCalories * 0.35),
+                protein: Math.round(targetProtein * 0.35),
+                carbs: Math.round(targetCarbs * 0.35),
+                fat: Math.round(targetFat * 0.35),
+                ingredients: ["batata", "carne", "couve"]
+              },
+              lanche: { 
+                name: "Lanche", 
+                description: "Sanduíche natural + suco de frutas",
+                time: "15:00",
+                calories: Math.round(targetCalories * 0.15),
+                protein: Math.round(targetProtein * 0.15),
+                carbs: Math.round(targetCarbs * 0.15),
+                fat: Math.round(targetFat * 0.15),
+                ingredients: ["pão integral", "peito de peru", "alface"]
+              },
+              dinner: { 
+                name: "Jantar", 
+                description: "Peixe assado + arroz + salada de beterraba",
+                time: "19:00",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["peixe", "arroz", "beterraba"]
+              }
+            },
+            sexta: {
+              breakfast: { 
+                name: "Café da Manhã", 
+                description: "Vitamina de banana + aveia + mel",
+                time: "07:00",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["banana", "aveia", "leite", "mel"]
+              },
+              lunch: { 
+                name: "Almoço", 
+                description: "Feijoada light + arroz + couve + laranja",
+                time: "12:00",
+                calories: Math.round(targetCalories * 0.35),
+                protein: Math.round(targetProtein * 0.35),
+                carbs: Math.round(targetCarbs * 0.35),
+                fat: Math.round(targetFat * 0.35),
+                ingredients: ["feijão preto", "carne magra", "arroz", "couve"]
+              },
+              lanche: { 
+                name: "Lanche", 
+                description: "Biscoito integral + chá verde",
+                time: "15:00",
+                calories: Math.round(targetCalories * 0.15),
+                protein: Math.round(targetProtein * 0.15),
+                carbs: Math.round(targetCarbs * 0.15),
+                fat: Math.round(targetFat * 0.15),
+                ingredients: ["biscoito integral", "chá verde"]
+              },
+              dinner: { 
+                name: "Jantar", 
+                description: "Frango desfiado + mandioca + legumes",
+                time: "19:00",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["frango", "mandioca", "vagem", "cenoura"]
+              }
+            },
+            sabado: {
+              breakfast: { 
+                name: "Café da Manhã", 
+                description: "Panqueca de aveia + frutas vermelhas",
+                time: "07:00",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["aveia", "ovos", "morango", "mirtilo"]
+              },
+              lunch: { 
+                name: "Almoço", 
+                description: "Risotto de camarão + salada verde",
+                time: "12:00",
+                calories: Math.round(targetCalories * 0.35),
+                protein: Math.round(targetProtein * 0.35),
+                carbs: Math.round(targetCarbs * 0.35),
+                fat: Math.round(targetFat * 0.35),
+                ingredients: ["arroz arbóreo", "camarão", "rúcula", "tomate"]
+              },
+              lanche: { 
+                name: "Lanche", 
+                description: "Açaí na tigela + granola",
+                time: "15:00",
+                calories: Math.round(targetCalories * 0.15),
+                protein: Math.round(targetProtein * 0.15),
+                carbs: Math.round(targetCarbs * 0.15),
+                fat: Math.round(targetFat * 0.15),
+                ingredients: ["açaí", "granola", "banana"]
+              },
+              dinner: { 
+                name: "Jantar", 
+                description: "Pizza integral caseira + salada",
+                time: "19:00",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["massa integral", "queijo", "tomate", "manjericão"]
+              }
+            },
+            domingo: {
+              breakfast: { 
+                name: "Café da Manhã", 
+                description: "Torrada integral + abacate + café",
+                time: "07:00",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["pão integral", "abacate", "café"]
+              },
+              lunch: { 
+                name: "Almoço", 
+                description: "Churrasco magro + farofa + vinagrete",
+                time: "12:00",
+                calories: Math.round(targetCalories * 0.35),
+                protein: Math.round(targetProtein * 0.35),
+                carbs: Math.round(targetCarbs * 0.35),
+                fat: Math.round(targetFat * 0.35),
+                ingredients: ["picanha magra", "farinha de mandioca", "tomate", "cebola"]
+              },
+              lanche: { 
+                name: "Lanche", 
+                description: "Sorvete de frutas + castanhas",
+                time: "15:00",
+                calories: Math.round(targetCalories * 0.15),
+                protein: Math.round(targetProtein * 0.15),
+                carbs: Math.round(targetCarbs * 0.15),
+                fat: Math.round(targetFat * 0.15),
+                ingredients: ["sorvete natural", "castanhas"]
+              },
+              dinner: { 
+                name: "Jantar", 
+                description: "Sopa de legumes + pão integral",
+                time: "19:00",
+                calories: Math.round(targetCalories * 0.25),
+                protein: Math.round(targetProtein * 0.25),
+                carbs: Math.round(targetCarbs * 0.25),
+                fat: Math.round(targetFat * 0.25),
+                ingredients: ["abóbora", "cenoura", "chuchu", "pão integral"]
               }
             }
           })

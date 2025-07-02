@@ -10,6 +10,14 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-02 05:03**
+- ✓ Fixed nutrition cronogram to show proper weekdays (Segunda-feira, Terça-feira, etc.)
+- ✓ Expanded fallback nutrition plan to include all 7 days of the week
+- ✓ Reorganized nutrition layout - kcal and protein values now appear as badges below
+- ✓ Enhanced nutrition prompt with strict requirements for exact macro targets
+- ✓ Added time fields to all meal entries (07:00, 12:00, 15:00, 19:00)
+- ✓ Corrected meal keys from "snack" to "lanche" throughout the system
+
 **2025-07-02 04:50**
 - ✓ Fixed layout alignment in plan cards (nutrition and workout)
 - ✓ Reduced button sizes for better proportions (h-8, px-3, text-xs)
