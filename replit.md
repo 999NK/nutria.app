@@ -10,6 +10,14 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-02 03:30**
+- ✓ Fixed AI Chat page header to use standard NutrIA layout
+- ✓ Removed custom dark header that appeared incorrectly in light mode  
+- ✓ Added proper page title "Assistente Nutricional" in desktop header
+- ✓ Integrated AI Chat page with standard Layout component
+- ✓ Fixed responsive design consistency across all pages
+- ✓ Maintained chat functionality while using proper UI patterns
+
 **2025-07-01 23:30**
 - ✓ Added meal times to nutrition schedules (07:00, 12:00, 15:00, 19:00)
 - ✓ Replaced "snack" with "Lanche" throughout the system

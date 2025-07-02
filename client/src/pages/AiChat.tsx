@@ -179,23 +179,7 @@ export default function AiChat() {
   }
 
   return (
-    <div className="flex flex-col h-full pb-20">
-      {/* Subtítulo do Assistente Nutricional */}
-      <div className="px-4 py-3 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-            <Brain className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              Assistente Nutricional
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Tire suas dúvidas sobre nutrição e alimentação
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-col h-full pb-20">{/* Space for bottom navigation */}
 
       {/* Chat Messages Container */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">

@@ -133,7 +133,7 @@ function getPageTitle(pathname: string): string {
     '/add-meal': 'Adicionar Refeição',
     '/my-plan': 'Meu Plano',
     '/progress': 'Progresso',
-    '/ai-chat': 'Chat IA',
+    '/ai-chat': 'Assistente Nutricional',
     '/profile': 'Perfil'
   };
   return titles[pathname] || 'NutrIA';
