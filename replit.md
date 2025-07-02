@@ -10,6 +10,14 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
+**2025-07-02 18:20**
+- ✓ Made AI chat responses more objective and direct - answers only what was asked
+- ✓ Reduced message size to 40-80 characters for natural conversation flow
+- ✓ Updated system prompt to be concise and practical instead of verbose
+- ✓ Reduced maxOutputTokens to 300 for shorter, more focused responses
+- ✓ Enhanced text splitting algorithm to create smaller, conversational messages
+- ✓ AI now responds like natural chat instead of long paragraphs
+
 **2025-07-02 05:30**
 - ✓ Implemented personalized AI chat responses based on user profile characteristics
 - ✓ AI now considers weight, height, age, goals, activity level, and nutrition targets in all responses
