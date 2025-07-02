@@ -87,7 +87,7 @@ class AIService {
               {
                 parts: [
                   {
-                    text: "Você é um nutricionista virtual brasileiro. Responda de forma CONCISA e DIRETA com explicações breves. Use o perfil do usuário para personalizar. REGRAS: 1) NUNCA use símbolos (*, **, _, ~, hífen, bullets). 2) Máximo 2-3 frases por parágrafo. 3) Use quebras de linha duplas entre tópicos. 4) Seja educativo mas muito breve. 5) Explique o essencial sem detalhes excessivos. 6) Foque no que realmente importa para a pergunta.",
+                    text: "Você é um nutricionista virtual brasileiro. Responda APENAS o que foi perguntado de forma DIRETA e RELEVANTE. Use o perfil do usuário para personalizar. REGRAS: 1) NUNCA use símbolos (*, **, _, ~, hífen, bullets). 2) Responda somente informações relacionadas à pergunta específica. 3) Máximo 2 frases por tópico. 4) Use quebras de linha duplas entre tópicos. 5) NÃO adicione dicas gerais não relacionadas. 6) Seja extremamente relevante e conectado ao assunto perguntado.",
                   },
                 ],
                 role: "user",
@@ -115,7 +115,7 @@ class AIService {
             ],
             generationConfig: {
               temperature: 0.7,
-              maxOutputTokens: 280, // Reduzido para mensagens mais curtas
+              maxOutputTokens: 200, // Reduzido ainda mais para evitar informações desconexas
             },
           }),
         },
@@ -168,19 +168,26 @@ class AIService {
       .replace(/>/g, "") // Remove citações >
       .trim();
 
-    // 2. Dividir em mensagens curtas e naturais
+    // 2. Dividir em mensagens curtas e conectadas ao tópico principal
     let parts: string[] = [];
     
     // Primeiro, dividir por quebras de linha duplas (parágrafos)
     const paragraphs = cleanedResponse.split(/\n\s*\n/);
     
     if (paragraphs.length > 1) {
-      // Se já tem parágrafos, dividir cada parágrafo em pedaços menores se necessário
+      // Se já tem parágrafos, filtrar apenas os relevantes e dividir se necessário
       for (const paragraph of paragraphs) {
         const trimmedParagraph = paragraph.trim();
         if (trimmedParagraph.length === 0) continue;
         
-        if (trimmedParagraph.length <= 150) {
+        // Filtrar parágrafos que parecem desconexos ou genéricos demais
+        const isGenericAdvice = /^(lembre|observe|atenção|dica|importante)/i.test(trimmedParagraph);
+        const isOffTopic = /urina|fezes|sono|exercício físico/i.test(trimmedParagraph) && 
+                          !/água|hidratação|líquido/i.test(trimmedParagraph);
+        
+        if (isGenericAdvice || isOffTopic) continue;
+        
+        if (trimmedParagraph.length <= 120) {
           parts.push(trimmedParagraph);
         } else {
           // Dividir parágrafo longo em frases menores
@@ -188,7 +195,7 @@ class AIService {
           let currentPart = "";
           
           for (const sentence of sentences) {
-            if (currentPart.length + sentence.length > 150 && currentPart.length > 0) {
+            if (currentPart.length + sentence.length > 120 && currentPart.length > 0) {
               parts.push(currentPart.trim());
               currentPart = sentence;
             } else {
@@ -207,8 +214,8 @@ class AIService {
       let currentPart = "";
       
       for (const sentence of sentences) {
-        // Limitar cada mensagem a ~150 caracteres
-        if (currentPart.length + sentence.length > 150 && currentPart.length > 0) {
+        // Limitar cada mensagem a ~120 caracteres
+        if (currentPart.length + sentence.length > 120 && currentPart.length > 0) {
           parts.push(currentPart.trim());
           currentPart = sentence;
         } else {

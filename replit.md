@@ -10,13 +10,13 @@ A comprehensive nutrition tracking mobile application called "NutrIA" for Brazil
 - Features: AI-powered nutrition assistance and recipe generation
 
 ## Recent Changes
-**2025-07-02 19:12**
-- ✓ Fixed AI message length by limiting each message to maximum 150 characters
-- ✓ Enhanced text splitting to break long paragraphs into smaller digestible parts
-- ✓ Updated prompt to generate concise responses with maximum 2-3 sentences per topic
-- ✓ Reduced token limit to 280 to force shorter, more focused responses
-- ✓ AI now sends brief educational explanations without excessive detail
-- ✓ Messages now appear in quick succession with manageable content size
+**2025-07-02 19:15**
+- ✓ Fixed AI responses to stay strictly relevant to the specific question asked
+- ✓ Implemented content filtering to remove generic advice unrelated to the topic
+- ✓ Enhanced prompt to avoid disconnected information like "observe urine" for water questions
+- ✓ Reduced token limit to 200 to prevent tangential or off-topic responses
+- ✓ Added intelligent paragraph filtering to skip irrelevant advice sections
+- ✓ AI now maintains laser focus on the exact question without adding unrelated tips
 
 **2025-07-02 05:30**
 - ✓ Implemented personalized AI chat responses based on user profile characteristics
