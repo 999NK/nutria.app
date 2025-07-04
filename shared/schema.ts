@@ -29,14 +29,16 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table.
-// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+// User storage table
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  email: varchar("email").unique().notNull(),
+  password: varchar("password"), // null for Google login users
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  googleId: varchar("google_id").unique(), // for Google login
+  authProvider: varchar("auth_provider").default("local"), // 'local' or 'google'
   weight: decimal("weight", { precision: 5, scale: 2 }),
   height: integer("height"),
   age: integer("age"),
@@ -66,7 +68,7 @@ export const foods = pgTable("foods", {
   sugarPer100g: decimal("sugar_per_100g", { precision: 7, scale: 2 }).default("0"),
   sodiumPer100g: decimal("sodium_per_100g", { precision: 7, scale: 2 }).default("0"),
   isCustom: boolean("is_custom").default(false),
-  userId: varchar("user_id").references(() => users.id),
+  userId: integer("user_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -75,12 +77,12 @@ export const mealTypes = pgTable("meal_types", {
   name: varchar("name", { length: 100 }).notNull(),
   icon: varchar("icon", { length: 50 }),
   isDefault: boolean("is_default").default(false),
-  userId: varchar("user_id").references(() => users.id),
+  userId: integer("user_id").references(() => users.id),
 });
 
 export const meals = pgTable("meals", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
   mealTypeId: integer("meal_type_id").references(() => mealTypes.id).notNull(),
   date: date("date").notNull(),
   name: varchar("name", { length: 255 }),
@@ -105,7 +107,7 @@ export const mealFoods = pgTable("meal_foods", {
 
 export const recipes = pgTable("recipes", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   instructions: text("instructions"),
@@ -129,7 +131,7 @@ export const recipeIngredients = pgTable("recipe_ingredients", {
 
 export const dailyNutrition = pgTable("daily_nutrition", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
   date: date("date").notNull(),
   totalCalories: integer("total_calories").default(0),
   totalProtein: decimal("total_protein", { precision: 5, scale: 2 }).default("0"),
@@ -144,7 +146,7 @@ export const dailyNutrition = pgTable("daily_nutrition", {
 
 export const userPlans = pgTable("user_plans", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").notNull().references(() => users.id),
   name: varchar("name").notNull(),
   description: text("description").notNull(),
   type: varchar("type").notNull(), // 'diet', 'workout', 'combined'
@@ -161,7 +163,7 @@ export const userPlans = pgTable("user_plans", {
 
 export const dailyProgress = pgTable("daily_progress", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").notNull().references(() => users.id),
   planId: integer("plan_id").notNull().references(() => userPlans.id),
   date: varchar("date").notNull(), // YYYY-MM-DD format
   dietCompleted: boolean("diet_completed").default(false),
@@ -173,7 +175,7 @@ export const dailyProgress = pgTable("daily_progress", {
 // Keep meal_plans for backward compatibility
 export const mealPlans = pgTable("meal_plans", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").notNull().references(() => users.id),
   name: varchar("name").notNull(),
   description: text("description"),
   meals: jsonb("meals"), // JSON structure with daily meal plans

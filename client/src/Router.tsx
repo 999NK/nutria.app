@@ -1,6 +1,6 @@
 import { Switch, Route } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import Landing from "@/pages/Landing";
+import AuthPage from "@/pages/AuthPage";
 import Dashboard from "@/pages/Dashboard";
 import AddMeal from "@/pages/AddMeal";
 import MyPlan from "@/pages/MyPlan";
@@ -28,7 +28,7 @@ export default function Router() {
   }
 
   if (!isAuthenticated) {
-    return <Landing />;
+    return <AuthPage />;
   }
   
   if (user && !(user as any).isProfileComplete) {

@@ -37,10 +37,14 @@ import { db } from "./db";
 import { eq, and, desc, sql, gte, lte, or, isNull, ne } from "drizzle-orm";
 
 export interface IStorage {
-  // User operations (mandatory for Replit Auth)
-  getUser(id: string): Promise<User | undefined>;
+  // User operations
+  getUser(id: number): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByGoogleId(googleId: string): Promise<User | undefined>;
+  createUser(user: Partial<UpsertUser>): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
-  updateUserGoals(userId: string, updates: { 
+  linkGoogleAccount(userId: number, googleId: string): Promise<User>;
+  updateUserGoals(userId: number, updates: { 
     weight?: number; 
     height?: number; 
     age?: number; 
@@ -94,7 +98,7 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   // User operations
-  async getUser(id: string): Promise<User | undefined> {
+  async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
@@ -114,7 +118,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserGoals(userId: string, updates: { 
+  async updateUserGoals(userId: number, updates: { 
     weight?: number; 
     height?: number; 
     age?: number; 
@@ -149,20 +153,51 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.googleId, googleId));
+    return user;
+  }
+
+  async createUser(userData: Partial<UpsertUser>): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData as any)
+      .returning();
+    return user;
+  }
+
+  async linkGoogleAccount(userId: number, googleId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        googleId, 
+        authProvider: "google",
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
   // Food operations
   async getFoods(userId?: string, search?: string): Promise<Food[]> {
-    if (userId && search) {
+    const userIdNum = userId ? parseInt(userId) : undefined;
+    if (userIdNum && search) {
       return await db.select().from(foods)
         .where(
           and(
-            or(isNull(foods.userId), eq(foods.userId, userId)),
+            or(isNull(foods.userId), eq(foods.userId, userIdNum)),
             sql`LOWER(${foods.name}) LIKE LOWER(${'%' + search + '%'})`
           )
         )
         .orderBy(foods.name);
-    } else if (userId) {
+    } else if (userIdNum) {
       return await db.select().from(foods)
-        .where(or(isNull(foods.userId), eq(foods.userId, userId)))
+        .where(or(isNull(foods.userId), eq(foods.userId, userIdNum)))
         .orderBy(foods.name);
     } else if (search) {
       return await db.select().from(foods)
