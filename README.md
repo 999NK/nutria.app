@@ -1,7 +1,7 @@
 # NutrIA - Aplicativo de Nutrição
 
 Um aplicativo móvel de rastreamento nutricional que utiliza IA para simplificar o registro de refeições e análise nutricional, com capacidades avançadas de busca de alimentos internacionais.
-
+https://i.ibb.co/N2bxP2bn/Captura-de-tela-2025-11-03-001849.png
 ## 🚀 Como Rodar o Projeto na Sua Máquina
 
 ### Estrutura do Projeto
